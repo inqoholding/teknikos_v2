@@ -1,0 +1,500 @@
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { api } from "./client";
+import type {
+  AdminClientSubscription,
+  AdminResetPasswordResult,
+  Business,
+  Contract,
+  Customer,
+  CustomerDetail,
+  DashboardStatPayload,
+  InventoryItem,
+  Invoice,
+  JobDetail,
+  JobListItem,
+  SessionPayload,
+  Technician,
+} from "./types";
+
+async function getSession() {
+  try {
+    const { data } = await api.get<SessionPayload>("/api/auth/get-session");
+    return data;
+  } catch (error) {
+    if (typeof error === "object" && error !== null && "status" in error && error.status === 401) {
+      return null;
+    }
+    throw error;
+  }
+}
+
+async function getBusiness() {
+  const { data } = await api.get<{ data: Business }>("/api/business/me");
+  return data.data;
+}
+
+async function getDashboardStats() {
+  const { data } = await api.get<{ data: DashboardStatPayload }>("/api/dashboard/stats");
+  return data.data;
+}
+
+async function getJobs(params?: Record<string, string>) {
+  const { data } = await api.get<{ data: JobListItem[] }>("/api/jobs", { params });
+  return data.data;
+}
+
+async function getJob(id: string) {
+  const { data } = await api.get<{ data: JobDetail }>(`/api/jobs/${id}`);
+  return data.data;
+}
+
+async function getTechnicians() {
+  const { data } = await api.get<{ data: Technician[] }>("/api/technicians");
+  return data.data;
+}
+
+async function getCustomers(params?: Record<string, string>) {
+  const { data } = await api.get<{ data: Customer[] }>("/api/customers", { params });
+  return data.data;
+}
+
+async function getCustomer(id: string) {
+  const { data } = await api.get<{ data: CustomerDetail }>(`/api/customers/${id}`);
+  return data.data;
+}
+
+async function getInvoices(params?: Record<string, string>) {
+  const { data } = await api.get<{ data: Invoice[] }>("/api/invoices", { params });
+  return data.data;
+}
+
+async function getInventory() {
+  const { data } = await api.get<{ data: InventoryItem[] }>("/api/inventory");
+  return data.data;
+}
+
+async function getContracts() {
+  const { data } = await api.get<{ data: Contract[] }>("/api/contracts");
+  return data.data;
+}
+
+async function getAdminSubscriptions() {
+  const { data } = await api.get<{
+    data: AdminClientSubscription[];
+    meta: {
+      plans: NonNullable<Business["availablePlans"]>;
+      statuses: Array<NonNullable<Business["subscriptionStatus"]>>;
+    };
+  }>("/api/admin/subscriptions");
+  return data;
+}
+
+export function useSessionQuery(enabled = true) {
+  return useQuery({
+    queryKey: ["session"],
+    queryFn: getSession,
+    retry: false,
+    staleTime: 30_000,
+    enabled,
+  });
+}
+
+export function useBusinessQuery(enabled = true) {
+  return useQuery({
+    queryKey: ["business"],
+    queryFn: getBusiness,
+    retry: false,
+    enabled,
+  });
+}
+
+export function useDashboardStatsQuery(enabled = true) {
+  return useQuery({
+    queryKey: ["dashboard", "stats"],
+    queryFn: getDashboardStats,
+    enabled,
+  });
+}
+
+export function useJobsQuery(params?: Record<string, string>, enabled = true) {
+  return useQuery({
+    queryKey: ["jobs", params],
+    queryFn: () => getJobs(params),
+    enabled,
+  });
+}
+
+export function useJobQuery(id?: string) {
+  return useQuery({
+    queryKey: ["jobs", id],
+    queryFn: () => getJob(id!),
+    enabled: Boolean(id),
+  });
+}
+
+export function useTechniciansQuery(enabled = true) {
+  return useQuery({
+    queryKey: ["technicians"],
+    queryFn: getTechnicians,
+    enabled,
+  });
+}
+
+export function useCustomersQuery(params?: Record<string, string>, enabled = true) {
+  return useQuery({
+    queryKey: ["customers", params],
+    queryFn: () => getCustomers(params),
+    enabled,
+  });
+}
+
+export function useCustomerQuery(id?: string) {
+  return useQuery({
+    queryKey: ["customers", id],
+    queryFn: () => getCustomer(id!),
+    enabled: Boolean(id),
+  });
+}
+
+export function useInvoicesQuery(params?: Record<string, string>, enabled = true) {
+  return useQuery({
+    queryKey: ["invoices", params],
+    queryFn: () => getInvoices(params),
+    enabled,
+  });
+}
+
+export function useInventoryQuery(enabled = true) {
+  return useQuery({
+    queryKey: ["inventory"],
+    queryFn: getInventory,
+    enabled,
+  });
+}
+
+export function useContractsQuery(enabled = true) {
+  return useQuery({
+    queryKey: ["contracts"],
+    queryFn: getContracts,
+    enabled,
+  });
+}
+
+export function useLoginMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (payload: { email: string; password: string }) => {
+      const { data } = await api.post("/api/auth/sign-in/email", payload);
+      return data;
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["session"] });
+      await queryClient.invalidateQueries({ queryKey: ["business"] });
+    },
+  });
+}
+
+export function useRegisterMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (payload: { name: string; email: string; password: string; phone?: string }) => {
+      const { data } = await api.post("/api/auth/sign-up/email", payload);
+      return data;
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["session"] });
+    },
+  });
+}
+
+export function useLogoutMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async () => {
+      const { data } = await api.post("/api/auth/sign-out");
+      return data;
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["session"] });
+      await queryClient.invalidateQueries({ queryKey: ["business"] });
+    },
+  });
+}
+
+export function useSetupBusinessMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (payload: {
+      name: string;
+      phone: string;
+      email?: string;
+      address: string;
+      city: string;
+      serviceType: string;
+      plan: string;
+    }) => {
+      const { data } = await api.post<{ data: Business }>("/api/business/setup", payload);
+      return data.data;
+    },
+    onSuccess: async (business) => {
+      queryClient.setQueryData(["business"], business);
+      await queryClient.invalidateQueries({ queryKey: ["dashboard", "stats"] });
+    },
+  });
+}
+
+export function useUpdateBusinessMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (payload: Partial<Business>) => {
+      const { data } = await api.patch<{ data: Business }>("/api/business/me", payload);
+      return data.data;
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["business"] });
+      await queryClient.invalidateQueries({ queryKey: ["dashboard", "stats"] });
+    },
+  });
+}
+
+export function useUpdateJobMutation(id?: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (payload: Record<string, unknown>) => {
+      const { data } = await api.patch(`/api/jobs/${id}`, payload);
+      return data;
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["jobs"] });
+      await queryClient.invalidateQueries({ queryKey: ["jobs", id] });
+      await queryClient.invalidateQueries({ queryKey: ["dashboard", "stats"] });
+    },
+  });
+}
+
+export function useCreateInvoiceFromJobMutation(id?: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async () => {
+      const { data } = await api.post(`/api/jobs/${id}/invoice`);
+      return data;
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["jobs", id] });
+      await queryClient.invalidateQueries({ queryKey: ["invoices"] });
+    },
+  });
+}
+
+export function useAdjustInventoryMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, delta }: { id: string; delta: number }) => {
+      const { data } = await api.patch(`/api/inventory/${id}/adjust-stock`, { delta });
+      return data;
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["inventory"] });
+      await queryClient.invalidateQueries({ queryKey: ["dashboard", "stats"] });
+    },
+  });
+}
+
+export function useCreateCustomerMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (payload: {
+      name: string;
+      phone: string;
+      email?: string;
+      address: string;
+      units: string[];
+    }) => {
+      const { data } = await api.post("/api/customers", payload);
+      return data;
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["customers"] });
+      await queryClient.invalidateQueries({ queryKey: ["dashboard", "stats"] });
+    },
+  });
+}
+
+export function useCreateTechnicianMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (payload: {
+      name: string;
+      phone: string;
+      specialties: string[];
+      status: string;
+      rating?: number;
+    }) => {
+      const { data } = await api.post("/api/technicians", payload);
+      return data;
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["technicians"] });
+      await queryClient.invalidateQueries({ queryKey: ["dashboard", "stats"] });
+    },
+  });
+}
+
+export function useUpdateTechnicianMutation(id?: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (payload: Record<string, unknown>) => {
+      const { data } = await api.patch(`/api/technicians/${id}`, payload);
+      return data;
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["technicians"] });
+      await queryClient.invalidateQueries({ queryKey: ["dashboard", "stats"] });
+    },
+  });
+}
+
+export function useCreateJobMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (payload: Record<string, unknown>) => {
+      const { data } = await api.post("/api/jobs", payload);
+      return data;
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["jobs"] });
+      await queryClient.invalidateQueries({ queryKey: ["customers"] });
+      await queryClient.invalidateQueries({ queryKey: ["dashboard", "stats"] });
+    },
+  });
+}
+
+export function useCreateInvoiceMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (payload: Record<string, unknown>) => {
+      const { data } = await api.post("/api/invoices", payload);
+      return data;
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["invoices"] });
+      await queryClient.invalidateQueries({ queryKey: ["jobs"] });
+      await queryClient.invalidateQueries({ queryKey: ["dashboard", "stats"] });
+    },
+  });
+}
+
+export function useUpdateInvoiceMutation(id?: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (payload: Record<string, unknown>) => {
+      const { data } = await api.patch(`/api/invoices/${id}`, payload);
+      return data;
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["invoices"] });
+      await queryClient.invalidateQueries({ queryKey: ["dashboard", "stats"] });
+      await queryClient.invalidateQueries({ queryKey: ["jobs"] });
+    },
+  });
+}
+
+export function useCreateInventoryMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (payload: Record<string, unknown>) => {
+      const { data } = await api.post("/api/inventory", payload);
+      return data;
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["inventory"] });
+      await queryClient.invalidateQueries({ queryKey: ["dashboard", "stats"] });
+    },
+  });
+}
+
+export function useCreateContractMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (payload: Record<string, unknown>) => {
+      const { data } = await api.post("/api/contracts", payload);
+      return data;
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["contracts"] });
+      await queryClient.invalidateQueries({ queryKey: ["customers"] });
+      await queryClient.invalidateQueries({ queryKey: ["dashboard", "stats"] });
+    },
+  });
+}
+
+export function useAdminSubscriptionsQuery(enabled = true) {
+  return useQuery({
+    queryKey: ["admin", "subscriptions"],
+    queryFn: getAdminSubscriptions,
+    enabled,
+  });
+}
+
+export function useUpdateAdminSubscriptionMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      businessId,
+      payload,
+    }: {
+      businessId: string;
+      payload: {
+        plan?: "Starter" | "Pro" | "Bisnis";
+        subscriptionStatus?:
+          | "pending_payment"
+          | "paid"
+          | "active"
+          | "trialing"
+          | "past_due"
+          | "paused"
+          | "cancelled";
+        trialEndsAt?: string | null;
+        currentPeriodEndsAt?: string | null;
+        subscriptionNotes?: string | null;
+      };
+    }) => {
+      const { data } = await api.patch(`/api/admin/subscriptions/${businessId}`, payload);
+      return data;
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["admin", "subscriptions"] });
+      await queryClient.invalidateQueries({ queryKey: ["business"] });
+      await queryClient.invalidateQueries({ queryKey: ["dashboard", "stats"] });
+    },
+  });
+}
+
+export function useResetClientPasswordMutation() {
+  return useMutation({
+    mutationFn: async (payload: { businessId: string; newPassword?: string }) => {
+      const { data } = await api.post<{ data: AdminResetPasswordResult }>(
+        "/api/admin/clients/reset-password",
+        payload,
+      );
+      return data.data;
+    },
+  });
+}

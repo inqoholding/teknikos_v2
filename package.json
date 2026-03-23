@@ -1,0 +1,22 @@
+{
+  "name": "inqo1",
+  "private": true,
+  "devDependencies": {
+    "concurrently": "^9.2.1",
+    "playwright": "^1.52.0"
+  },
+  "scripts": {
+    "dev": "concurrently -k -n frontend,backend \"npm --prefix frontend run dev\" \"npm --prefix backend run dev\"",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "build": "npm --prefix frontend run build",
+    "build:all": "npm run build && npm run build:backend",
+    "preview": "npm --prefix frontend run preview",
+    "install:frontend": "npm --prefix frontend install",
+    "dev:backend": "npm --prefix backend run dev",
+    "build:backend": "npm --prefix backend run build",
+    "start:backend": "npm --prefix backend run start",
+    "db:push:backend": "npm --prefix backend run db:push",
+    "seed:backend": "npm --prefix backend run seed",
+    "install:backend": "npm --prefix backend install"
+  }
+}
