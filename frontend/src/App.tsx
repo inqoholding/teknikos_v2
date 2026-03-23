@@ -15,6 +15,8 @@ import InvoicesPage from "./pages/InvoicesPage";
 import InventoryPage from "./pages/InventoryPage";
 import ContractsPage from "./pages/ContractsPage";
 import SettingsPage from "./pages/SettingsPage";
+import SettingsWhatsappConnectPage from "./pages/SettingsWhatsappConnectPage";
+import SettingsWhatsappRulesPage from "./pages/SettingsWhatsappRulesPage";
 import AdminSubscriptionsPage from "./pages/AdminSubscriptionsPage";
 import PendingPaymentPage from "./pages/PendingPaymentPage";
 import {
@@ -25,6 +27,10 @@ import {
   DemoInventoryPage,
   DemoJobDetailPage,
   DemoJobsPage,
+  DemoSettingsPage,
+  DemoTechniciansPage,
+  DemoWhatsappConnectPage,
+  DemoWhatsappRulesPage,
   DemoWorkspaceLayout,
 } from "./pages/demo/DemoWorkspace";
 
@@ -37,10 +43,14 @@ export default function App() {
           <Route index element={<DemoDashboardPage />} />
           <Route path="jobs" element={<DemoJobsPage />} />
           <Route path="jobs/:id" element={<DemoJobDetailPage />} />
+          <Route path="technicians" element={<DemoTechniciansPage />} />
           <Route path="customers" element={<DemoCustomersPage />} />
           <Route path="invoices" element={<DemoInvoicesPage />} />
           <Route path="inventory" element={<DemoInventoryPage />} />
           <Route path="contracts" element={<DemoContractsPage />} />
+          <Route path="settings" element={<DemoSettingsPage />} />
+          <Route path="settings/whatsapp-rules" element={<DemoWhatsappRulesPage />} />
+          <Route path="settings/whatsapp-connect" element={<DemoWhatsappConnectPage />} />
         </Route>
         <Route element={<GuestGuard />}>
           <Route path="/login" element={<LoginPage />} />
@@ -64,6 +74,8 @@ export default function App() {
             <Route path="/inventory" element={<InventoryPage />} />
             <Route path="/contracts" element={<ContractsPage />} />
             <Route path="/settings" element={<SettingsPage />} />
+            <Route path="/settings/whatsapp-rules" element={<SettingsWhatsappRulesPage />} />
+            <Route path="/settings/whatsapp-connect" element={<SettingsWhatsappConnectPage />} />
           </Route>
         </Route>
         <Route element={<StaffGuard />}>

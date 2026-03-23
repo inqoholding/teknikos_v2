@@ -2,13 +2,19 @@ import { FormEvent, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { getErrorMessage } from "../api/client";
 import {
+  useBusinessQuery,
+  useCreateBusinessSupportRequestMutation,
   useCreateInvoiceMutation,
   useCustomersQuery,
   useDashboardStatsQuery,
   useJobsQuery,
+  useSendBusinessWhatsappMutation,
+  useTechniciansQuery,
 } from "../api/hooks";
 import { PageError, PageLoader } from "../components/PageState";
+import { DeadlineList, ScheduleCalendar } from "../components/ScheduleCalendar";
 import { Badge, DonutSummary, EmptyAction, MiniBarChart, SectionCard, StatCard } from "../components/UI";
+import { WAHA_TEST_MESSAGE } from "../utils/whatsapp";
 
 function defaultDueDate() {
   const date = new Date();
@@ -19,11 +25,16 @@ function defaultDueDate() {
 
 export default function DashboardPage() {
   const dashboardQuery = useDashboardStatsQuery();
+  const businessQuery = useBusinessQuery();
+  const supportRequestMutation = useCreateBusinessSupportRequestMutation();
   const customersQuery = useCustomersQuery();
+  const techniciansQuery = useTechniciansQuery();
   const jobsQuery = useJobsQuery();
   const createInvoiceMutation = useCreateInvoiceMutation();
+  const sendBusinessWhatsappMutation = useSendBusinessWhatsappMutation();
   const [customerId, setCustomerId] = useState("");
   const [jobId, setJobId] = useState("");
+  const [wahaJobId, setWahaJobId] = useState("");
   const [serviceLabel, setServiceLabel] = useState("Instalasi AC");
   const [installationFee, setInstallationFee] = useState("0");
   const [sparepartFee, setSparepartFee] = useState("0");
@@ -39,10 +50,39 @@ export default function DashboardPage() {
   }
 
   const stats = dashboardQuery.data;
+  const business = businessQuery.data;
   const customers = customersQuery.data ?? [];
+  const technicians = techniciansQuery.data ?? [];
   const jobs = jobsQuery.data ?? [];
+  const calendarItems = jobs.map((job) => ({
+    id: job.id,
+    title: `${job.number} · ${job.title}`,
+    subtitle: `${job.customer} · ${job.technician}`,
+    scheduleAt: job.scheduleAt,
+    deadlineAt: job.deadlineAt ?? null,
+    href: `/jobs/${job.id}`,
+    status: job.status,
+    priority: job.priority,
+  }));
   const selectedJob = jobs.find((job) => job.id === jobId);
+  const selectedWahaJob = jobs.find((job) => job.id === wahaJobId) ?? jobs[0];
+  const selectedWahaCustomer = customers.find((customer) => customer.id === selectedWahaJob?.customerId);
+  const selectedWahaTechnicians = technicians.filter((technician) =>
+    selectedWahaJob?.technicianIds.includes(technician.id),
+  );
   const totalInvoice = Number(installationFee || 0) + Number(sparepartFee || 0);
+  const canUseWahaAutomation = business?.whatsapp?.canUseAutomation ?? false;
+
+  async function handleSubscriptionRequest(type: "subscription_upgrade" | "subscription_renewal") {
+    await supportRequestMutation.mutateAsync({
+      type,
+      targetPlan: type === "subscription_upgrade" ? "Bisnis" : undefined,
+      message:
+        type === "subscription_upgrade"
+          ? "Owner meminta upgrade subscription dari dashboard."
+          : "Owner meminta perpanjangan subscription dari dashboard.",
+    });
+  }
 
   const dashboardStats = [
     { label: "Job Hari Ini", value: String(stats.todayJobs), hint: `${stats.doneToday} selesai hari ini`, tone: "success" as const },
@@ -70,6 +110,33 @@ export default function DashboardPage() {
     setSparepartFee("0");
     setInvoiceStatus("Sent");
     setDueDate(defaultDueDate());
+  }
+
+  async function handleSendCustomerUpdate() {
+    if (!selectedWahaJob || !selectedWahaCustomer?.phone) {
+      return;
+    }
+
+    await sendBusinessWhatsappMutation.mutateAsync({
+      phone: selectedWahaCustomer.phone,
+      message: WAHA_TEST_MESSAGE,
+    });
+  }
+
+  async function handleSendTechnicianUpdate(technicianId: string) {
+    if (!selectedWahaJob) {
+      return;
+    }
+
+    const technician = technicians.find((item) => item.id === technicianId);
+    if (!technician?.phone) {
+      return;
+    }
+
+    await sendBusinessWhatsappMutation.mutateAsync({
+      phone: technician.phone,
+      message: WAHA_TEST_MESSAGE,
+    });
   }
 
   return (
@@ -137,6 +204,22 @@ export default function DashboardPage() {
 
       <div className="dashboard-grid">
         <SectionCard
+          title="Kalender Jadwal & Deadline"
+          description="Lihat semua jadwal kerja bisnis dan deadline yang sudah melekat pada job."
+        >
+          <ScheduleCalendar items={calendarItems} emptyLabel="Belum ada job terjadwal pada hari ini." />
+        </SectionCard>
+
+        <SectionCard
+          title="Deadline Mendekat"
+          description="Pantau job yang deadline-nya perlu segera ditindak."
+        >
+          <DeadlineList items={calendarItems} emptyLabel="Belum ada deadline aktif untuk job bisnis ini." />
+        </SectionCard>
+      </div>
+
+      <div className="dashboard-grid">
+        <SectionCard
           title="Revenue 7 Hari"
           description="Puncak pemasukan muncul saat jadwal maintenance area kantor."
         >
@@ -161,7 +244,88 @@ export default function DashboardPage() {
         <Link to="/settings">Kelola Paket →</Link>
       </div>
 
+      {business?.subscriptionAlert ? (
+        <div className="callout callout--warning">
+          <div>
+            <strong>{business.subscriptionAlert.title}</strong>
+            <p>{business.subscriptionAlert.message}</p>
+          </div>
+          <div className="button-row button-row--left">
+            <button className="btn btn--primary" type="button" onClick={() => handleSubscriptionRequest("subscription_renewal")}>
+              Minta Perpanjang
+            </button>
+            <button className="btn btn--secondary" type="button" onClick={() => handleSubscriptionRequest("subscription_upgrade")}>
+              Tanya Upgrade
+            </button>
+          </div>
+        </div>
+      ) : null}
+
       <div className="dashboard-grid">
+        <SectionCard
+          title="Kirim Otomatis via WAHA"
+          description='Pilih job lalu uji alur kirim otomatis ke pelanggan atau teknisi. Untuk hard test saat ini payload yang dikirim sengaja hanya ".".'
+        >
+          <div className="action-stack">
+            <label className="field">
+              <span>Pilih job untuk notifikasi</span>
+              <select value={selectedWahaJob?.id ?? ""} onChange={(event) => setWahaJobId(event.target.value)}>
+                {jobs.map((job) => (
+                  <option key={job.id} value={job.id}>
+                    {job.number} · {job.title}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <div className="summary-list">
+              <div><span>Status WAHA</span><strong>{business?.whatsapp?.automationStatusLabel ?? "Belum aktif"}</strong></div>
+              <div><span>Pelanggan</span><strong>{selectedWahaCustomer?.name ?? selectedWahaJob?.customer ?? "-"}</strong></div>
+              <div><span>Teknisi</span><strong>{selectedWahaJob?.technicians.join(", ") || "Belum ada teknisi"}</strong></div>
+            </div>
+
+            {!canUseWahaAutomation ? (
+              <div className="callout callout--warning">
+                <strong>WAHA belum siap dipakai</strong>
+                <p>Aktifkan mode Otomasi WAHA dan hubungkan nomor bisnis lebih dulu dari halaman Hubungkan WAHA.</p>
+              </div>
+            ) : null}
+
+            <div className="button-row button-row--left">
+              <EmptyAction
+                primary
+                onClick={() => void handleSendCustomerUpdate()}
+                disabled={!canUseWahaAutomation || sendBusinessWhatsappMutation.isPending || !selectedWahaCustomer?.phone}
+              >
+                {sendBusinessWhatsappMutation.isPending ? "Mengirim..." : "Kirim ke Pelanggan"}
+              </EmptyAction>
+            </div>
+
+            {selectedWahaTechnicians.length > 0 ? (
+              <div className="stack-list">
+                {selectedWahaTechnicians.map((technician) => (
+                  <div key={technician.id} className="stack-list__item">
+                    <strong>{technician.name}</strong>
+                    <p>{technician.phone || "Nomor teknisi belum tersedia."}</p>
+                    <EmptyAction
+                      onClick={() => void handleSendTechnicianUpdate(technician.id)}
+                      disabled={!canUseWahaAutomation || sendBusinessWhatsappMutation.isPending || !technician.phone}
+                    >
+                      {sendBusinessWhatsappMutation.isPending ? "Mengirim..." : "Kirim ke Teknisi"}
+                    </EmptyAction>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="chart-helper">Job ini belum punya teknisi yang bisa dikirimi notifikasi.</p>
+            )}
+
+            {sendBusinessWhatsappMutation.error ? (
+              <p className="form-error">{getErrorMessage(sendBusinessWhatsappMutation.error)}</p>
+            ) : null}
+          </div>
+        </SectionCard>
+
         <SectionCard
           title="Quick Billing"
           description="Alur ringkas yang lebih logis: pilih pelanggan atau job, isi biaya jasa instalasi, tambah komponen sparepart, lalu kirim invoice."

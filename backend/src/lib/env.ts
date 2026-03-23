@@ -15,6 +15,9 @@ const envSchema = z.object({
   ADMIN_PASSWORD: z.string().min(8).default("Admin12345!"),
   MODERATOR_EMAIL: z.string().email().default("moderator@teknikos.id"),
   MODERATOR_PASSWORD: z.string().min(8).default("Moderator123!"),
+  WAHA_URL: z.string().url().optional(),
+  WAHA_API_KEY: z.string().min(16).optional(),
+  WAHA_SESSION_NAME: z.string().default("default"),
 });
 
 export const env = envSchema.parse(process.env);

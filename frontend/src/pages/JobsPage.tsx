@@ -23,6 +23,7 @@ export default function JobsPage() {
   const [technicianIds, setTechnicianIds] = useState<string[]>(searchParams.get("technicianId") ? [searchParams.get("technicianId") as string] : []);
   const [type, setType] = useState("AC");
   const [scheduleAt, setScheduleAt] = useState("");
+  const [deadlineAt, setDeadlineAt] = useState("");
   const [price, setPrice] = useState("0");
   const [priority, setPriority] = useState<"Normal" | "Urgent">("Normal");
   const [description, setDescription] = useState("");
@@ -65,6 +66,7 @@ export default function JobsPage() {
       technicianIds,
       type,
       scheduleAt,
+      deadlineAt: deadlineAt || null,
       price: Number(price),
       status: technicianIds.length > 0 ? "assigned" : "pending",
       priority,
@@ -78,6 +80,7 @@ export default function JobsPage() {
     setTechnicianIds([]);
     setType("AC");
     setScheduleAt("");
+    setDeadlineAt("");
     setPrice("0");
     setPriority("Normal");
     setDescription("");
@@ -198,11 +201,15 @@ export default function JobsPage() {
                 <input type="datetime-local" value={scheduleAt} onChange={(event) => setScheduleAt(event.target.value)} required />
               </label>
               <label className="field">
-                <span>Harga</span>
-                <input type="number" min="0" value={price} onChange={(event) => setPrice(event.target.value)} required />
+                <span>Deadline tugas</span>
+                <input type="datetime-local" value={deadlineAt} onChange={(event) => setDeadlineAt(event.target.value)} />
               </label>
             </div>
             <div className="field-grid">
+              <label className="field">
+                <span>Harga</span>
+                <input type="number" min="0" value={price} onChange={(event) => setPrice(event.target.value)} required />
+              </label>
               <label className="field">
                 <span>Prioritas</span>
                 <select value={priority} onChange={(event) => setPriority(event.target.value as "Normal" | "Urgent")}>
@@ -262,7 +269,10 @@ export default function JobsPage() {
                 <span>{job.customer}</span>
                 <span>{job.technician}</span>
                 <span>{job.type}</span>
-                <span>{job.schedule.split("·")[1]?.trim() ?? job.schedule}</span>
+                <span>
+                  {job.schedule.split("·")[1]?.trim() ?? job.schedule}
+                  <small>{job.deadlineAt ? `Deadline ${new Date(job.deadlineAt).toLocaleString("id-ID")}` : "Tanpa deadline"}</small>
+                </span>
                 <span>
                   <Badge tone={job.status === "pending" ? "warning" : job.status === "done" ? "success" : "info"}>
                     {job.status.replaceAll("_", " ")}
@@ -295,6 +305,7 @@ export default function JobsPage() {
                         <span>{job.technician}</span>
                         <span>{job.price}</span>
                       </div>
+                      <small>{job.deadlineAt ? `Deadline ${new Date(job.deadlineAt).toLocaleDateString("id-ID")}` : "Tanpa deadline"}</small>
                     </article>
                   ))}
                 </div>

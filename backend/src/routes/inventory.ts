@@ -58,7 +58,7 @@ inventoryRouter.post("/", async (req, res) => {
   const business = await getCurrentBusiness(res);
   const payload = inventorySchema.parse(req.body);
   assertPlanFeature(business.plan, "inventoryEnabled");
-  assertSubscriptionWritable(business.subscriptionStatus);
+  assertSubscriptionWritable(business.subscriptionStatus, business.currentPeriodEndsAt);
   const [created] = await db
     .insert(inventory)
     .values({
@@ -78,7 +78,7 @@ inventoryRouter.patch("/:id", async (req, res) => {
   const business = await getCurrentBusiness(res);
   const payload = inventorySchema.partial().parse(req.body);
   assertPlanFeature(business.plan, "inventoryEnabled");
-  assertSubscriptionWritable(business.subscriptionStatus);
+  assertSubscriptionWritable(business.subscriptionStatus, business.currentPeriodEndsAt);
   const [updated] = await db
     .update(inventory)
     .set({
@@ -100,7 +100,7 @@ inventoryRouter.patch("/:id/adjust-stock", async (req, res) => {
   const business = await getCurrentBusiness(res);
   const payload = adjustStockSchema.parse(req.body);
   assertPlanFeature(business.plan, "inventoryEnabled");
-  assertSubscriptionWritable(business.subscriptionStatus);
+  assertSubscriptionWritable(business.subscriptionStatus, business.currentPeriodEndsAt);
   const [item] = await db
     .select()
     .from(inventory)
@@ -128,7 +128,7 @@ inventoryRouter.delete("/:id", async (req, res) => {
   const businessId = requireBusiness(res);
   const business = await getCurrentBusiness(res);
   assertPlanFeature(business.plan, "inventoryEnabled");
-  assertSubscriptionWritable(business.subscriptionStatus);
+  assertSubscriptionWritable(business.subscriptionStatus, business.currentPeriodEndsAt);
   const [deleted] = await db
     .delete(inventory)
     .where(and(eq(inventory.id, req.params.id), eq(inventory.businessId, businessId)))

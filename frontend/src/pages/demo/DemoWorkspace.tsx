@@ -1,7 +1,19 @@
-import { ArrowLeft, MessageCircle } from "lucide-react";
+import {
+  Bell,
+  ClipboardList,
+  FileCheck,
+  FileText,
+  LayoutDashboard,
+  MessageCircle,
+  Package,
+  Settings,
+  UserCircle,
+  Users,
+} from "lucide-react";
 import { useMemo, useState } from "react";
 import { Link, NavLink, Outlet, useLocation, useParams, useSearchParams } from "react-router-dom";
 import { Badge, DonutSummary, MiniBarChart, SectionCard, StatCard } from "../../components/UI";
+import { whatsappDonts, whatsappRules } from "../settings/whatsappContent";
 import {
   business,
   contracts,
@@ -19,18 +31,52 @@ const waLink =
   "https://wa.me/6281354444967?text=Halo%20TeknikOS,%20saya%20ingin%20lanjut%20demo%20atau%20berlangganan.";
 
 const demoNav = [
-  { to: "/demo-owner-dashboard", label: "Dashboard" },
-  { to: "/demo-owner-dashboard/jobs", label: "Job Order" },
-  { to: "/demo-owner-dashboard/customers", label: "Pelanggan" },
-  { to: "/demo-owner-dashboard/invoices", label: "Invoice" },
-  { to: "/demo-owner-dashboard/inventory", label: "Inventori" },
-  { to: "/demo-owner-dashboard/contracts", label: "Kontrak" },
+  { to: "/demo-owner-dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { to: "/demo-owner-dashboard/jobs", label: "Job Order", icon: ClipboardList },
+  { to: "/demo-owner-dashboard/technicians", label: "Teknisi", icon: Users },
+  { to: "/demo-owner-dashboard/customers", label: "Pelanggan", icon: UserCircle },
+  { to: "/demo-owner-dashboard/invoices", label: "Invoice", icon: FileText },
+  { to: "/demo-owner-dashboard/inventory", label: "Inventori", icon: Package },
+  { to: "/demo-owner-dashboard/contracts", label: "Kontrak", icon: FileCheck },
+  { to: "/demo-owner-dashboard/settings", label: "Pengaturan", icon: Settings },
 ];
 
 const queueCards = [
   { title: "Dispatch", value: "3 job", text: "Belum ada teknisi dan perlu assignment cepat.", tone: "warning" as const },
   { title: "Ready To Bill", value: "5 job", text: "Pekerjaan sudah berjalan dan siap lanjut invoice.", tone: "info" as const },
   { title: "CRM Follow Up", value: "7 akun", text: "Pelanggan dengan kontrak due atau invoice tertunda.", tone: "success" as const },
+];
+
+const calendarCards = [
+  { day: "Sen", jobs: "4 job", deadline: "1 deadline sore" },
+  { day: "Sel", jobs: "3 job", deadline: "2 urgent" },
+  { day: "Rab", jobs: "5 job", deadline: "Normal" },
+  { day: "Kam", jobs: "2 job", deadline: "1 kontrak visit" },
+];
+
+const wahaSteps = [
+  "Pilih mode WhatsApp dasar atau otomasi WAHA",
+  "Hubungkan session WAHA agar QR muncul",
+  "Scan QR dan tes koneksi nomor bisnis",
+];
+
+const deadlineCards = [
+  { title: "JOB-014 · PT Sinar Jaya", meta: "Hari ini · 16:30", tone: "danger" as const },
+  { title: "JOB-011 · Outdoor unit rooftop", meta: "Besok · 11:00", tone: "warning" as const },
+  { title: "Kontrak Klinik Arafah", meta: "26 Mar 2026", tone: "info" as const },
+];
+
+const quickBillingPreview = [
+  { label: "Job terkait", value: "JOB-014 · Cuci besar 4 unit cassette" },
+  { label: "Pelanggan", value: "PT Sinar Jaya" },
+  { label: "Estimasi total", value: "Rp450rb" },
+  { label: "Status invoice", value: "Sent" },
+];
+
+const autoSendPreview = [
+  { label: "Status WAHA", value: "Siap dipakai setelah connect" },
+  { label: "Pelanggan", value: "PT Sinar Jaya" },
+  { label: "Teknisi", value: "Ardiansyah, Fadli" },
 ];
 
 function titleForPath(pathname: string) {
@@ -49,6 +95,10 @@ function titleForPath(pathname: string) {
     return { title: "Demo Pelanggan", subtitle: "Lihat CRM, health pelanggan, dan potensi follow-up dalam mode demo." };
   }
 
+  if (pathname.endsWith("/technicians")) {
+    return { title: "Demo Teknisi", subtitle: "Pantau kapasitas tim lapangan, skill, rating, dan status kerja dari mode demo." };
+  }
+
   if (pathname.endsWith("/invoices")) {
     return { title: "Demo Invoice", subtitle: "Review billing, overdue, dan alur invoice read-only." };
   }
@@ -61,9 +111,21 @@ function titleForPath(pathname: string) {
     return { title: "Demo Kontrak", subtitle: "Kontrak aktif dan jadwal berikutnya bisa dilihat dari demo." };
   }
 
+  if (pathname.endsWith("/settings")) {
+    return { title: "Demo Pengaturan", subtitle: "Preview struktur pengaturan bisnis dan halaman WAHA seperti di app utama." };
+  }
+
+  if (pathname.endsWith("/settings/whatsapp-rules")) {
+    return { title: "Rules WhatsApp", subtitle: "Versi demo dari halaman rules WhatsApp untuk membantu client memahami batas aman pemakaian." };
+  }
+
+  if (pathname.endsWith("/settings/whatsapp-connect")) {
+    return { title: "Hubungkan WAHA", subtitle: "Versi demo dari langkah connect WAHA, scan QR, dan tes koneksi." };
+  }
+
   return {
-    title: "Demo Owner Dashboard",
-    subtitle: "Demo interaktif read-only agar calon pengguna tetap bisa menjelajah fitur utama TeknikOS.",
+    title: "Dashboard",
+    subtitle: "Pantau performa bisnis dan operasional teknisi hari ini",
   };
 }
 
@@ -85,13 +147,14 @@ export function DemoWorkspaceLayout() {
           </div>
         </Link>
         <div className="sidebar-intro">
-          <span>Demo workspace</span>
-          <strong>Interactive read-only</strong>
-          <small>{business.location}</small>
+          <span>Workspace</span>
+          <strong>{business.plan} plan</strong>
+          <small>{business.subscriptionStatusLabel} · {business.city}</small>
         </div>
         <nav className="app-nav">
           {demoNav.map((item) => (
             <NavLink key={item.to} to={item.to} end={item.to === "/demo-owner-dashboard"} className={({ isActive }) => `app-nav__link ${isActive ? "app-nav__link--active" : ""}`}>
+              <item.icon size={18} />
               <span>{item.label}</span>
             </NavLink>
           ))}
@@ -104,7 +167,7 @@ export function DemoWorkspaceLayout() {
           </div>
           <a href={waLink} className="btn btn--primary" target="_blank" rel="noreferrer">
             <MessageCircle size={16} />
-            Tanya via WA
+            Chat Sales
           </a>
         </div>
       </aside>
@@ -112,31 +175,53 @@ export function DemoWorkspaceLayout() {
       <div className="app-shell__body">
         <header className="app-shell__topbar">
           <div>
-            <span className="page-kicker">Demo mode · {demoState}</span>
+            <span className="page-kicker">{business.plan} plan · {business.subscriptionStatusLabel}</span>
             <h1>{heading.title}</h1>
             <p>{heading.subtitle}</p>
           </div>
           <div className="topbar-actions">
             <div className="status-pill">
               <span className="status-pill__dot" />
-              Tidak mengubah data asli
+              Operasional live
             </div>
-            <Link to="/" className="btn btn--secondary">
-              <ArrowLeft size={16} />
-              Kembali ke landing
-            </Link>
+            <button className="icon-button">
+              <Bell size={18} />
+            </button>
+            <div className="profile-pill">
+              <div className="avatar avatar--small">BS</div>
+              <div>
+                <strong>Budi Santoso</strong>
+                <span>{business.city}</span>
+              </div>
+            </div>
           </div>
         </header>
         <main className="app-shell__content">
           <div className="demo-banner">
             <strong>Demo interaktif aktif</strong>
             <p>
-              Kamu bisa pindah halaman, cari data, ganti tab, lihat detail, dan memahami alur fitur.
-              Action berat seperti simpan data tetap dikunci agar aman.
+              Layout, istilah, dan urutan panel mengikuti business app utama. Data tetap read-only
+              agar aman untuk demo dan closing.
             </p>
+          </div>
+          <div className="demo-sales-card">
+            <div>
+              <strong>Butuh dibantu closing atau setup cepat?</strong>
+              <p>Hubungi sales TeknikOS langsung. Nomor ini sengaja selalu tampil di demo agar client tidak bingung cari akses lanjutan.</p>
+            </div>
+            <a href={waLink} className="btn btn--primary" target="_blank" rel="noreferrer">
+              <MessageCircle size={16} />
+              Hubungi Sales 0813-5444-4967
+            </a>
           </div>
           <Outlet />
         </main>
+        <div className="mobile-nav">
+          <NavLink to="/demo-owner-dashboard" end>Home</NavLink>
+          <NavLink to="/demo-owner-dashboard/jobs">Jobs</NavLink>
+          <NavLink to="/demo-owner-dashboard/customers">CRM</NavLink>
+          <NavLink to="/demo-owner-dashboard/settings">Menu</NavLink>
+        </div>
       </div>
     </div>
   );
@@ -152,7 +237,7 @@ export function DemoDashboardPage() {
       </div>
 
       <div className="dashboard-grid">
-        <SectionCard title="Queue Operasional" description="Prioritas yang biasa dicek owner saat memulai hari.">
+        <SectionCard title="Operations Cockpit" description="Panel pertama di dashboard live: dispatch, billing, dan CRM follow up dibaca dari satu layar.">
           <div className="ops-grid">
             {queueCards.map((card) => (
               <article key={card.title} className={`ops-queue-card ops-queue-card--${card.tone}`}>
@@ -165,12 +250,66 @@ export function DemoDashboardPage() {
           </div>
         </SectionCard>
 
-        <SectionCard title="Revenue 7 Hari" description="Preview ritme pendapatan mingguan.">
-          <MiniBarChart items={revenueBars.map((item) => ({ ...item, valueLabel: `Rp${item.value}00rb` }))} />
+        <SectionCard title="Dispatch Hari Ini" description="Ringkas, cepat dibaca, dan fokus ke siapa berangkat ke mana seperti dashboard live.">
+          <div className="dispatch-list">
+            {jobs.slice(0, 3).map((job) => (
+              <Link key={job.id} to={`/demo-owner-dashboard/jobs/${job.id}`} className="dispatch-item">
+                <div className="dispatch-item__time">
+                  <strong>{job.schedule.split("·")[1]?.trim() ?? job.schedule}</strong>
+                  <span>{job.number}</span>
+                </div>
+                <div className="dispatch-item__body">
+                  <strong>{job.title}</strong>
+                  <p>{job.customer} · {job.location}</p>
+                  <small>{job.technician}</small>
+                  <div className="dispatch-item__tags">
+                    <span>{job.type}</span>
+                    <span>{job.price}</span>
+                    <span>{job.priority ?? "Normal"}</span>
+                  </div>
+                </div>
+                <div className="dispatch-item__status">
+                  <Badge tone={job.priority === "Urgent" ? "danger" : job.status === "done" ? "success" : job.status === "pending" ? "warning" : "info"}>
+                    {job.priority === "Urgent" ? `Urgent · ${job.status.replaceAll("_", " ")}` : job.status.replaceAll("_", " ")}
+                  </Badge>
+                </div>
+              </Link>
+            ))}
+          </div>
         </SectionCard>
       </div>
 
       <div className="dashboard-grid">
+        <SectionCard title="Kalender Jadwal & Deadline" description="Preview tampilan kalender kerja yang sekarang ada di app utama.">
+          <div className="demo-feature-list">
+            {calendarCards.map((item) => (
+              <div key={item.day} className="demo-feature-list__item">
+                <span className="demo-feature-list__dot" />
+                <strong>{item.day} · {item.jobs}</strong>
+                <p>{item.deadline}</p>
+              </div>
+            ))}
+          </div>
+        </SectionCard>
+
+        <SectionCard title="Deadline Mendekat" description="Daftar deadline yang perlu langsung dibaca owner atau admin.">
+          <div className="stack-list">
+            {deadlineCards.map((item) => (
+              <div key={item.title} className="stack-list__item">
+                <strong>{item.title}</strong>
+                <p>{item.meta}</p>
+                <Badge tone={item.tone}>{item.tone === "danger" ? "Perlu aksi" : item.tone === "warning" ? "Mendekat" : "Terjadwal"}</Badge>
+              </div>
+            ))}
+          </div>
+        </SectionCard>
+      </div>
+
+      <div className="dashboard-grid">
+        <SectionCard title="Revenue 7 Hari" description="Preview ritme pendapatan mingguan.">
+          <MiniBarChart items={revenueBars.map((item) => ({ ...item, valueLabel: `Rp${item.value}00rb` }))} />
+        </SectionCard>
+
         <SectionCard title="Status Job" description="Distribusi kerja aktif di demo.">
           <DonutSummary items={statusBreakdown} />
         </SectionCard>
@@ -179,10 +318,11 @@ export function DemoDashboardPage() {
           <div className="demo-feature-list">
             {[
               "Dashboard owner dan queue operasional",
+              "Kalender jadwal dan deadline job",
               "Job list, kanban, dan detail pekerjaan",
               "CRM pelanggan dan histori unit",
               "Invoice dan status pembayaran",
-              "Inventori sparepart dan kontrak servis",
+              "Inventori sparepart, kontrak servis, dan setup WAHA",
             ].map((item) => (
               <div key={item} className="demo-feature-list__item">
                 <span className="demo-feature-list__dot" />
@@ -193,28 +333,64 @@ export function DemoDashboardPage() {
         </SectionCard>
       </div>
 
-      <SectionCard title="Dispatch Hari Ini" description="Klik job untuk melihat detail demo.">
-        <div className="dispatch-list">
-          {jobs.map((job) => (
-            <Link key={job.id} to={`/demo-owner-dashboard/jobs/${job.id}`} className="dispatch-item">
-              <div className="dispatch-item__time">
-                <strong>{job.schedule.split("·")[1]?.trim() ?? job.schedule}</strong>
-                <span>{job.number}</span>
+      <div className="dashboard-grid">
+        <SectionCard title="Setup WAHA" description="Di aplikasi utama, pengaturan WAHA sekarang dibikin bertahap dan lebih mudah diikuti client.">
+          <div className="demo-feature-list">
+            {wahaSteps.map((item) => (
+              <div key={item} className="demo-feature-list__item">
+                <span className="demo-feature-list__dot" />
+                <strong>{item}</strong>
               </div>
-              <div className="dispatch-item__body">
-                <strong>{job.title}</strong>
-                <p>{job.customer} · {job.location}</p>
-                <small>{job.technician}</small>
+            ))}
+          </div>
+        </SectionCard>
+
+        <SectionCard title="Action Panel yang Sekarang Ada" description="Demo ini sekarang juga mewakili panel terbaru di halaman detail job dan pengaturan.">
+          <div className="demo-feature-list">
+            {[
+              "Set deadline tugas langsung dari detail job",
+              "Upload before-after photo untuk bukti kerja",
+              "Lihat rules WhatsApp dan halaman connect WAHA terpisah",
+            ].map((item) => (
+              <div key={item} className="demo-feature-list__item">
+                <span className="demo-feature-list__dot" />
+                <strong>{item}</strong>
               </div>
-              <div className="dispatch-item__status">
-                <Badge tone={job.priority === "Urgent" ? "danger" : job.status === "done" ? "success" : job.status === "pending" ? "warning" : "info"}>
-                  {job.status.replaceAll("_", " ")}
-                </Badge>
+            ))}
+          </div>
+        </SectionCard>
+      </div>
+
+      <div className="dashboard-grid">
+        <SectionCard title="Kirim Otomatis via WAHA" description="Di dashboard live ada panel pilih job, pelanggan, dan teknisi untuk notifikasi otomatis.">
+          <div className="summary-list">
+            {autoSendPreview.map((item) => (
+              <div key={item.label}>
+                <span>{item.label}</span>
+                <strong>{item.value}</strong>
               </div>
-            </Link>
-          ))}
-        </div>
-      </SectionCard>
+            ))}
+          </div>
+          <div className="button-row button-row--left">
+            <button className="btn btn--secondary" disabled>Kirim ke Pelanggan</button>
+            <button className="btn btn--secondary" disabled>Kirim ke Teknisi</button>
+          </div>
+        </SectionCard>
+
+        <SectionCard title="Quick Billing" description="Di dashboard live owner bisa langsung pilih job, isi total, lalu kirim invoice dari panel cepat.">
+          <div className="summary-list">
+            {quickBillingPreview.map((item) => (
+              <div key={item.label}>
+                <span>{item.label}</span>
+                <strong>{item.value}</strong>
+              </div>
+            ))}
+          </div>
+          <div className="button-row button-row--left">
+            <button className="btn btn--secondary" disabled>Buat Invoice Cepat</button>
+          </div>
+        </SectionCard>
+      </div>
     </div>
   );
 }
@@ -331,6 +507,7 @@ export function DemoJobDetailPage() {
             <div className="summary-list">
               <div><span>Teknisi</span><strong>{job.technician}</strong></div>
               <div><span>Jadwal</span><strong>{job.schedule}</strong></div>
+              <div><span>Deadline</span><strong>Hari yang sama · 17:00</strong></div>
               <div><span>Status</span><strong>{job.status.replaceAll("_", " ")}</strong></div>
               <div><span>Harga</span><strong>{job.price}</strong></div>
             </div>
@@ -352,15 +529,41 @@ export function DemoJobDetailPage() {
                 <span>Teknisi</span>
                 <input value={job.technician} readOnly />
               </label>
+              <label className="field">
+                <span>Deadline tugas</span>
+                <input value="2026-03-24T17:00" readOnly />
+              </label>
             </div>
             <div className="button-row button-row--left">
               <button className="btn btn--secondary" disabled>Update Status</button>
               <button className="btn btn--secondary" disabled>Buat Invoice</button>
             </div>
           </SectionCard>
+
+          <SectionCard title="Panel Operasional Baru" description="Preview area yang sekarang ada di halaman detail job aplikasi utama.">
+            <div className="demo-feature-list">
+              {[
+                "Before / after photo untuk bukti kerja",
+                "Item service dan sparepart yang terpakai",
+                "Panel WhatsApp otomatis WAHA saat nomor bisnis sudah terhubung",
+              ].map((item) => (
+                <div key={item} className="demo-feature-list__item">
+                  <span className="demo-feature-list__dot" />
+                  <strong>{item}</strong>
+                </div>
+              ))}
+            </div>
+          </SectionCard>
         </div>
 
         <div className="detail-grid__side">
+          <SectionCard title="Ringkasan Job Live-style">
+            <div className="summary-list">
+              <div><span>Prioritas</span><strong>{job.priority ?? "Normal"}</strong></div>
+              <div><span>Jenis pekerjaan</span><strong>{job.type}</strong></div>
+              <div><span>Status invoice</span><strong>{relatedInvoice?.status ?? "Belum ada"}</strong></div>
+            </div>
+          </SectionCard>
           <SectionCard title="Pelanggan">
             <div className="stack-list">
               <div className="stack-list__item">
@@ -426,6 +629,37 @@ export function DemoCustomersPage() {
               </div>
               <div className="customer-card__units">
                 {customer.units.map((unit) => <span key={unit}>{unit}</span>)}
+              </div>
+            </article>
+          ))}
+        </div>
+      </SectionCard>
+    </div>
+  );
+}
+
+export function DemoTechniciansPage() {
+  return (
+    <div className="page-stack">
+      <SectionCard title="Daftar Teknisi Demo" description="Struktur halaman mengikuti modul teknisi di business app utama.">
+        <div className="customer-list">
+          {technicians.map((technician) => (
+            <article key={technician.id} className="customer-card">
+              <div className="customer-card__head">
+                <div>
+                  <strong>{technician.name}</strong>
+                  <p>{technician.phone}</p>
+                </div>
+                <Badge tone={technician.status === "Aktif" ? "success" : technician.status === "Bertugas" ? "info" : "warning"}>
+                  {technician.status}
+                </Badge>
+              </div>
+              <div className="customer-card__meta">
+                <span>Rating {technician.rating}</span>
+                <span>{technician.jobsCompleted} job selesai</span>
+              </div>
+              <div className="customer-card__units">
+                {technician.specialties.map((item) => <span key={item}>{item}</span>)}
               </div>
             </article>
           ))}
@@ -532,6 +766,158 @@ export function DemoContractsPage() {
               </div>
             </article>
           ))}
+        </div>
+      </SectionCard>
+    </div>
+  );
+}
+
+export function DemoSettingsPage() {
+  return (
+    <div className="page-stack">
+      <SectionCard title="Profil Bisnis" description="Preview struktur pengaturan bisnis yang sama dengan app utama.">
+        <div className="summary-list">
+          <div><span>Nama bisnis</span><strong>{business.name}</strong></div>
+          <div><span>WhatsApp</span><strong>0812 4455 8899</strong></div>
+          <div><span>Alamat</span><strong>Jl. Urip Sumoharjo No. 55, Makassar</strong></div>
+          <div><span>Paket aktif</span><strong>{business.plan}</strong></div>
+        </div>
+      </SectionCard>
+
+      <div className="cards-grid cards-grid--two">
+        <article className="settings-link-card">
+          <span className="eyebrow">WhatsApp Rules</span>
+          <strong>Rules Penggunaan WhatsApp</strong>
+          <p>Halaman rules dipisah agar client memahami batas aman penggunaan WhatsApp bisnis.</p>
+          <Link className="btn btn--secondary" to="/demo-owner-dashboard/settings/whatsapp-rules">Buka Rules WhatsApp</Link>
+        </article>
+
+        <article className="settings-link-card">
+          <span className="eyebrow">WAHA Connection</span>
+          <strong>Hubungkan ke WAHA</strong>
+          <p>Langkah connect WAHA, scan QR, dan tes koneksi dibuat terpisah seperti di app live.</p>
+          <Link className="btn btn--primary" to="/demo-owner-dashboard/settings/whatsapp-connect">Buka Halaman WAHA</Link>
+        </article>
+      </div>
+    </div>
+  );
+}
+
+export function DemoWhatsappRulesPage() {
+  return (
+    <div className="page-stack">
+      <SectionCard title="Rules WhatsApp" description="Versi demo yang bisa dibuka client untuk memahami aturan penggunaan WhatsApp di TeknikOS.">
+        <div className="rules-grid">
+          {whatsappRules.map((rule) => (
+            <article key={rule.title} className="rule-card">
+              <strong>{rule.title}</strong>
+              <p>{rule.description}</p>
+            </article>
+          ))}
+        </div>
+        <div className="callout callout--warning">
+          <strong>Yang sebaiknya dihindari</strong>
+          <ul className="settings-list">
+            {whatsappDonts.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+        </div>
+        <div className="demo-sales-inline">
+          <strong>Perlu dibantu aktivasi atau konsultasi?</strong>
+          <a href={waLink} target="_blank" rel="noreferrer">Chat sales TeknikOS</a>
+        </div>
+      </SectionCard>
+    </div>
+  );
+}
+
+export function DemoWhatsappConnectPage() {
+  return (
+    <div className="page-stack">
+      <SectionCard title="Menghubungkan ke WAHA" description="Versi demo dari halaman connect WAHA. Alurnya aktif untuk dipreview, tetapi tidak mengubah data sungguhan.">
+        <div className="page-stack">
+          <div className="callout callout--success">
+            <strong>Mode aktif sekarang: Otomasi WAHA</strong>
+            <p>Ini hanya preview demo. Di app live, langkah ini akan memanggil session WAHA bisnis Anda.</p>
+          </div>
+
+          <div className="waha-stepper">
+            <article className="waha-step-card">
+              <div className="waha-step-card__header">
+                <div>
+                  <span className="eyebrow">Langkah 1</span>
+                  <strong>Pilih cara pakai WhatsApp</strong>
+                  <p>Di demo ini mode sudah dipilih ke Otomasi WAHA agar client bisa langsung melihat alurnya.</p>
+                </div>
+                <Badge tone="success">Sudah disimpan</Badge>
+              </div>
+              <div className="integration-choice-grid">
+                <label className="integration-choice">
+                  <input type="radio" checked={false} readOnly />
+                  <div>
+                    <strong>WhatsApp Dasar</strong>
+                    <p>Dipakai jika hanya ingin tombol chat dan pesan manual.</p>
+                  </div>
+                </label>
+                <label className="integration-choice integration-choice--active">
+                  <input type="radio" checked readOnly />
+                  <div>
+                    <strong>Otomasi WAHA</strong>
+                    <p>Dipakai jika ingin pesan otomatis dari dashboard dan detail job.</p>
+                  </div>
+                </label>
+              </div>
+            </article>
+
+            <article className="waha-step-card">
+              <div className="waha-step-card__header">
+                <div>
+                  <span className="eyebrow">Langkah 2</span>
+                  <strong>Hubungkan session WAHA</strong>
+                  <p>Di demo ini statusnya dibuat siap tersambung agar client paham urutannya.</p>
+                </div>
+                <Badge tone="warning">Siap disambungkan</Badge>
+              </div>
+              <div className="summary-list">
+                <div><span>Mode di sistem</span><strong>Otomasi WAHA</strong></div>
+                <div><span>Nomor bisnis</span><strong>0812 4455 8899</strong></div>
+                <div><span>Runtime WAHA</span><strong>WAHA Docker</strong></div>
+                <div><span>Status</span><strong>Menunggu QR</strong></div>
+              </div>
+              <div className="button-row button-row--left">
+                <button className="btn btn--primary" disabled>Hubungkan WAHA</button>
+                <button className="btn btn--secondary" disabled>Refresh Status</button>
+              </div>
+            </article>
+
+            <article className="waha-step-card">
+              <div className="waha-step-card__header">
+                <div>
+                  <span className="eyebrow">Langkah 3</span>
+                  <strong>Scan QR dan tes koneksi</strong>
+                  <p>Client bisa melihat dengan jelas bahwa langkah berikutnya adalah scan QR lalu tes koneksi.</p>
+                </div>
+                <Badge tone="warning">Menunggu scan QR</Badge>
+              </div>
+              <div className="qr-panel">
+                <div className="photo-box photo-box--success">QR Demo</div>
+                <div>
+                  <strong>Preview area QR</strong>
+                  <p>Di app live, area ini akan menampilkan QR dari session WAHA bisnis Anda. Setelah scan, tombol tes koneksi dipakai untuk verifikasi.</p>
+                </div>
+              </div>
+              <div className="button-row button-row--left">
+                <button className="btn btn--secondary" disabled>Tampilkan QR Lagi</button>
+                <button className="btn btn--primary" disabled>Tes Koneksi WAHA</button>
+              </div>
+            </article>
+          </div>
+
+          <div className="demo-sales-inline">
+            <strong>Perlu bantuan setup WAHA setelah demo?</strong>
+            <a href={waLink} target="_blank" rel="noreferrer">Hubungi sales TeknikOS</a>
+          </div>
         </div>
       </SectionCard>
     </div>

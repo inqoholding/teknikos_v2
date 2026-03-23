@@ -36,6 +36,12 @@ export interface Business {
   subscriptionStatusLabel?: string;
   trialEndsAt?: string | null;
   currentPeriodEndsAt?: string | null;
+  subscriptionAlert?: {
+    level: "warning" | "danger";
+    daysRemaining: number;
+    title: string;
+    message: string;
+  } | null;
   subscriptionNotes?: string | null;
   entitlements?: {
     key: "Starter" | "Pro" | "Bisnis";
@@ -55,6 +61,16 @@ export interface Business {
     name: string;
     email: string;
     phone: string | null;
+  };
+  whatsapp?: {
+    mode: "basic" | "automation";
+    modeLabel: string;
+    automationStatus: "not_connected" | "connecting" | "pairing" | "connected" | "error";
+    automationStatusLabel: string;
+    connectedAt?: string | null;
+    lastError?: string | null;
+    canUseAutomation: boolean;
+    channelSummary: string;
   };
 }
 
@@ -114,6 +130,8 @@ export interface JobListItem {
   technicians: string[];
   type: string;
   schedule: string;
+  scheduleAt: string;
+  deadlineAt?: string | null;
   price: string;
   status: string;
   priority: "Normal" | "Urgent";
@@ -256,6 +274,7 @@ export interface AdminClientSubscription {
   trialEndsAtLabel?: string;
   currentPeriodEndsAt?: string | null;
   currentPeriodEndsAtLabel?: string;
+  subscriptionAlert?: Business["subscriptionAlert"];
   subscriptionNotes: string;
   createdAtLabel: string;
   owner: {
@@ -286,9 +305,64 @@ export interface AdminClientSubscription {
   };
 }
 
+export interface AdminInboxItem {
+  id: string;
+  type: "password_help" | "subscription_upgrade" | "subscription_renewal" | "subscription_alert";
+  status: string;
+  source: string;
+  businessId?: string | null;
+  businessName: string;
+  requesterName: string;
+  requesterEmail: string;
+  requesterPhone: string;
+  currentPlan: string;
+  targetPlan: string;
+  message: string;
+  title?: string | null;
+  level: "info" | "warning" | "danger";
+  createdAt: string;
+  createdAtLabel: string;
+}
+
+export interface SupportRequestResult {
+  id: string;
+  type: string;
+  status: string;
+}
+
+export interface AdminCalendarJob {
+  id: string;
+  number: string;
+  title: string;
+  status: string;
+  priority: "Normal" | "Urgent";
+  scheduleAt: string;
+  schedule: string;
+  deadlineAt?: string | null;
+  business: string;
+  customer: string;
+  technicians: string[];
+  location: string;
+}
+
 export interface AdminResetPasswordResult {
   businessId: string;
   ownerEmail: string;
   temporaryPassword: string;
   message: string;
+}
+
+export interface BusinessWhatsappState {
+  mode: "basic" | "automation";
+  modeLabel: string;
+  automationStatus: "not_connected" | "connecting" | "pairing" | "connected" | "error";
+  automationStatusLabel: string;
+  connectedAt?: string | null;
+  lastError?: string | null;
+  canUseAutomation: boolean;
+  channelSummary: string;
+  businessPhone?: string | null;
+  dockerRuntime?: string;
+  recommendedFlow?: string[];
+  qrCodeDataUrl?: string | null;
 }

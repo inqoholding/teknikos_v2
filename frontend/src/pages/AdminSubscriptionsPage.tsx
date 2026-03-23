@@ -1,13 +1,18 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { getErrorMessage } from "../api/client";
 import {
+  useAdminCalendarQuery,
+  useAdminInboxQuery,
   useAdminSubscriptionsQuery,
   useResetClientPasswordMutation,
   useUpdateAdminSubscriptionMutation,
 } from "../api/hooks";
 import type { AdminClientSubscription } from "../api/types";
 import { PageError, PageLoader } from "../components/PageState";
+import { DeadlineList, ScheduleCalendar } from "../components/ScheduleCalendar";
 import { Badge, EmptyAction, SectionCard, StatCard } from "../components/UI";
+
+const SALES_WHATSAPP = "6281354444967";
 
 function toDateTimeLocal(value?: string | null) {
   if (!value) return "";
@@ -21,8 +26,21 @@ function isDefinedPlanOption<T>(value: T | null | undefined): value is T {
   return value != null;
 }
 
+function buildSalesResetPasswordLink(client?: AdminClientSubscription | null) {
+  const message = [
+    "Halo sales TeknikOS, saya butuh bantuan reset password client.",
+    `Nama bisnis: ${client?.name ?? "-"}`,
+    `Owner: ${client?.owner?.name ?? "-"}`,
+    `Email: ${client?.owner?.email ?? "-"}`,
+  ].join("\n");
+
+  return `https://wa.me/${SALES_WHATSAPP}?text=${encodeURIComponent(message)}`;
+}
+
 export default function AdminSubscriptionsPage() {
   const subscriptionsQuery = useAdminSubscriptionsQuery();
+  const calendarQuery = useAdminCalendarQuery();
+  const inboxQuery = useAdminInboxQuery();
   const updateMutation = useUpdateAdminSubscriptionMutation();
   const resetPasswordMutation = useResetClientPasswordMutation();
   const [search, setSearch] = useState("");
@@ -38,6 +56,16 @@ export default function AdminSubscriptionsPage() {
   const [lastResetPassword, setLastResetPassword] = useState("");
 
   const rows = subscriptionsQuery.data?.data ?? [];
+  const inboxItems = inboxQuery.data ?? [];
+  const calendarItems = (calendarQuery.data ?? []).map((job) => ({
+    id: job.id,
+    title: `${job.number} · ${job.title}`,
+    subtitle: `${job.business} · ${job.customer} · ${job.technicians.join(", ") || "Belum ada teknisi"}`,
+    scheduleAt: job.scheduleAt,
+    deadlineAt: job.deadlineAt ?? null,
+    status: job.status,
+    priority: job.priority,
+  }));
   const meta = subscriptionsQuery.data?.meta;
 
   const filteredRows = useMemo(() => {
@@ -49,6 +77,7 @@ export default function AdminSubscriptionsPage() {
   }, [rows, search]);
 
   const focused = filteredRows.find((row) => row.id === selectedId) ?? filteredRows[0];
+  const salesResetPasswordLink = buildSalesResetPasswordLink(focused);
 
   useEffect(() => {
     if (!focused) return;
@@ -74,6 +103,7 @@ export default function AdminSubscriptionsPage() {
   const trialCount = rows.filter((row) => row.subscriptionStatus === "trialing").length;
   const pendingCount = rows.filter((row) => row.subscriptionStatus === "pending_payment").length;
   const issueCount = rows.filter((row) => ["past_due", "paused", "cancelled"].includes(row.subscriptionStatus)).length;
+  const inboxOpenCount = inboxItems.length;
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -109,9 +139,57 @@ export default function AdminSubscriptionsPage() {
         <StatCard label="Masih Trial" value={String(trialCount)} hint="Perlu follow up closing" />
         <StatCard label="Pending Payment" value={String(pendingCount)} hint="Perlu ditindak admin" tone="warning" />
         <StatCard label="Perlu Tindakan" value={String(issueCount)} hint="Past due / paused / cancelled" tone="warning" />
+        <StatCard label="Inbox Admin" value={String(inboxOpenCount)} hint="Permintaan client & alert subscription" tone="warning" />
       </div>
 
       <div className="dashboard-grid">
+        <SectionCard
+          title="Kalender Semua Jadwal Client"
+          description="Staff admin bisa melihat seluruh jadwal job lintas client dalam satu tampilan."
+        >
+          <ScheduleCalendar items={calendarItems} emptyLabel="Belum ada jadwal client pada hari ini." />
+        </SectionCard>
+
+        <SectionCard
+          title="Deadline Client"
+          description="Tenggat kerja lintas client yang perlu pengawasan dari admin."
+        >
+          <DeadlineList items={calendarItems} emptyLabel="Belum ada deadline aktif lintas client." />
+        </SectionCard>
+      </div>
+
+      <div className="dashboard-grid">
+        <SectionCard
+          title="Inbox Admin"
+          description="Semua permintaan upgrade, perpanjang, reset password, dan peringatan subscription client masuk ke sini."
+        >
+          <div className="stack-list">
+            {inboxItems.length > 0 ? (
+              inboxItems.map((item) => (
+                <article key={item.id} className="stack-list__item">
+                  <div className="admin-subscription-card">
+                    <div>
+                      <strong>{item.title ?? item.businessName}</strong>
+                      <p>
+                        {item.requesterName} · {item.requesterEmail} · {item.createdAtLabel}
+                      </p>
+                      <small>{item.message || `Permintaan ${item.type}`}</small>
+                    </div>
+                    <div className="admin-subscription-card__meta">
+                      <Badge tone={item.level === "danger" ? "danger" : item.level === "warning" ? "warning" : "info"}>
+                        {item.type.replaceAll("_", " ")}
+                      </Badge>
+                      <small>{item.currentPlan}{item.targetPlan && item.targetPlan !== "-" ? ` → ${item.targetPlan}` : ""}</small>
+                    </div>
+                  </div>
+                </article>
+              ))
+            ) : (
+              <p className="chart-helper">Permintaan dari owner dan alert subscription otomatis akan muncul di sini.</p>
+            )}
+          </div>
+        </SectionCard>
+
         <SectionCard title="Client Workspace" description="Lihat siapa pemilik bisnis, paket aktif, dan sinyal operasional yang sudah terpakai.">
           <div className="toolbar toolbar--simple">
             <input
@@ -290,6 +368,9 @@ export default function AdminSubscriptionsPage() {
                       >
                         {resetPasswordMutation.isPending ? "Mereset..." : "Reset Password Client"}
                       </EmptyAction>
+                      <a className="btn btn--secondary" href={salesResetPasswordLink} target="_blank" rel="noreferrer">
+                        Reset via Sales
+                      </a>
                     </div>
                   </div>
                 </SectionCard>

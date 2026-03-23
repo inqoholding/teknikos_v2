@@ -1,16 +1,29 @@
 import { FormEvent, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { getErrorMessage, isApiErrorStatus } from "../api/client";
-import { useBusinessQuery, useLoginMutation, useSessionQuery } from "../api/hooks";
+import { useBusinessQuery, useCreatePublicSupportRequestMutation, useLoginMutation, useSessionQuery } from "../api/hooks";
 import { AuthScaffold } from "../components/Layout";
+
+const SALES_WHATSAPP = "6281354444967";
+
+function buildResetPasswordLink(email?: string) {
+  const message = [
+    "Halo sales TeknikOS, saya butuh bantuan reset password.",
+    `Email akun: ${email?.trim() || "-"}`,
+  ].join("\n");
+
+  return `https://wa.me/${SALES_WHATSAPP}?text=${encodeURIComponent(message)}`;
+}
 
 export default function LoginPage() {
   const navigate = useNavigate();
   const loginMutation = useLoginMutation();
+  const publicSupportRequestMutation = useCreatePublicSupportRequestMutation();
   const sessionQuery = useSessionQuery(false);
   const businessQuery = useBusinessQuery(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const resetPasswordLink = buildResetPasswordLink(email);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -27,7 +40,7 @@ export default function LoginPage() {
           }
 
           const result = await businessQuery.refetch();
-          if (result.data?.subscriptionStatus === "pending_payment") {
+          if (["pending_payment", "past_due", "paused", "cancelled"].includes(result.data?.subscriptionStatus ?? "")) {
             navigate("/payment-pending", { replace: true });
             return;
           }
@@ -45,6 +58,16 @@ export default function LoginPage() {
         },
       },
     );
+  }
+
+  async function handleForgotPassword() {
+    await publicSupportRequestMutation.mutateAsync({
+      type: "password_help",
+      requesterEmail: email.trim() || "unknown@teknikos.local",
+      message: "User meminta bantuan reset password dari halaman login.",
+    });
+
+    window.open(resetPasswordLink, "_blank", "noopener,noreferrer");
   }
 
   return (
@@ -81,7 +104,9 @@ export default function LoginPage() {
             <input type="checkbox" defaultChecked />
             <span>Ingat saya</span>
           </label>
-          <a href="/">Lupa password?</a>
+          <button type="button" className="btn btn--link" onClick={handleForgotPassword}>
+            Lupa password?
+          </button>
         </div>
         {loginMutation.error ? <p className="form-error">{getErrorMessage(loginMutation.error)}</p> : null}
         <button className="btn btn--primary btn--block" type="submit" disabled={loginMutation.isPending}>

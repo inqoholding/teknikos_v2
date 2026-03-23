@@ -46,6 +46,7 @@ const jobSchema = z.object({
   technicianIds: z.array(z.string()).optional(),
   type: z.string().min(2),
   scheduleAt: z.coerce.date(),
+  deadlineAt: z.coerce.date().optional().nullable(),
   price: z.number().int().min(0),
   status: jobStatusSchema.default("pending"),
   priority: z.enum(["Normal", "Urgent"]).default("Normal"),
@@ -91,6 +92,16 @@ function requireValidTransition(currentStatus: string, nextStatus: string) {
 function getJobTotalPrice(price: number, items: Array<{ totalPrice: number }>) {
   const itemsTotal = items.reduce((sum, item) => sum + item.totalPrice, 0);
   return itemsTotal > 0 ? itemsTotal : price;
+}
+
+function validateDeadlineWindow(scheduleAt: Date, deadlineAt?: Date | null) {
+  if (!deadlineAt) {
+    return;
+  }
+
+  if (deadlineAt.getTime() < scheduleAt.getTime()) {
+    throw badRequest("Deadline job tidak boleh lebih awal dari jadwal kerja.");
+  }
 }
 
 async function nextJobNumber(businessId: string) {
@@ -260,6 +271,8 @@ function serializeJob(
     technicians: assignedTechnicians,
     type: row.job.type,
     schedule: formatSchedule(row.job.scheduleAt),
+    scheduleAt: row.job.scheduleAt,
+    deadlineAt: row.job.deadlineAt,
     price: formatRupiahCompact(row.job.price),
     status: row.job.status,
     priority: row.job.priority as "Normal" | "Urgent",
@@ -357,7 +370,7 @@ jobsRouter.post("/", async (req, res) => {
   const businessId = requireBusiness(res);
   const business = await getCurrentBusiness(res);
   const payload = jobSchema.parse(req.body);
-  assertSubscriptionWritable(business.subscriptionStatus);
+  assertSubscriptionWritable(business.subscriptionStatus, business.currentPeriodEndsAt);
   if (!isInitialJobStatus(payload.status)) {
     throw badRequest("Job baru hanya bisa dibuat dengan status pending atau assigned.");
   }
@@ -368,6 +381,7 @@ jobsRouter.post("/", async (req, res) => {
   }
   assertJobItemPlanAccess(business.plan, payload.items);
   await assertMonthlyJobLimit(businessId, business.plan, payload.scheduleAt);
+  validateDeadlineWindow(payload.scheduleAt, payload.deadlineAt);
   await validateJobRelations({
     businessId,
     customerId: payload.customerId,
@@ -396,6 +410,7 @@ jobsRouter.post("/", async (req, res) => {
       assignedTechnicianIds: technicianIds,
       type: payload.type,
       scheduleAt: payload.scheduleAt,
+      deadlineAt: payload.deadlineAt || null,
       price: resolvedPrice,
       status: payload.status,
       priority: payload.priority,
@@ -419,7 +434,7 @@ jobsRouter.patch("/:id", async (req, res) => {
   const businessId = requireBusiness(res);
   const business = await getCurrentBusiness(res);
   const payload = jobSchema.partial().parse(req.body);
-  assertSubscriptionWritable(business.subscriptionStatus);
+  assertSubscriptionWritable(business.subscriptionStatus, business.currentPeriodEndsAt);
   const { items: _items, beforePhotoUrl, afterPhotoUrl, ...jobUpdates } = payload;
   const currentJob = await requireJobForBusiness(req.params.id, businessId);
 
@@ -435,6 +450,8 @@ jobsRouter.patch("/:id", async (req, res) => {
     payload.cancelReason === undefined ? currentJob.cancelReason : payload.cancelReason || null;
   const nextCustomerId = payload.customerId ?? currentJob.customerId;
   const nextItems = payload.items ?? null;
+  const nextScheduleAt = payload.scheduleAt ?? currentJob.scheduleAt;
+  const nextDeadlineAt = payload.deadlineAt === undefined ? currentJob.deadlineAt : payload.deadlineAt;
   if (nextTechnicianIds.length > 1) {
     assertPlanFeature(business.plan, "multiTechnicianEnabled");
   }
@@ -443,6 +460,8 @@ jobsRouter.patch("/:id", async (req, res) => {
   if (payload.status) {
     requireValidTransition(currentJob.status, payload.status);
   }
+
+  validateDeadlineWindow(nextScheduleAt, nextDeadlineAt);
 
   await validateJobRelations({
     businessId,
@@ -469,6 +488,7 @@ jobsRouter.patch("/:id", async (req, res) => {
       afterPhotoUrl: afterPhotoUrl === undefined ? undefined : afterPhotoUrl || null,
       technicianId: nextTechnicianIds[0] ?? null,
       assignedTechnicianIds: nextTechnicianIds,
+      deadlineAt: payload.deadlineAt === undefined ? undefined : nextDeadlineAt || null,
       cancelReason:
         payload.cancelReason === undefined
           ? nextStatus === "cancelled"
@@ -500,7 +520,7 @@ jobsRouter.patch("/:id", async (req, res) => {
 jobsRouter.delete("/:id", async (req, res) => {
   const businessId = requireBusiness(res);
   const business = await getCurrentBusiness(res);
-  assertSubscriptionWritable(business.subscriptionStatus);
+  assertSubscriptionWritable(business.subscriptionStatus, business.currentPeriodEndsAt);
   await requireJobForBusiness(req.params.id, businessId);
   await db.delete(jobs).where(and(eq(jobs.id, req.params.id), eq(jobs.businessId, businessId)));
   res.json({ data: { success: true } });
@@ -509,7 +529,7 @@ jobsRouter.delete("/:id", async (req, res) => {
 jobsRouter.post("/:id/invoice", async (req, res) => {
   const businessId = requireBusiness(res);
   const business = await getCurrentBusiness(res);
-  assertSubscriptionWritable(business.subscriptionStatus);
+  assertSubscriptionWritable(business.subscriptionStatus, business.currentPeriodEndsAt);
   const job = await requireJobForBusiness(req.params.id, businessId);
 
   if (job.status === "cancelled") {

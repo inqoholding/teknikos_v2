@@ -90,7 +90,7 @@ invoicesRouter.post("/", async (req, res) => {
   const businessId = requireBusiness(res);
   const business = await getCurrentBusiness(res);
   const payload = invoiceSchema.parse(req.body);
-  assertSubscriptionWritable(business.subscriptionStatus);
+  assertSubscriptionWritable(business.subscriptionStatus, business.currentPeriodEndsAt);
   await validateInvoiceRelations({
     businessId,
     customerId: payload.customerId,
@@ -121,7 +121,7 @@ invoicesRouter.patch("/:id", async (req, res) => {
   const businessId = requireBusiness(res);
   const business = await getCurrentBusiness(res);
   const payload = invoiceSchema.partial().parse(req.body);
-  assertSubscriptionWritable(business.subscriptionStatus);
+  assertSubscriptionWritable(business.subscriptionStatus, business.currentPeriodEndsAt);
   const currentInvoice = await requireInvoiceForBusiness(req.params.id, businessId);
   const nextCustomerId = payload.customerId ?? currentInvoice.customerId;
   const nextJobId = payload.jobId === undefined ? currentInvoice.jobId : payload.jobId || null;

@@ -89,6 +89,20 @@ function resolveHeading(pathname: string) {
     };
   }
 
+  if (pathname.startsWith("/settings/whatsapp-rules")) {
+    return {
+      title: "Rules WhatsApp",
+      subtitle: "Panduan singkat penggunaan WhatsApp agar lebih aman dipakai di TeknikOS",
+    };
+  }
+
+  if (pathname.startsWith("/settings/whatsapp-connect")) {
+    return {
+      title: "Hubungkan WAHA",
+      subtitle: "Sambungkan nomor bisnis ke WAHA dan kelola status koneksinya",
+    };
+  }
+
   return titleMap[pathname] ?? titleMap["/dashboard"];
 }
 

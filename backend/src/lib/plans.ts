@@ -71,6 +71,11 @@ const PLAN_ENTITLEMENTS: Record<BusinessPlan, PlanEntitlement> = {
 
 const WRITABLE_SUBSCRIPTION_STATUSES = new Set<SubscriptionStatus>(["active", "trialing", "paid"]);
 
+type SubscriptionTimelineInput = {
+  subscriptionStatus?: string | null;
+  currentPeriodEndsAt?: Date | null;
+};
+
 export function normalizeBusinessPlan(plan?: string | null): BusinessPlan {
   if (plan === "Pro" || plan === "Bisnis" || plan === "Starter") {
     return plan;
@@ -114,6 +119,58 @@ export function getSubscriptionLabel(status?: string | null) {
   return "Dibatalkan";
 }
 
+export function getEffectiveSubscriptionStatus(input: SubscriptionTimelineInput) {
+  const normalized = normalizeSubscriptionStatus(input.subscriptionStatus);
+  const subscriptionEndsAt = input.currentPeriodEndsAt ?? null;
+
+  if (!subscriptionEndsAt) {
+    return normalized;
+  }
+
+  if (!["active", "paid", "trialing"].includes(normalized)) {
+    return normalized;
+  }
+
+  if (subscriptionEndsAt.getTime() < Date.now()) {
+    return "paused";
+  }
+
+  return normalized;
+}
+
+export function getSubscriptionAlert(input: SubscriptionTimelineInput) {
+  const subscriptionEndsAt = input.currentPeriodEndsAt ?? null;
+  const effectiveStatus = getEffectiveSubscriptionStatus(input);
+
+  if (!subscriptionEndsAt) {
+    return null;
+  }
+
+  const now = Date.now();
+  const msRemaining = subscriptionEndsAt.getTime() - now;
+  const daysRemaining = Math.ceil(msRemaining / (1000 * 60 * 60 * 24));
+
+  if (effectiveStatus === "paused") {
+    return {
+      level: "danger" as const,
+      daysRemaining,
+      title: "Akun dibekukan karena subscription sudah lewat tenggat",
+      message: "Data bisnis tetap aman, tetapi perubahan data dan akses dashboard operasional dibatasi sampai subscription diperpanjang.",
+    };
+  }
+
+  if (daysRemaining >= 0 && daysRemaining <= 5) {
+    return {
+      level: "warning" as const,
+      daysRemaining,
+      title: `Subscription akan habis dalam ${daysRemaining} hari`,
+      message: "Segera perpanjang subscription agar akun tidak dibekukan dan operasional tetap berjalan.",
+    };
+  }
+
+  return null;
+}
+
 export async function getBusinessSubscriptionContext(businessId: string) {
   const [business] = await db
     .select()
@@ -137,19 +194,37 @@ export async function getBusinessSubscriptionContext(businessId: string) {
 
 export function serializePlanState(plan?: string | null, subscriptionStatus?: string | null) {
   const entitlements = getPlanEntitlements(plan);
+  const effectiveStatus = getEffectiveSubscriptionStatus({ subscriptionStatus });
   return {
     plan: entitlements.key,
-    subscriptionStatus: normalizeSubscriptionStatus(subscriptionStatus),
-    subscriptionStatusLabel: getSubscriptionLabel(subscriptionStatus),
+    subscriptionStatus: effectiveStatus,
+    subscriptionStatusLabel: getSubscriptionLabel(effectiveStatus),
     entitlements,
   };
 }
 
-export function assertSubscriptionWritable(subscriptionStatus?: string | null) {
-  const normalized = normalizeSubscriptionStatus(subscriptionStatus);
+export function serializeSubscriptionState(input: {
+  plan?: string | null;
+  subscriptionStatus?: string | null;
+  currentPeriodEndsAt?: Date | null;
+}) {
+  const entitlements = getPlanEntitlements(input.plan);
+  const effectiveStatus = getEffectiveSubscriptionStatus(input);
+  return {
+    plan: entitlements.key,
+    subscriptionStatus: effectiveStatus,
+    subscriptionStatusLabel: getSubscriptionLabel(effectiveStatus),
+    entitlements,
+    subscriptionAlert: getSubscriptionAlert(input),
+    currentPeriodEndsAt: input.currentPeriodEndsAt ?? null,
+  };
+}
+
+export function assertSubscriptionWritable(subscriptionStatus?: string | null, currentPeriodEndsAt?: Date | null) {
+  const normalized = getEffectiveSubscriptionStatus({ subscriptionStatus, currentPeriodEndsAt });
   if (!WRITABLE_SUBSCRIPTION_STATUSES.has(normalized)) {
     throw forbidden(
-      normalized === "past_due"
+      normalized === "past_due" || normalized === "paused"
         ? "Subscription perlu diperbarui sebelum data bisa diubah."
         : "Subscription bisnis ini sedang tidak aktif untuk perubahan data.",
     );

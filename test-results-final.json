@@ -1,0 +1,107 @@
+{
+  "baseUrl": "http://156.67.220.110",
+  "generatedAt": "2026-03-23T13:36:18.673Z",
+  "totals": {
+    "total": 16,
+    "passed": 16,
+    "failed": 0
+  },
+  "results": [
+    {
+      "name": "landing page load",
+      "status": "pass",
+      "details": "",
+      "at": "2026-03-23T13:35:55.656Z"
+    },
+    {
+      "name": "demo owner dashboard",
+      "status": "pass",
+      "details": "",
+      "at": "2026-03-23T13:35:55.845Z"
+    },
+    {
+      "name": "demo settings",
+      "status": "pass",
+      "details": "",
+      "at": "2026-03-23T13:35:55.929Z"
+    },
+    {
+      "name": "demo whatsapp rules",
+      "status": "pass",
+      "details": "",
+      "at": "2026-03-23T13:35:56.008Z"
+    },
+    {
+      "name": "demo waha connect",
+      "status": "pass",
+      "details": "",
+      "at": "2026-03-23T13:35:56.092Z"
+    },
+    {
+      "name": "cta sales whatsapp",
+      "status": "pass",
+      "details": "",
+      "at": "2026-03-23T13:35:56.159Z"
+    },
+    {
+      "name": "wrong password error",
+      "status": "pass",
+      "details": "",
+      "at": "2026-03-23T13:35:58.715Z"
+    },
+    {
+      "name": "register and onboarding",
+      "status": "pass",
+      "details": "",
+      "at": "2026-03-23T13:36:03.561Z"
+    },
+    {
+      "name": "logout flow",
+      "status": "pass",
+      "details": "",
+      "at": "2026-03-23T13:36:04.913Z"
+    },
+    {
+      "name": "owner login and dashboard",
+      "status": "pass",
+      "details": "",
+      "at": "2026-03-23T13:36:07.768Z"
+    },
+    {
+      "name": "owner settings and whatsapp pages",
+      "status": "pass",
+      "details": "",
+      "at": "2026-03-23T13:36:11.531Z"
+    },
+    {
+      "name": "owner main modules",
+      "status": "pass",
+      "details": "",
+      "at": "2026-03-23T13:36:12.138Z"
+    },
+    {
+      "name": "job detail page",
+      "status": "pass",
+      "details": "",
+      "at": "2026-03-23T13:36:14.761Z"
+    },
+    {
+      "name": "admin login and dashboard",
+      "status": "pass",
+      "details": "",
+      "at": "2026-03-23T13:36:17.681Z"
+    },
+    {
+      "name": "responsive smoke",
+      "status": "pass",
+      "details": "",
+      "at": "2026-03-23T13:36:17.951Z"
+    },
+    {
+      "name": "api CRUD hard test",
+      "status": "pass",
+      "details": "",
+      "at": "2026-03-23T13:36:18.631Z"
+    }
+  ]
+}

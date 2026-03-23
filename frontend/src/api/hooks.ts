@@ -1,9 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "./client";
 import type {
+  AdminCalendarJob,
   AdminClientSubscription,
+  AdminInboxItem,
   AdminResetPasswordResult,
   Business,
+  BusinessWhatsappState,
   Contract,
   Customer,
   CustomerDetail,
@@ -13,6 +16,7 @@ import type {
   JobDetail,
   JobListItem,
   SessionPayload,
+  SupportRequestResult,
   Technician,
 } from "./types";
 
@@ -87,6 +91,21 @@ async function getAdminSubscriptions() {
     };
   }>("/api/admin/subscriptions");
   return data;
+}
+
+async function getAdminCalendar() {
+  const { data } = await api.get<{ data: AdminCalendarJob[] }>("/api/admin/calendar");
+  return data.data;
+}
+
+async function getAdminInbox() {
+  const { data } = await api.get<{ data: AdminInboxItem[] }>("/api/admin/inbox");
+  return data.data;
+}
+
+async function getBusinessWhatsapp() {
+  const { data } = await api.get<{ data: BusinessWhatsappState }>("/api/business/whatsapp");
+  return data.data;
 }
 
 export function useSessionQuery(enabled = true) {
@@ -452,6 +471,30 @@ export function useAdminSubscriptionsQuery(enabled = true) {
   });
 }
 
+export function useAdminCalendarQuery(enabled = true) {
+  return useQuery({
+    queryKey: ["admin", "calendar"],
+    queryFn: getAdminCalendar,
+    enabled,
+  });
+}
+
+export function useAdminInboxQuery(enabled = true) {
+  return useQuery({
+    queryKey: ["admin", "inbox"],
+    queryFn: getAdminInbox,
+    enabled,
+  });
+}
+
+export function useBusinessWhatsappQuery(enabled = true) {
+  return useQuery({
+    queryKey: ["business", "whatsapp"],
+    queryFn: getBusinessWhatsapp,
+    enabled,
+  });
+}
+
 export function useUpdateAdminSubscriptionMutation() {
   const queryClient = useQueryClient();
 
@@ -488,6 +531,8 @@ export function useUpdateAdminSubscriptionMutation() {
 }
 
 export function useResetClientPasswordMutation() {
+  const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: async (payload: { businessId: string; newPassword?: string }) => {
       const { data } = await api.post<{ data: AdminResetPasswordResult }>(
@@ -495,6 +540,117 @@ export function useResetClientPasswordMutation() {
         payload,
       );
       return data.data;
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["admin", "inbox"] });
+    },
+  });
+}
+
+export function useCreateBusinessSupportRequestMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (payload: {
+      type: "subscription_upgrade" | "subscription_renewal";
+      targetPlan?: "Starter" | "Pro" | "Bisnis";
+      message?: string;
+    }) => {
+      const { data } = await api.post<{ data: SupportRequestResult }>("/api/support-requests/business", payload);
+      return data.data;
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["admin", "inbox"] });
+      await queryClient.invalidateQueries({ queryKey: ["business"] });
+    },
+  });
+}
+
+export function useCreatePublicSupportRequestMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (payload: {
+      type: "password_help";
+      requesterEmail: string;
+      requesterName?: string;
+      requesterPhone?: string;
+      message?: string;
+    }) => {
+      const { data } = await api.post<{ data: SupportRequestResult }>("/api/support-requests/public", payload);
+      return data.data;
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["admin", "inbox"] });
+    },
+  });
+}
+
+export function useUpdateBusinessWhatsappMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (payload: { mode: "basic" | "automation" }) => {
+      const { data } = await api.patch<{ data: BusinessWhatsappState }>("/api/business/whatsapp", payload);
+      return data.data;
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["business"] });
+      await queryClient.invalidateQueries({ queryKey: ["business", "whatsapp"] });
+    },
+  });
+}
+
+export function useConnectBusinessWhatsappMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async () => {
+      const { data } = await api.post<{ data: BusinessWhatsappState }>("/api/business/whatsapp/connect");
+      return data.data;
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["business"] });
+      await queryClient.invalidateQueries({ queryKey: ["business", "whatsapp"] });
+    },
+  });
+}
+
+export function useBusinessWhatsappQrMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async () => {
+      const { data } = await api.get<{ data: BusinessWhatsappState }>("/api/business/whatsapp/qr");
+      return data.data;
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["business"] });
+      await queryClient.invalidateQueries({ queryKey: ["business", "whatsapp"] });
+    },
+  });
+}
+
+export function useDisconnectBusinessWhatsappMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async () => {
+      const { data } = await api.post<{ data: BusinessWhatsappState }>("/api/business/whatsapp/disconnect");
+      return data.data;
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["business"] });
+      await queryClient.invalidateQueries({ queryKey: ["business", "whatsapp"] });
+    },
+  });
+}
+
+export function useSendBusinessWhatsappMutation() {
+  return useMutation({
+    mutationFn: async (payload: { phone: string; message: string }) => {
+      const { data } = await api.post("/api/business/whatsapp/send-text", payload);
+      return data;
     },
   });
 }

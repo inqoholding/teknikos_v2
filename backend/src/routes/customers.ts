@@ -159,7 +159,7 @@ customersRouter.post("/", async (req, res) => {
   const businessId = requireBusiness(res);
   const business = await getCurrentBusiness(res);
   const payload = customerSchema.parse(req.body);
-  assertSubscriptionWritable(business.subscriptionStatus);
+  assertSubscriptionWritable(business.subscriptionStatus, business.currentPeriodEndsAt);
   const [created] = await db
     .insert(customers)
     .values({
@@ -182,7 +182,7 @@ customersRouter.patch("/:id", async (req, res) => {
   const businessId = requireBusiness(res);
   const business = await getCurrentBusiness(res);
   const payload = customerSchema.partial().parse(req.body);
-  assertSubscriptionWritable(business.subscriptionStatus);
+  assertSubscriptionWritable(business.subscriptionStatus, business.currentPeriodEndsAt);
   const [updated] = await db
     .update(customers)
     .set({
@@ -203,7 +203,7 @@ customersRouter.patch("/:id", async (req, res) => {
 customersRouter.delete("/:id", async (req, res) => {
   const businessId = requireBusiness(res);
   const business = await getCurrentBusiness(res);
-  assertSubscriptionWritable(business.subscriptionStatus);
+  assertSubscriptionWritable(business.subscriptionStatus, business.currentPeriodEndsAt);
   const [deleted] = await db
     .delete(customers)
     .where(and(eq(customers.id, req.params.id), eq(customers.businessId, businessId)))

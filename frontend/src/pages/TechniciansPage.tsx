@@ -1,15 +1,18 @@
 import { FormEvent, useEffect, useState } from "react";
 import { getErrorMessage } from "../api/client";
-import { useBusinessQuery, useCreateTechnicianMutation, useTechniciansQuery, useUpdateTechnicianMutation } from "../api/hooks";
+import { useBusinessQuery, useCreateTechnicianMutation, useJobsQuery, useTechniciansQuery, useUpdateTechnicianMutation } from "../api/hooks";
 import { PageError, PageLoader } from "../components/PageState";
+import { DeadlineList, ScheduleCalendar } from "../components/ScheduleCalendar";
 import { Badge, EmptyAction, SectionCard, StatCard } from "../components/UI";
 import { buildTechnicianTaskMessage, buildWhatsAppLink } from "../utils/whatsapp";
 
 export default function TechniciansPage() {
   const techniciansQuery = useTechniciansQuery();
   const businessQuery = useBusinessQuery();
+  const jobsQuery = useJobsQuery();
   const createTechnicianMutation = useCreateTechnicianMutation();
   const [editingId, setEditingId] = useState("");
+  const [selectedTechnicianId, setSelectedTechnicianId] = useState("");
   const updateTechnicianMutation = useUpdateTechnicianMutation(editingId || undefined);
   const [showForm, setShowForm] = useState(false);
   const [name, setName] = useState("");
@@ -17,7 +20,15 @@ export default function TechniciansPage() {
   const [specialties, setSpecialties] = useState("");
   const [status, setStatus] = useState<"Aktif" | "Bertugas" | "Standby" | "Tidak Aktif">("Aktif");
   const technicians = techniciansQuery.data ?? [];
+  const jobs = jobsQuery.data ?? [];
   const editingTechnician = technicians.find((item) => item.id === editingId);
+  const focusedTechnician = technicians.find((item) => item.id === selectedTechnicianId) ?? technicians[0];
+
+  useEffect(() => {
+    if (!selectedTechnicianId && technicians[0]) {
+      setSelectedTechnicianId(technicians[0].id);
+    }
+  }, [selectedTechnicianId, technicians]);
 
   useEffect(() => {
     if (!editingTechnician) {
@@ -43,6 +54,19 @@ export default function TechniciansPage() {
   const inactiveCount = technicians.filter((item) => item.status === "Tidak Aktif").length;
   const maxTechnicians = businessQuery.data?.entitlements?.maxTechnicians ?? 1;
   const technicianSlotsLeft = Math.max(0, maxTechnicians - technicians.length);
+  const focusedAssignments = focusedTechnician
+    ? jobs.filter((job) => job.technicianIds.includes(focusedTechnician.id))
+    : [];
+  const focusedCalendarItems = focusedAssignments.map((job) => ({
+    id: job.id,
+    title: `${job.number} · ${job.title}`,
+    subtitle: `${job.customer} · ${job.location}`,
+    scheduleAt: job.scheduleAt,
+    deadlineAt: job.deadlineAt ?? null,
+    href: `/jobs/${job.id}`,
+    status: job.status,
+    priority: job.priority,
+  }));
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -175,6 +199,9 @@ export default function TechniciansPage() {
                   <div><span>Phone</span><strong>{technician.phone}</strong></div>
                 </div>
                 <div className="button-row button-row--left">
+                  <EmptyAction onClick={() => setSelectedTechnicianId(technician.id)}>
+                    Buka Kalender
+                  </EmptyAction>
                   <EmptyAction
                     onClick={() => {
                       setEditingId(technician.id);
@@ -202,6 +229,24 @@ export default function TechniciansPage() {
           );
         })}
       </div>
+
+      {focusedTechnician ? (
+        <div className="dashboard-grid">
+          <SectionCard
+            title={`Kalender Tugas ${focusedTechnician.name}`}
+            description="Teknisi bisa melihat semua jadwal kerja yang menjadi tanggung jawabnya."
+          >
+            <ScheduleCalendar items={focusedCalendarItems} emptyLabel="Belum ada jadwal untuk teknisi ini." />
+          </SectionCard>
+
+          <SectionCard
+            title="Deadline Tugas Teknisi"
+            description="Pantau tenggat kerja teknisi yang sudah ditetapkan pada job."
+          >
+            <DeadlineList items={focusedCalendarItems} emptyLabel="Belum ada deadline untuk teknisi ini." />
+          </SectionCard>
+        </div>
+      ) : null}
     </div>
   );
 }

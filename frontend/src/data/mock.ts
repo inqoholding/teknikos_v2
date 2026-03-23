@@ -81,6 +81,9 @@ export const business = {
   name: "CV Teknik Makassar",
   owner: "Budi Santoso",
   location: "Makassar HQ",
+  city: "Makassar",
+  plan: "Pro",
+  subscriptionStatusLabel: "Aktif",
 };
 
 export const dashboardStats = [

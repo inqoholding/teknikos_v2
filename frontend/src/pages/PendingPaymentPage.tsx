@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { useBusinessQuery } from "../api/hooks";
+import { useBusinessQuery, useCreateBusinessSupportRequestMutation } from "../api/hooks";
 import { getErrorMessage } from "../api/client";
 import { PageError, PageLoader } from "../components/PageState";
 
@@ -24,6 +24,7 @@ function buildWhatsAppLink(input: {
 
 export default function PendingPaymentPage() {
   const businessQuery = useBusinessQuery();
+  const supportRequestMutation = useCreateBusinessSupportRequestMutation();
 
   if (businessQuery.isLoading) {
     return <PageLoader title="Memuat status pembayaran..." />;
@@ -40,15 +41,30 @@ export default function PendingPaymentPage() {
     ownerName: business.owner?.name ?? null,
     ownerEmail: business.owner?.email ?? null,
   });
+  const isFrozen = business.subscriptionStatus === "paused";
+  const heading = isFrozen ? "Akun dibekukan sementara." : "Subscription kamu belum aktif.";
+
+  async function handleRequest(type: "subscription_renewal" | "subscription_upgrade") {
+    await supportRequestMutation.mutateAsync({
+      type,
+      targetPlan: type === "subscription_upgrade" ? "Bisnis" : undefined,
+      message:
+        type === "subscription_upgrade"
+          ? "Owner meminta upgrade subscription."
+          : "Owner meminta perpanjangan subscription.",
+    });
+
+    window.open(whatsappLink, "_blank", "noopener,noreferrer");
+  }
 
   return (
     <div className="page-stack">
       <section className="surface-card waiting-payment-card">
         <span className="eyebrow-pill">Pending Payment</span>
-        <h1>Subscription kamu belum aktif.</h1>
+        <h1>{heading}</h1>
         <p>
           Paket <strong>{business.plan}</strong> untuk <strong>{business.name}</strong> sudah
-          tercatat. Langkah berikutnya adalah menghubungi admin untuk lanjut pembayaran manual.
+          tercatat. Langkah berikutnya adalah menghubungi sales untuk lanjut pembayaran, perpanjangan, atau upgrade paket.
         </p>
 
         <div className="summary-list">
@@ -62,16 +78,18 @@ export default function PendingPaymentPage() {
           <div>
             <strong>Akses dashboard penuh masih dikunci</strong>
             <p>
-              Setelah admin mengubah status menjadi <strong>Paid</strong>, kamu bisa login dan
-              langsung masuk ke dashboard operasional.
+              Setelah status subscription aktif kembali, akses dashboard akan dibuka lagi tanpa menghapus data bisnis yang sudah ada.
             </p>
           </div>
         </div>
 
         <div className="button-row button-row--left">
-          <a className="btn btn--primary" href={whatsappLink} target="_blank" rel="noreferrer">
-            Lanjutkan Pembayaran via WhatsApp
-          </a>
+          <button className="btn btn--primary" type="button" onClick={() => handleRequest("subscription_renewal")}>
+            Perpanjang via WhatsApp
+          </button>
+          <button className="btn btn--secondary" type="button" onClick={() => handleRequest("subscription_upgrade")}>
+            Upgrade Paket via Sales
+          </button>
           <Link className="btn btn--secondary" to="/login">
             Kembali ke Login
           </Link>

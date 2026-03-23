@@ -1,5 +1,7 @@
 type MaybeText = string | null | undefined;
 
+export const WAHA_TEST_MESSAGE = ".";
+
 function normalizePhoneNumber(phone?: MaybeText) {
   if (!phone) return null;
   const digits = phone.replace(/[^\d]/g, "");

@@ -7,6 +7,7 @@ import {
   useCustomersQuery,
   useInventoryQuery,
   useJobQuery,
+  useSendBusinessWhatsappMutation,
   useTechniciansQuery,
   useUpdateJobMutation,
 } from "../api/hooks";
@@ -14,7 +15,8 @@ import type { JobDetail } from "../api/types";
 import { Badge, EmptyAction, SectionCard } from "../components/UI";
 import { PageError, PageLoader } from "../components/PageState";
 import { printInvoice } from "../utils/invoicePrint";
-import { buildInvoiceMessage, buildJobProgressMessage, buildTechnicianTaskMessage, buildWhatsAppLink } from "../utils/whatsapp";
+import { createClientId } from "../utils/ids";
+import { buildInvoiceMessage, buildJobProgressMessage, buildTechnicianTaskMessage, buildWhatsAppLink, WAHA_TEST_MESSAGE } from "../utils/whatsapp";
 
 type EditableItem = {
   id: string;
@@ -60,7 +62,7 @@ function toEditableItem(item: JobDetail["items"][number]): EditableItem {
 
 function createBlankItem(): EditableItem {
   return {
-    id: crypto.randomUUID(),
+    id: createClientId("job-item"),
     inventoryId: null,
     kind: "service",
     name: "",
@@ -96,10 +98,12 @@ export default function JobDetailPage() {
   const customersQuery = useCustomersQuery();
   const inventoryQuery = useInventoryQuery();
   const businessQuery = useBusinessQuery();
+  const sendBusinessWhatsappMutation = useSendBusinessWhatsappMutation();
 
   const [status, setStatus] = useState("pending");
   const [technicianIds, setTechnicianIds] = useState<string[]>([]);
   const [cancelReason, setCancelReason] = useState("");
+  const [deadlineAt, setDeadlineAt] = useState("");
   const [beforePhotoUrl, setBeforePhotoUrl] = useState<string | null>(null);
   const [afterPhotoUrl, setAfterPhotoUrl] = useState<string | null>(null);
   const [lineItems, setLineItems] = useState<EditableItem[]>([]);
@@ -112,6 +116,7 @@ export default function JobDetailPage() {
     setStatus(jobQuery.data.status);
     setTechnicianIds(jobQuery.data.technicianIds ?? (jobQuery.data.technicianId ? [jobQuery.data.technicianId] : []));
     setCancelReason(jobQuery.data.cancelReason ?? "");
+    setDeadlineAt(jobQuery.data.deadlineAt ? new Date(jobQuery.data.deadlineAt).toISOString().slice(0, 16) : "");
     setBeforePhotoUrl(jobQuery.data.beforePhotoUrl ?? null);
     setAfterPhotoUrl(jobQuery.data.afterPhotoUrl ?? null);
     setLineItems(
@@ -172,6 +177,7 @@ export default function JobDetailPage() {
           }),
         )
       : null;
+  const canUseWahaAutomation = businessQuery.data?.whatsapp?.canUseAutomation ?? false;
 
   function updateLineItem(idToUpdate: string, patch: Partial<EditableItem>) {
     setLineItems((current) =>
@@ -234,6 +240,7 @@ export default function JobDetailPage() {
       status,
       technicianIds,
       cancelReason: status === "cancelled" ? cancelReason : null,
+      deadlineAt: deadlineAt || null,
       beforePhotoUrl,
       afterPhotoUrl,
       items: payloadItems,
@@ -261,6 +268,29 @@ export default function JobDetailPage() {
         dueDate: job.invoice.dueDateLabel,
       },
       job,
+    });
+  }
+
+  async function handleSendCustomerAutoMessage(kind: "progress" | "invoice") {
+    if (!customer?.phone) {
+      return;
+    }
+
+    await sendBusinessWhatsappMutation.mutateAsync({
+      phone: customer.phone,
+      message: WAHA_TEST_MESSAGE,
+    });
+  }
+
+  async function handleSendTechnicianAutoMessage(technicianId: string) {
+    const technician = assignedTechnicians.find((item) => item.id === technicianId);
+    if (!technician?.phone) {
+      return;
+    }
+
+    await sendBusinessWhatsappMutation.mutateAsync({
+      phone: technician.phone,
+      message: WAHA_TEST_MESSAGE,
     });
   }
 
@@ -469,6 +499,10 @@ export default function JobDetailPage() {
                   <textarea value={cancelReason} onChange={(event) => setCancelReason(event.target.value)} />
                 </label>
               ) : null}
+              <label className="field">
+                <span>Deadline tugas</span>
+                <input type="datetime-local" value={deadlineAt} onChange={(event) => setDeadlineAt(event.target.value)} />
+              </label>
               <button className="btn btn--secondary" onClick={() => void handleUpdateStatus()} disabled={updateJobMutation.isPending}>
                 {updateJobMutation.isPending ? "Menyimpan..." : "Simpan Perubahan"}
               </button>
@@ -512,6 +546,7 @@ export default function JobDetailPage() {
             <div className="summary-list">
               <div><span>Dibuat</span><strong>{job.createdAt ?? "-"}</strong></div>
               <div><span>Dijadwalkan</span><strong>{job.schedule}</strong></div>
+              <div><span>Deadline</span><strong>{job.deadlineAt ? new Date(job.deadlineAt).toLocaleString("id-ID") : "Belum diatur"}</strong></div>
               <div><span>Update terakhir</span><strong>{job.updatedAt ?? "-"}</strong></div>
               <div><span>Nilai job</span><strong>{formatCurrency(totalItemsValue || 0)}</strong></div>
               <div><span>Invoice</span><strong>{job.invoice?.number ?? "Belum ada"}</strong></div>
@@ -584,6 +619,60 @@ export default function JobDetailPage() {
                   <p className="form-helper">Pilih teknisi dulu di Action Panel agar reminder tugas bisa dikirim.</p>
                 )}
               </div>
+            </div>
+          </SectionCard>
+
+          <SectionCard title="WhatsApp Otomatis WAHA" description="Jika WAHA sudah terhubung, kirim pesan otomatis ke client dan teknisi langsung dari detail job.">
+            <div className="action-stack">
+              {!canUseWahaAutomation ? (
+                <div className="callout callout--warning">
+                  <strong>WAHA belum siap dipakai</strong>
+                  <p>Aktifkan mode Otomasi WAHA dan hubungkan nomor bisnis lebih dulu dari halaman Hubungkan WAHA.</p>
+                </div>
+              ) : null}
+
+              <div className="summary-list">
+                <div><span>Status WAHA</span><strong>{businessQuery.data?.whatsapp?.automationStatusLabel ?? "Belum aktif"}</strong></div>
+                <div><span>Client</span><strong>{customer?.name ?? job.customer}</strong></div>
+                <div><span>Tim teknisi</span><strong>{assignedTechnicians.map((item) => item.name).join(", ") || "Belum ada teknisi"}</strong></div>
+              </div>
+
+              <div className="button-row button-row--left">
+                <EmptyAction
+                  primary
+                  onClick={() => void handleSendCustomerAutoMessage("progress")}
+                  disabled={!canUseWahaAutomation || sendBusinessWhatsappMutation.isPending || !customer?.phone}
+                >
+                  {sendBusinessWhatsappMutation.isPending ? "Mengirim..." : "Kirim Progress ke Client"}
+                </EmptyAction>
+                <EmptyAction
+                  onClick={() => void handleSendCustomerAutoMessage("invoice")}
+                  disabled={!canUseWahaAutomation || sendBusinessWhatsappMutation.isPending || !customer?.phone || !job.invoice}
+                >
+                  {sendBusinessWhatsappMutation.isPending ? "Mengirim..." : "Kirim Invoice ke Client"}
+                </EmptyAction>
+              </div>
+
+              <div className="whatsapp-share-grid">
+                {assignedTechnicians.length > 0 ? (
+                  assignedTechnicians.map((technician) => (
+                    <div key={technician.id} className="whatsapp-share-card">
+                      <strong>{technician.name}</strong>
+                      <span>{technician.phone}</span>
+                      <EmptyAction
+                        onClick={() => void handleSendTechnicianAutoMessage(technician.id)}
+                        disabled={!canUseWahaAutomation || sendBusinessWhatsappMutation.isPending || !technician.phone}
+                      >
+                        {sendBusinessWhatsappMutation.isPending ? "Mengirim..." : "Kirim Tugas Otomatis"}
+                      </EmptyAction>
+                    </div>
+                  ))
+                ) : (
+                  <p className="form-helper">Belum ada teknisi yang ditugaskan untuk job ini.</p>
+                )}
+              </div>
+
+              {sendBusinessWhatsappMutation.error ? <p className="form-error">{getErrorMessage(sendBusinessWhatsappMutation.error)}</p> : null}
             </div>
           </SectionCard>
         </div>

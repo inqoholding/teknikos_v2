@@ -8,7 +8,7 @@ function isStaffRole(role?: string | null) {
 }
 
 function isPendingPayment(status?: string | null) {
-  return status === "pending_payment";
+  return ["pending_payment", "past_due", "paused", "cancelled"].includes(status ?? "");
 }
 
 export function GuestGuard() {

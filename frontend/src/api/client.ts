@@ -1,6 +1,9 @@
 import axios from "axios";
 import type { ApiErrorPayload } from "./types";
 
+export const CSRF_HEADER_NAME = "x-teknikos-csrf";
+export const CSRF_HEADER_VALUE = "1";
+
 function resolveApiUrl() {
   if (import.meta.env.VITE_API_URL) {
     return import.meta.env.VITE_API_URL;
@@ -14,6 +17,14 @@ function resolveApiUrl() {
 }
 
 export const API_URL = resolveApiUrl();
+
+function normalizeApiPath(url?: string) {
+  if (!url) return url;
+  if (!API_URL) return url;
+  if (!API_URL.endsWith("/api")) return url;
+  if (!url.startsWith("/api/")) return url;
+  return url.slice(4);
+}
 
 function resolveDirectBackendUrl() {
   if (typeof window === "undefined") {
@@ -29,6 +40,17 @@ export const api = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
+});
+
+api.interceptors.request.use((config) => {
+  const method = config.method?.toUpperCase();
+  config.url = normalizeApiPath(config.url);
+
+  if (method && !["GET", "HEAD", "OPTIONS"].includes(method)) {
+    config.headers.set(CSRF_HEADER_NAME, CSRF_HEADER_VALUE);
+  }
+
+  return config;
 });
 
 api.interceptors.response.use(
@@ -74,4 +96,8 @@ export function getErrorMessage(error: unknown, fallback = "Terjadi kesalahan.")
 
 export function isApiErrorStatus(error: unknown, status: number) {
   return typeof error === "object" && error !== null && "status" in error && error.status === status;
+}
+
+export function isMissingBusinessError(error: unknown) {
+  return isApiErrorStatus(error, 403) || isApiErrorStatus(error, 404);
 }

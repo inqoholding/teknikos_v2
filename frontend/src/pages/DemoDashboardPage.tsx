@@ -119,6 +119,23 @@ export default function DemoDashboardPage() {
             </div>
           </SectionCard>
 
+          <SectionCard title="Mode Hard Test" description='Saat pengujian, pengiriman otomatis WAHA cukup mengirim "." supaya alur bisa dicek tanpa spam isi pesan panjang.'>
+            <div className="stack-list">
+              <div className="stack-list__item">
+                <strong>Setup WAHA dibuat bertahap</strong>
+                <p>Pilih mode, hubungkan session, scan QR, lalu tes koneksi dari halaman pengaturan.</p>
+              </div>
+              <div className="stack-list__item">
+                <strong>Kirim otomatis tetap dites end-to-end</strong>
+                <p>Dashboard dan detail job tetap menjalankan fungsi kirim, hanya payload testing yang dibuat minimal.</p>
+              </div>
+              <div className="stack-list__item">
+                <strong>Landing dan demo ikut disamakan</strong>
+                <p>Calon client bisa lihat alur komunikasi, sementara tim internal tetap aman saat test.</p>
+              </div>
+            </div>
+          </SectionCard>
+
           <SectionCard title="Lanjut Setelah Demo" description="Kalau cocok, tim bisa lanjut tanpa perlu bingung alur berikutnya.">
             <div className="stack-list">
               <div className="stack-list__item">

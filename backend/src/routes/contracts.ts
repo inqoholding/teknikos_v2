@@ -54,7 +54,7 @@ contractsRouter.post("/", async (req, res) => {
   const business = await getCurrentBusiness(res);
   const payload = contractSchema.parse(req.body);
   assertPlanFeature(business.plan, "contractsEnabled");
-  assertSubscriptionWritable(business.subscriptionStatus);
+  assertSubscriptionWritable(business.subscriptionStatus, business.currentPeriodEndsAt);
   await requireCustomerForBusiness(payload.customerId, businessId);
   const [created] = await db
     .insert(contracts)
@@ -76,7 +76,7 @@ contractsRouter.patch("/:id", async (req, res) => {
   const business = await getCurrentBusiness(res);
   const payload = contractSchema.partial().parse(req.body);
   assertPlanFeature(business.plan, "contractsEnabled");
-  assertSubscriptionWritable(business.subscriptionStatus);
+  assertSubscriptionWritable(business.subscriptionStatus, business.currentPeriodEndsAt);
   const nextCustomerId = payload.customerId;
   if (nextCustomerId) {
     await requireCustomerForBusiness(nextCustomerId, businessId);
@@ -105,7 +105,7 @@ contractsRouter.delete("/:id", async (req, res) => {
   const businessId = requireBusiness(res);
   const business = await getCurrentBusiness(res);
   assertPlanFeature(business.plan, "contractsEnabled");
-  assertSubscriptionWritable(business.subscriptionStatus);
+  assertSubscriptionWritable(business.subscriptionStatus, business.currentPeriodEndsAt);
   const [deleted] = await db
     .delete(contracts)
     .where(and(eq(contracts.id, req.params.id), eq(contracts.businessId, businessId)))

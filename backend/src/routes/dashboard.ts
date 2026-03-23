@@ -2,7 +2,7 @@ import { Router } from "express";
 import { eq } from "drizzle-orm";
 import { businesses, contracts, customers, inventory, invoices, jobs, technicians } from "../db/app-schema.js";
 import { db } from "../db/index.js";
-import { serializePlanState } from "../lib/plans.js";
+import { serializeSubscriptionState } from "../lib/plans.js";
 import { requireBusiness, requireSession } from "../lib/session.js";
 import {
   contractStatus,
@@ -239,7 +239,7 @@ dashboardRouter.get("/stats", async (_req, res) => {
       business: businessRecord
         ? {
             ...businessRecord,
-            ...serializePlanState(businessRecord.plan, businessRecord.subscriptionStatus),
+            ...serializeSubscriptionState(businessRecord),
           }
         : null,
     },

@@ -4,10 +4,10 @@ import { Link } from "react-router-dom";
 import { FeatureIcon, MarketingFooter } from "../components/Layout";
 
 const featureCards = [
-  "Dispatch yang jelas",
-  "Invoice lebih rapi",
-  "CRM pelanggan hidup",
-  "Stok dan kontrak ikut jalan",
+  "Dispatch dan kalender kerja",
+  "Invoice dan billing lebih rapi",
+  "CRM pelanggan yang hidup",
+  "Inventori, kontrak, dan WAHA",
 ];
 
 const narrativeCards = [
@@ -38,8 +38,38 @@ const communicationCards = [
     body: "Nomor invoice, total tagihan, status, dan jatuh tempo sudah disusun otomatis agar lebih enak dibagikan ke client.",
   },
   {
-    title: "Reminder tugas untuk teknisi",
-    body: "Tugas harian, lokasi, dan pelanggan bisa dikirim cepat ke teknisi tanpa perlu setup bot WhatsApp dulu.",
+    title: "Setup WAHA dibuat step-by-step",
+    body: "Admin tinggal ikuti urutan pilih mode, hubungkan session, scan QR, lalu tes koneksi. Tidak perlu menebak langkah berikutnya.",
+  },
+];
+
+const latestFeatureCards = [
+  {
+    title: "Kalender jadwal dan deadline",
+    body: "Dashboard owner dan admin sekarang bisa melihat seluruh jadwal kerja dan deadline job tanpa buka satu per satu.",
+  },
+  {
+    title: "Panel WAHA yang lebih jelas",
+    body: "Halaman pengaturan sudah dipisah jadi rules dan setup WAHA, lengkap dengan langkah hubungkan session, QR, dan tes koneksi.",
+  },
+  {
+    title: "Detail job lebih operasional",
+    body: "Di detail job sekarang ada deadline, before-after photo, item sparepart, invoice, dan panel tindakan yang lebih lengkap.",
+  },
+];
+
+const livePanelPreview = [
+  {
+    title: "Operations Cockpit",
+    body: "Queue dispatch, billing, dan CRM follow up dibaca dari satu panel yang langsung bisa ditindak.",
+  },
+  {
+    title: "Kalender & Deadline",
+    body: "Jadwal kerja dan tenggat job terlihat berdampingan, jadi owner tidak cuma melihat list job.",
+  },
+  {
+    title: "WAHA Setup",
+    body: "Rules WhatsApp dan langkah connect WAHA dipisah supaya setup lebih mudah dipahami client.",
   },
 ];
 
@@ -134,6 +164,9 @@ function buildPlanRegisterLink(plan: string) {
   return `/register?plan=${encodeURIComponent(plan)}`;
 }
 
+const SALES_WHATSAPP_LINK =
+  "https://wa.me/6281354444967?text=Halo%20sales%20TeknikOS,%20saya%20ingin%20tanya%20demo%20dan%20langganan.";
+
 export default function HomePage() {
   const [draftQuestion, setDraftQuestion] = useState("");
   const [activeChat, setActiveChat] = useState(chatbotFaq[0]);
@@ -173,6 +206,10 @@ export default function HomePage() {
             hilang dengan satu sistem owner dashboard yang terasa lokal, ringan, dan siap dipakai
             tim Indonesia.
           </p>
+          <p className="chart-helper">
+            Sekarang bukan cuma dispatch dan billing. TeknikOS juga sudah punya kalender jadwal,
+            deadline job, setup WAHA bertahap, dan halaman demo yang mengikuti alur aplikasi utama.
+          </p>
           <div className="landing-hero__actions">
             <Link to="/register" className="btn btn--secondary">
               Buat Akun Gratis
@@ -183,6 +220,9 @@ export default function HomePage() {
             <Link to="/demo-owner-dashboard" className="btn btn--secondary">
               Lihat Demo Owner Dashboard
             </Link>
+            <a href={SALES_WHATSAPP_LINK} target="_blank" rel="noreferrer" className="btn btn--secondary">
+              Tanya via WhatsApp
+            </a>
           </div>
           <div className="landing-pill-row">
             <div className="mini-metric">
@@ -228,8 +268,9 @@ export default function HomePage() {
               <div className="demo-chart demo-chart--features">
                 {[
                   "Dispatch board dengan status live",
+                  "Kalender jadwal dan deadline job",
                   "CRM pelanggan dan histori unit",
-                  "Invoice, kontrak, dan inventori",
+                  "Invoice, kontrak, inventori, dan setup WAHA",
                 ].map((item) => (
                   <div key={item} className="demo-feature-item">
                     <span className="demo-feature-item__dot" />
@@ -269,6 +310,36 @@ export default function HomePage() {
             <p>{item.body}</p>
           </article>
         ))}
+      </section>
+
+      <section className="landing-rhythm-grid">
+        {latestFeatureCards.map((item) => (
+          <article key={item.title} className="rhythm-card">
+            <span className="eyebrow">Fitur Terbaru</span>
+            <h3>{item.title}</h3>
+            <p>{item.body}</p>
+          </article>
+        ))}
+      </section>
+
+      <section className="landing-ops-strip">
+        <div className="landing-ops-strip__copy">
+          <span className="eyebrow">Preview Dashboard Live</span>
+          <h2>Yang dilihat calon user di demo sekarang lebih dekat dengan yang benar-benar dipakai di app utama.</h2>
+          <p>
+            Bukan cuma halaman promosi. Struktur panel, istilah, dan prioritas di landing serta demo
+            sekarang mengikuti dashboard live TeknikOS sedekat mungkin.
+          </p>
+        </div>
+        <div className="landing-ops-strip__grid">
+          {livePanelPreview.map((item, index) => (
+            <article key={item.title} className={`ops-story-card ops-story-card--${index + 1}`}>
+              <span className="eyebrow-pill">Live 0{index + 1}</span>
+              <h3>{item.title}</h3>
+              <p>{item.body}</p>
+            </article>
+          ))}
+        </div>
       </section>
 
       <section className="landing-ops-strip">
@@ -360,14 +431,14 @@ export default function HomePage() {
               <FeatureIcon />
               <h3>{card}</h3>
               <p>
-                {card === "Dispatch yang jelas" &&
-                  "Job dibuat, di-assign, dipantau, dan selesai dalam satu alur status."}
-                {card === "Invoice lebih rapi" &&
+                {card === "Dispatch dan kalender kerja" &&
+                  "Job dibuat, di-assign, dipantau, lalu dibaca juga dari kalender dan daftar deadline."}
+                {card === "Invoice dan billing lebih rapi" &&
                   "Invoice manual dan auto-generate dari job selesai, tanpa tulis ulang."}
-                {card === "CRM pelanggan hidup" &&
+                {card === "CRM pelanggan yang hidup" &&
                   "Alamat, unit AC, job history, dan kontrak aktif tersimpan rapi."}
-                {card === "Stok dan kontrak ikut jalan" &&
-                  "Owner tahu item hampir habis dan kontrak mana yang harus diremind."}
+                {card === "Inventori, kontrak, dan WAHA" &&
+                  "Owner tahu item hampir habis, kontrak mana yang mendekat, dan nomor bisnis bisa disiapkan ke WAHA."}
               </p>
             </article>
           ))}
@@ -383,7 +454,7 @@ export default function HomePage() {
           {[
             "Buat job dan assign teknisi dalam hitungan detik.",
             "Pantau status pending, on the way, in progress, done, atau cancelled.",
-            "Buat invoice sesudah kerja lapangan dan follow up pembayaran lebih cepat.",
+            "Baca jadwal dari kalender, cek deadline, lalu lanjutkan ke invoice atau follow up pembayaran.",
           ].map((text, index) => (
             <div key={text} className="workflow-list__item">
               <span>{index + 1}</span>

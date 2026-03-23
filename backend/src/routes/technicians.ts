@@ -62,7 +62,7 @@ techniciansRouter.post("/", async (req, res) => {
   const businessId = requireBusiness(res);
   const business = await getCurrentBusiness(res);
   const payload = technicianSchema.parse(req.body);
-  assertSubscriptionWritable(business.subscriptionStatus);
+  assertSubscriptionWritable(business.subscriptionStatus, business.currentPeriodEndsAt);
   await assertTechnicianLimit(businessId, business.plan);
   const [created] = await db
     .insert(technicians)
@@ -82,7 +82,7 @@ techniciansRouter.patch("/:id", async (req, res) => {
   const businessId = requireBusiness(res);
   const business = await getCurrentBusiness(res);
   const payload = technicianSchema.partial().parse(req.body);
-  assertSubscriptionWritable(business.subscriptionStatus);
+  assertSubscriptionWritable(business.subscriptionStatus, business.currentPeriodEndsAt);
   const [updated] = await db
     .update(technicians)
     .set({
@@ -102,7 +102,7 @@ techniciansRouter.patch("/:id", async (req, res) => {
 techniciansRouter.delete("/:id", async (req, res) => {
   const businessId = requireBusiness(res);
   const business = await getCurrentBusiness(res);
-  assertSubscriptionWritable(business.subscriptionStatus);
+  assertSubscriptionWritable(business.subscriptionStatus, business.currentPeriodEndsAt);
   const [deleted] = await db
     .delete(technicians)
     .where(and(eq(technicians.id, req.params.id), eq(technicians.businessId, businessId)))

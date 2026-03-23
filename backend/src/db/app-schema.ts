@@ -19,6 +19,31 @@ export const businesses = sqliteTable("businesses", {
   trialEndsAt: integer("trial_ends_at", { mode: "timestamp" }),
   currentPeriodEndsAt: integer("current_period_ends_at", { mode: "timestamp" }),
   subscriptionNotes: text("subscription_notes"),
+  whatsappMode: text("whatsapp_mode").notNull().default("basic"),
+  whatsappAutomationStatus: text("whatsapp_automation_status").notNull().default("not_connected"),
+  whatsappAutomationConnectedAt: integer("whatsapp_automation_connected_at", { mode: "timestamp" }),
+  whatsappAutomationLastError: text("whatsapp_automation_last_error"),
+  createdAt: integer("created_at", { mode: "timestamp" })
+    .$defaultFn(() => new Date())
+    .notNull(),
+  updatedAt: integer("updated_at", { mode: "timestamp" })
+    .$defaultFn(() => new Date())
+    .notNull(),
+});
+
+export const adminInboxRequests = sqliteTable("admin_inbox_requests", {
+  id: text("id").primaryKey(),
+  businessId: text("business_id").references(() => businesses.id, { onDelete: "set null" }),
+  type: text("type").notNull(),
+  status: text("status").notNull().default("open"),
+  source: text("source").notNull().default("app"),
+  businessName: text("business_name"),
+  requesterName: text("requester_name"),
+  requesterEmail: text("requester_email"),
+  requesterPhone: text("requester_phone"),
+  currentPlan: text("current_plan"),
+  targetPlan: text("target_plan"),
+  message: text("message"),
   createdAt: integer("created_at", { mode: "timestamp" })
     .$defaultFn(() => new Date())
     .notNull(),
@@ -82,6 +107,7 @@ export const jobs = sqliteTable("jobs", {
   assignedTechnicianIds: text("assigned_technician_ids", { mode: "json" }).$type<string[]>(),
   type: text("type").notNull(),
   scheduleAt: integer("schedule_at", { mode: "timestamp" }).notNull(),
+  deadlineAt: integer("deadline_at", { mode: "timestamp" }),
   price: integer("price").notNull(),
   status: text("status").notNull().default("pending"),
   priority: text("priority").notNull().default("Normal"),
@@ -184,6 +210,7 @@ export const businessesRelations = relations(businesses, ({ many, one }) => ({
     fields: [businesses.ownerUserId],
     references: [user.id],
   }),
+  adminInboxRequests: many(adminInboxRequests),
   technicians: many(technicians),
   customers: many(customers),
   jobs: many(jobs),
