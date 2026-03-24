@@ -32,12 +32,22 @@ function generatePassword(prefix) {
 }
 
 function replaceEnvValue(source, key, value) {
-  const pattern = new RegExp(`^${key}=.*$`, "m");
-  if (!pattern.test(source)) {
+  const lines = source.split("\n");
+  let found = false;
+
+  for (let i = 0; i < lines.length; i++) {
+    if (lines[i].startsWith(`${key}=`)) {
+      lines[i] = `${key}=${value}`;
+      found = true;
+      break;
+    }
+  }
+
+  if (!found) {
     throw new Error(`Env key not found in ${envPath}: ${key}`);
   }
 
-  return source.replace(pattern, `${key}=${value}`);
+  return lines.join("\n");
 }
 
 const nextPasswords = {

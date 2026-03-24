@@ -457,12 +457,15 @@ export default function HomePage() {
               />
               <div className="relative">
               <h3 className="text-xl font-semibold text-[#10231b]">Starter</h3>
-              <strong className="mt-3 block font-['Space_Grotesk'] text-4xl text-[#10231b]">Rp0</strong>
+              <div className="mt-3 flex items-start gap-1">
+                <span className="mt-1 text-sm font-semibold text-[#2d7b5f]">Rp</span>
+                <strong className="font-['Space_Grotesk'] text-4xl tracking-tight text-[#10231b]">0</strong>
+              </div>
               <p className="mt-2 text-sm text-[#56665e]">Solo teknisi yang baru mulai rapi.</p>
-              <ul className="mt-4 space-y-2 text-sm text-[#56665e]">
-                <li>Job dasar</li>
-                <li>Pelanggan</li>
-                <li>Invoice manual</li>
+              <ul className="mt-4 space-y-3 text-sm text-[#56665e]">
+                <li className="flex items-center gap-2"><CheckCircle2 size={16} className="shrink-0 text-[#8fceab]" /> Job dasar</li>
+                <li className="flex items-center gap-2"><CheckCircle2 size={16} className="shrink-0 text-[#8fceab]" /> Pelanggan</li>
+                <li className="flex items-center gap-2"><CheckCircle2 size={16} className="shrink-0 text-[#8fceab]" /> Invoice manual</li>
               </ul>
               <button
                 type="button"
@@ -488,12 +491,17 @@ export default function HomePage() {
                 Primary
               </div>
               <h3 className="mt-4 text-xl font-semibold text-white">Pro</h3>
-              <strong className="mt-3 block font-['Space_Grotesk'] text-4xl text-white">Rp249.000</strong>
-              <p className="mt-2 text-sm text-white/72">Untuk bengkel AC 4 teknisi seperti persona utama.</p>
-              <ul className="mt-4 space-y-2 text-sm text-white/78">
-                <li>Dashboard penuh</li>
-                <li>Job board</li>
-                <li>CRM, stok, kontrak</li>
+              <div className="mt-3 flex items-start gap-1">
+                <span className="mt-1 text-sm font-medium text-[#bfe9d7]">Rp</span>
+                <strong className="font-['Space_Grotesk'] text-4xl tracking-tighter text-white">249<span className="text-2xl text-white/70">.000</span></strong>
+                <span className="mb-[4px] self-end text-xs text-white/60">/bln</span>
+              </div>
+              <p className="mt-2 text-sm text-white/80">Untuk bengkel AC 4 teknisi seperti persona utama.</p>
+              <ul className="mt-4 space-y-3 text-sm text-white/90">
+                <li className="flex items-start gap-2 font-medium text-[#bfe9d7]"><CheckCircle2 size={16} className="mt-0.5 shrink-0 text-[#61d0a8]" /> Semua fitur Starter, plus:</li>
+                <li className="flex items-start gap-2"><CheckCircle2 size={16} className="mt-0.5 shrink-0 text-[#61d0a8] opacity-70" /> Dashboard penuh</li>
+                <li className="flex items-start gap-2"><CheckCircle2 size={16} className="mt-0.5 shrink-0 text-[#61d0a8] opacity-70" /> Job board</li>
+                <li className="flex items-start gap-2"><CheckCircle2 size={16} className="mt-0.5 shrink-0 text-[#61d0a8] opacity-70" /> CRM, stok, kontrak</li>
               </ul>
               <ShimmerButton
                 type="button"
@@ -518,12 +526,17 @@ export default function HomePage() {
               />
               <div className="relative">
               <h3 className="text-xl font-semibold text-[#10231b]">Bisnis</h3>
-              <strong className="mt-3 block font-['Space_Grotesk'] text-4xl text-[#10231b]">Rp499.000</strong>
+              <div className="mt-3 flex items-start gap-1">
+                <span className="mt-1 text-sm font-medium text-[#2d7b5f]">Rp</span>
+                <strong className="font-['Space_Grotesk'] text-4xl tracking-tighter text-[#10231b]">499<span className="text-2xl text-[#10231b]/60">.000</span></strong>
+                <span className="mb-[4px] self-end text-xs text-[#10231b]/50">/bln</span>
+              </div>
               <p className="mt-2 text-sm text-[#56665e]">Untuk multi-cabang yang butuh visibilitas lebih luas.</p>
-              <ul className="mt-4 space-y-2 text-sm text-[#56665e]">
-                <li>Multi tim</li>
-                <li>Laporan konsolidasi</li>
-                <li>Visibility lintas kota</li>
+              <ul className="mt-4 space-y-3 text-sm text-[#10231b]/80">
+                <li className="flex items-start gap-2 font-medium text-[#2d7b5f]"><CheckCircle2 size={16} className="mt-0.5 shrink-0 text-[#2d7b5f]" /> Semua fitur Pro, plus:</li>
+                <li className="flex items-start gap-2"><CheckCircle2 size={16} className="mt-0.5 shrink-0 text-[#8fceab]" /> Multi tim</li>
+                <li className="flex items-start gap-2"><CheckCircle2 size={16} className="mt-0.5 shrink-0 text-[#8fceab]" /> Laporan konsolidasi</li>
+                <li className="flex items-start gap-2"><CheckCircle2 size={16} className="mt-0.5 shrink-0 text-[#8fceab]" /> Visibility lintas kota</li>
               </ul>
               <button
                 type="button"
