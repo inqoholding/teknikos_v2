@@ -2,7 +2,7 @@ import { Router } from "express";
 import { z } from "zod";
 import { db } from "../db/index.js";
 import { adminInboxRequests, businesses } from "../db/app-schema.js";
-import { requireBusiness, requireSession } from "../lib/session.js";
+import { requireBusiness, requireOwnerAccess, requireSession } from "../lib/session.js";
 import { eq } from "drizzle-orm";
 
 const publicSupportRequestSchema = z.object({
@@ -48,6 +48,7 @@ supportRouter.use(requireSession);
 
 supportRouter.post("/business", async (req, res) => {
   const businessId = requireBusiness(res);
+  requireOwnerAccess(res);
   const payload = businessSupportRequestSchema.parse(req.body);
   const [business] = await db.select().from(businesses).where(eq(businesses.id, businessId));
   const now = new Date();

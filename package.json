@@ -17,6 +17,8 @@
     "start:backend": "npm --prefix backend run start",
     "db:push:backend": "npm --prefix backend run db:push",
     "seed:backend": "npm --prefix backend run seed",
-    "install:backend": "npm --prefix backend install"
+    "install:backend": "npm --prefix backend install",
+    "rotate:credentials": "node backend/scripts/rotate-seed-credentials.mjs",
+    "smoke:test": "bash deploy/smoke-test.sh"
   }
 }

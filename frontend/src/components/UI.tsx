@@ -1,4 +1,6 @@
-import { ReactNode } from "react";
+import { MotionConfig, motion } from "framer-motion";
+import { ReactNode, useMemo, useState } from "react";
+import { formatRupiah } from "../utils/currency";
 
 type BadgeTone = "success" | "warning" | "info" | "neutral" | "danger";
 
@@ -61,8 +63,12 @@ export function StatCard({
 
 export function MiniBarChart({
   items,
+  className = "",
+  onSelectionChange,
 }: {
   items: Array<{ label: string; value: number; valueLabel?: string }>;
+  className?: string;
+  onSelectionChange?: (item: { label: string; value: number; valueLabel?: string }) => void;
 }) {
   const maxValue = Math.max(...items.map((item) => item.value), 1);
   const hasRevenue = items.some((item) => item.value > 0);
@@ -77,34 +83,78 @@ export function MiniBarChart({
       },
       null,
     ) ?? items[0];
+  const [selectedLabel, setSelectedLabel] = useState(peakItem?.label ?? items[0]?.label ?? "");
+  const selectedItem = useMemo(
+    () => items.find((item) => item.label === selectedLabel) ?? peakItem ?? items[0],
+    [items, peakItem, selectedLabel],
+  );
+
+  function selectItem(item: { label: string; value: number; valueLabel?: string }) {
+    setSelectedLabel(item.label);
+    onSelectionChange?.(item);
+  }
 
   return (
-    <div className="bar-chart-wrap">
-      <div className="bar-chart-summary">
-        <div className="bar-chart-summary__card">
-          <span>Total 7 hari</span>
-          <strong>{hasRevenue ? `Rp${totalValue.toLocaleString("id-ID")}` : "Belum ada pemasukan"}</strong>
-        </div>
-        <div className="bar-chart-summary__card">
-          <span>Puncak tertinggi</span>
-          <strong>{peakItem?.label ?? "-"}</strong>
-          <small>{peakItem?.valueLabel ?? peakItem?.value ?? 0}</small>
-        </div>
-      </div>
-      <div className="bar-chart">
-        {items.map((item, index) => (
-          <div key={item.label} className="bar-chart__item">
-            <small>{item.valueLabel ?? item.value}</small>
-            <div
-              className={`bar-chart__bar ${peakItem?.label === item.label ? "bar-chart__bar--peak" : ""} ${!hasRevenue ? "bar-chart__bar--empty" : ""}`}
-              style={{ height: `${Math.max((item.value / maxValue) * 100, 14)}%` }}
-            />
-            <span>{item.label}</span>
+    <MotionConfig transition={{ type: "spring", stiffness: 320, damping: 28 }} reducedMotion="user">
+      <div className={`bar-chart-wrap ${className}`.trim()}>
+        <div className="bar-chart-summary">
+          <div className="bar-chart-summary__card">
+            <span>Total 7 hari</span>
+            <strong>{hasRevenue ? formatRupiah(totalValue) : "Belum ada pemasukan"}</strong>
           </div>
-        ))}
+          <div className="bar-chart-summary__card">
+            <span>Hari dipilih</span>
+            <strong>{selectedItem?.label ?? "-"}</strong>
+            <small>{selectedItem?.valueLabel ?? selectedItem?.value ?? 0}</small>
+          </div>
+          <div className="bar-chart-summary__card">
+            <span>Puncak tertinggi</span>
+            <strong>{peakItem?.label ?? "-"}</strong>
+            <small>{peakItem?.valueLabel ?? peakItem?.value ?? 0}</small>
+          </div>
+        </div>
+        <div className="bar-chart">
+          {items.map((item) => {
+            const isPeak = peakItem?.label === item.label;
+            const isSelected = selectedItem?.label === item.label;
+
+            return (
+              <motion.button
+                key={item.label}
+                type="button"
+                className={`bar-chart__item bar-chart__item--interactive ${isSelected ? "bar-chart__item--selected" : ""}`}
+                onClick={() => selectItem(item)}
+                onHoverStart={() => selectItem(item)}
+                onFocus={() => selectItem(item)}
+                whileHover={{ y: -2 }}
+                whileTap={{ scale: 0.98 }}
+                aria-label={`${item.label} ${item.valueLabel ?? item.value}`}
+              >
+                {isSelected ? (
+                  <motion.div
+                    layoutId="bar-chart-tooltip"
+                    className="bar-chart__tooltip"
+                    initial={{ opacity: 0, y: 4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 4 }}
+                  >
+                    <strong>{item.label}</strong>
+                    <span>{item.valueLabel ?? item.value}</span>
+                  </motion.div>
+                ) : null}
+                <small>{item.valueLabel ?? item.value}</small>
+                <motion.div
+                  className={`bar-chart__bar ${isPeak ? "bar-chart__bar--peak" : ""} ${isSelected ? "bar-chart__bar--selected" : ""} ${!hasRevenue ? "bar-chart__bar--empty" : ""}`}
+                  animate={{ height: `${Math.max((item.value / maxValue) * 100, 14)}%` }}
+                />
+                <span>{item.label}</span>
+              </motion.button>
+            );
+          })}
+        </div>
+        {!hasRevenue ? <p className="chart-helper">Revenue 7 hari akan muncul setelah ada invoice berstatus lunas.</p> : null}
       </div>
-      {!hasRevenue ? <p className="chart-helper">Revenue 7 hari akan muncul setelah ada invoice berstatus lunas.</p> : null}
-    </div>
+    </MotionConfig>
   );
 }
 

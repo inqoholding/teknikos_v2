@@ -454,6 +454,58 @@ export function useResetTechnicianPasswordMutation() {
   });
 }
 
+export function useUpdateTechnicianAccountMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (payload: { technicianId: string; email?: string; newPassword?: string }) => {
+      const { data } = await api.patch<{ data: TechnicianAccountResult }>(
+        `/api/technicians/${payload.technicianId}/account`,
+        {
+          email: payload.email,
+          newPassword: payload.newPassword,
+        },
+      );
+      return data.data;
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["technicians"] });
+    },
+  });
+}
+
+export function useForceLogoutTechnicianMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (payload: { technicianId: string }) => {
+      const { data } = await api.post<{ data: TechnicianAccountResult }>(
+        `/api/technicians/${payload.technicianId}/account/force-logout`,
+      );
+      return data.data;
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["technicians"] });
+    },
+  });
+}
+
+export function useDisableTechnicianAccountMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (payload: { technicianId: string }) => {
+      const { data } = await api.post<{ data: TechnicianAccountResult }>(
+        `/api/technicians/${payload.technicianId}/account/disable`,
+      );
+      return data.data;
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["technicians"] });
+    },
+  });
+}
+
 export function useCreateJobMutation() {
   const queryClient = useQueryClient();
 

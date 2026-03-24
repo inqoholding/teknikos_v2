@@ -1,4 +1,4 @@
-import { FormEvent, useDeferredValue, useState } from "react";
+import { FormEvent, useDeferredValue, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { getErrorMessage } from "../api/client";
 import { useBusinessQuery, useCreateCustomerMutation, useCustomersQuery, useSendBusinessWhatsappMutation } from "../api/hooks";
@@ -9,6 +9,7 @@ import { buildCustomerFollowUpMessage } from "../utils/whatsapp";
 export default function CustomersPage() {
   const [search, setSearch] = useState("");
   const [showCreate, setShowCreate] = useState(false);
+  const [crmFilter, setCrmFilter] = useState<"all" | "contracts" | "follow_up" | "billing">("all");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
@@ -35,6 +36,26 @@ export default function CustomersPage() {
   const billingCount = filteredCustomers.filter((item) => item.health === "Butuh Billing").length;
   const followUpCount = filteredCustomers.filter((item) => item.health === "Perlu Follow Up").length;
   const canUseWahaAutomation = businessQuery.data?.whatsapp?.canUseAutomation ?? false;
+  const visibleCustomers = useMemo(() => {
+    if (crmFilter === "contracts") {
+      return filteredCustomers.filter((item) => item.contract !== "Tidak ada");
+    }
+    if (crmFilter === "follow_up") {
+      return filteredCustomers.filter((item) => item.health === "Perlu Follow Up");
+    }
+    if (crmFilter === "billing") {
+      return filteredCustomers.filter((item) => item.health === "Butuh Billing");
+    }
+    return filteredCustomers;
+  }, [crmFilter, filteredCustomers]);
+  const activeFilterCopy =
+    crmFilter === "contracts"
+      ? "Menampilkan pelanggan dengan kontrak aktif atau relasi maintenance berjalan."
+      : crmFilter === "follow_up"
+        ? "Menampilkan pelanggan yang perlu follow up supaya tidak dingin terlalu lama."
+        : crmFilter === "billing"
+          ? "Menampilkan pelanggan dengan billing aktif atau piutang yang perlu ditagih."
+          : "Menampilkan seluruh pelanggan yang lolos dari pencarian aktif.";
 
   function buildMapsLink(address: string) {
     return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
@@ -131,10 +152,44 @@ export default function CustomersPage() {
         </SectionCard>
       ) : null}
 
-      <div className="dashboard-grid dashboard-grid--balanced">
+      <div className="cards-grid cards-grid--job-overview">
+        <article className="sub-card">
+          <span>Pelanggan tampil</span>
+          <strong>{visibleCustomers.length}</strong>
+          <small>Hasil filter aktif</small>
+        </article>
+        <article className="sub-card">
+          <span>Kontrak aktif</span>
+          <strong>{contractsCount}</strong>
+          <small>Relasi maintenance aktif</small>
+        </article>
+        <article className="sub-card">
+          <span>Perlu follow up</span>
+          <strong>{followUpCount}</strong>
+          <small>Pelanggan perlu dihubungi</small>
+        </article>
+        <article className="sub-card">
+          <span>Butuh billing</span>
+          <strong>{billingCount}</strong>
+          <small>Piutang perlu ditagih</small>
+        </article>
+      </div>
+
+      <div className="page-stack">
         <SectionCard title="Database Pelanggan">
+          {crmFilter !== "all" ? (
+            <div className="callout callout--success">
+              <div>
+                <strong>Filter CRM aktif</strong>
+                <p>{activeFilterCopy}</p>
+              </div>
+              <button type="button" className="btn btn--secondary" onClick={() => setCrmFilter("all")}>
+                Tampilkan semua
+              </button>
+            </div>
+          ) : null}
           <div className="customer-list">
-            {filteredCustomers.map((customer) => (
+            {visibleCustomers.map((customer) => (
               <article key={customer.id} className="customer-card">
                 <div className="customer-card__head">
                   <div>
@@ -150,21 +205,49 @@ export default function CustomersPage() {
                   <span>Servis terakhir {customer.lastService}</span>
                 </div>
                 <div className="customer-card__insights">
-                  <Badge
-                    tone={
-                      customer.health === "Butuh Billing"
-                        ? "danger"
-                        : customer.health === "Perlu Follow Up"
-                          ? "warning"
-                          : customer.health === "Kontrak Aktif"
-                            ? "success"
-                            : "info"
+                  <button
+                    type="button"
+                    className="customer-card__insight-button"
+                    onClick={() =>
+                      setCrmFilter(
+                        customer.health === "Butuh Billing"
+                          ? "billing"
+                          : customer.health === "Perlu Follow Up"
+                            ? "follow_up"
+                            : customer.contract !== "Tidak ada"
+                              ? "contracts"
+                              : "all",
+                      )
                     }
                   >
-                    {customer.health}
-                  </Badge>
-                  <span>{customer.openInvoices} invoice aktif</span>
-                  <span>Piutang {customer.balanceDue}</span>
+                    <Badge
+                      tone={
+                        customer.health === "Butuh Billing"
+                          ? "danger"
+                          : customer.health === "Perlu Follow Up"
+                            ? "warning"
+                            : customer.health === "Kontrak Aktif"
+                              ? "success"
+                              : "info"
+                      }
+                    >
+                      {customer.health}
+                    </Badge>
+                  </button>
+                  <button
+                    type="button"
+                    className="customer-card__insight-chip"
+                    onClick={() => setCrmFilter(customer.openInvoices > 0 ? "billing" : "all")}
+                  >
+                    {customer.openInvoices} invoice aktif
+                  </button>
+                  <button
+                    type="button"
+                    className="customer-card__insight-chip"
+                    onClick={() => setCrmFilter(customer.health === "Butuh Billing" ? "billing" : "follow_up")}
+                  >
+                    Piutang {customer.balanceDue}
+                  </button>
                 </div>
                 <div className="customer-card__units">
                   {customer.units.length > 0
@@ -188,38 +271,61 @@ export default function CustomersPage() {
                     onClick={() => void handleSendAutomaticFollowUp(customer)}
                     disabled={!canUseWahaAutomation || sendBusinessWhatsappMutation.isPending || !customer.phone}
                   >
-                    {sendBusinessWhatsappMutation.isPending ? "Mengirim..." : "Kirim WAHA"}
+                    {sendBusinessWhatsappMutation.isPending ? "Mengirim..." : "Kirim Pesan Otomatis"}
                   </EmptyAction>
                 </div>
               </article>
             ))}
           </div>
         </SectionCard>
-        <SectionCard title="Insight CRM">
+        <SectionCard title="Insight CRM" description="Ringkasan CRM dipisah penuh agar tidak tenggelam di samping daftar pelanggan yang tinggi.">
           <div className="ops-grid ops-grid--compact">
-            <article className="ops-queue-card ops-queue-card--success">
+            <button
+              type="button"
+              className={`ops-queue-card ops-queue-card--success crm-insight-card ${crmFilter === "contracts" ? "crm-insight-card--active" : ""}`}
+              onClick={() => setCrmFilter((current) => (current === "contracts" ? "all" : "contracts"))}
+              aria-pressed={crmFilter === "contracts"}
+            >
               <div className="ops-queue-card__count">{contractsCount}</div>
               <strong>Kontrak Aktif</strong>
               <p>Pelanggan yang sudah punya relasi maintenance yang lebih stabil.</p>
-              <span>Retensi lebih sehat</span>
-            </article>
-            <article className="ops-queue-card ops-queue-card--warning">
+              <span>{crmFilter === "contracts" ? "Klik untuk reset" : "Klik untuk filter"}</span>
+            </button>
+            <button
+              type="button"
+              className={`ops-queue-card ops-queue-card--warning crm-insight-card ${crmFilter === "follow_up" ? "crm-insight-card--active" : ""}`}
+              onClick={() => setCrmFilter((current) => (current === "follow_up" ? "all" : "follow_up"))}
+              aria-pressed={crmFilter === "follow_up"}
+            >
               <div className="ops-queue-card__count">{followUpCount}</div>
               <strong>Perlu Follow Up</strong>
               <p>Pelanggan lama atau kontrak mendekati jatuh tempo yang perlu dihubungi.</p>
-              <span>Jangan dingin terlalu lama</span>
-            </article>
-            <article className="ops-queue-card ops-queue-card--danger">
+              <span>{crmFilter === "follow_up" ? "Klik untuk reset" : "Klik untuk filter"}</span>
+            </button>
+            <button
+              type="button"
+              className={`ops-queue-card ops-queue-card--danger crm-insight-card ${crmFilter === "billing" ? "crm-insight-card--active" : ""}`}
+              onClick={() => setCrmFilter((current) => (current === "billing" ? "all" : "billing"))}
+              aria-pressed={crmFilter === "billing"}
+            >
               <div className="ops-queue-card__count">{billingCount}</div>
               <strong>Butuh Billing</strong>
               <p>Piutang dan reminder invoice yang perlu dikerjakan owner hari ini.</p>
-              <span>Jaga cashflow</span>
-            </article>
+              <span>{crmFilter === "billing" ? "Klik untuk reset" : "Klik untuk filter"}</span>
+            </button>
           </div>
+          {visibleCustomers.length === 0 ? (
+            <div className="callout">
+              <div>
+                <strong>Tidak ada pelanggan pada filter ini</strong>
+                <p>Ubah filter CRM atau pencarian untuk melihat segmen pelanggan lain.</p>
+              </div>
+            </div>
+          ) : null}
           <div className="callout callout--success">
             <div>
               <strong>Peluang upsell</strong>
-              <p>{filteredCustomers.length} pelanggan aktif sekarang sudah punya playbook next action dari data live backend.</p>
+              <p>{visibleCustomers.length} pelanggan aktif sekarang sudah punya playbook next action dari data live backend.</p>
             </div>
           </div>
           <div className="callout callout--warning">
@@ -229,7 +335,7 @@ export default function CustomersPage() {
             </div>
           </div>
           {!canUseWahaAutomation ? (
-            <p className="form-helper">Tombol WAHA otomatis di daftar pelanggan aktif jika mode Otomasi WAHA sudah terhubung.</p>
+            <p className="form-helper">Tombol kirim pesan otomatis aktif jika mode Otomasi WAHA sudah terhubung.</p>
           ) : null}
           {sendBusinessWhatsappMutation.error ? <p className="form-error">{getErrorMessage(sendBusinessWhatsappMutation.error)}</p> : null}
         </SectionCard>

@@ -5,7 +5,7 @@ import { db } from "../db/index.js";
 import { inventory } from "../db/app-schema.js";
 import { notFound } from "../lib/errors.js";
 import { assertPlanFeature, assertSubscriptionWritable } from "../lib/plans.js";
-import { getCurrentBusiness, requireBusiness, requireSession } from "../lib/session.js";
+import { getCurrentBusiness, requireBusiness, requireOwnerAccess, requireSession } from "../lib/session.js";
 import { formatRupiahCompact, inventoryStatus } from "../utils/serializers.js";
 
 const inventorySchema = z.object({
@@ -25,6 +25,14 @@ const adjustStockSchema = z.object({
 export const inventoryRouter = Router();
 
 inventoryRouter.use(requireSession);
+inventoryRouter.use((_req, res, next) => {
+  try {
+    requireOwnerAccess(res);
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
 
 inventoryRouter.get("/", async (_req, res) => {
   const businessId = requireBusiness(res);

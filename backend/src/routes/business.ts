@@ -14,7 +14,7 @@ import {
   isWahaConfigured,
   sendWahaText,
 } from "../lib/waha.js";
-import { getSessionUser, isStaffRole, requireBusiness, requireSession } from "../lib/session.js";
+import { getSessionUser, isStaffRole, requireBusiness, requireOwnerAccess, requireSession } from "../lib/session.js";
 import { slugify } from "../utils/serializers.js";
 
 const setupSchema = z.object({
@@ -179,6 +179,7 @@ businessRouter.get("/me", async (_req, res) => {
 
 businessRouter.patch("/me", async (req, res) => {
   const businessId = requireBusiness(res);
+  requireOwnerAccess(res);
   const payload = setupSchema.partial().parse(req.body);
   const currentUser = getSessionUser(res);
   const updatePayload: Record<string, unknown> = {
@@ -217,6 +218,7 @@ businessRouter.patch("/me", async (req, res) => {
 
 businessRouter.get("/whatsapp", async (_req, res) => {
   const businessId = requireBusiness(res);
+  requireOwnerAccess(res);
   const [business] = await db.select().from(businesses).where(eq(businesses.id, businessId));
   if (!business) {
     throw notFound("Bisnis tidak ditemukan.");
@@ -268,6 +270,7 @@ businessRouter.get("/whatsapp", async (_req, res) => {
 
 businessRouter.patch("/whatsapp", async (req, res) => {
   const businessId = requireBusiness(res);
+  requireOwnerAccess(res);
   const payload = updateWhatsappSchema.parse(req.body);
   const [business] = await db.select().from(businesses).where(eq(businesses.id, businessId));
   if (!business) {
@@ -290,6 +293,7 @@ businessRouter.patch("/whatsapp", async (req, res) => {
 
 businessRouter.post("/whatsapp/connect", async (_req, res) => {
   const businessId = requireBusiness(res);
+  requireOwnerAccess(res);
   const [business] = await db.select().from(businesses).where(eq(businesses.id, businessId));
   if (!business) {
     throw notFound("Bisnis tidak ditemukan.");
@@ -327,6 +331,7 @@ businessRouter.post("/whatsapp/connect", async (_req, res) => {
 
 businessRouter.get("/whatsapp/qr", async (_req, res) => {
   const businessId = requireBusiness(res);
+  requireOwnerAccess(res);
   const [business] = await db.select().from(businesses).where(eq(businesses.id, businessId));
   if (!business) {
     throw notFound("Bisnis tidak ditemukan.");
@@ -363,6 +368,7 @@ businessRouter.get("/whatsapp/qr", async (_req, res) => {
 
 businessRouter.post("/whatsapp/disconnect", async (_req, res) => {
   const businessId = requireBusiness(res);
+  requireOwnerAccess(res);
   const [business] = await db.select().from(businesses).where(eq(businesses.id, businessId));
   if (!business) {
     throw notFound("Bisnis tidak ditemukan.");
@@ -401,6 +407,7 @@ businessRouter.post("/whatsapp/disconnect", async (_req, res) => {
 
 businessRouter.post("/whatsapp/send-text", async (req, res) => {
   const businessId = requireBusiness(res);
+  requireOwnerAccess(res);
   const payload = sendWhatsappSchema.parse(req.body);
   const [business] = await db.select().from(businesses).where(eq(businesses.id, businessId));
   if (!business) {

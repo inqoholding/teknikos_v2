@@ -6,7 +6,7 @@ import { db } from "../db/index.js";
 import { notFound } from "../lib/errors.js";
 import { assertPlanFeature, assertSubscriptionWritable } from "../lib/plans.js";
 import { requireCustomerForBusiness } from "../lib/ownership.js";
-import { getCurrentBusiness, requireBusiness, requireSession } from "../lib/session.js";
+import { getCurrentBusiness, requireBusiness, requireOwnerAccess, requireSession } from "../lib/session.js";
 import { contractStatus, formatDateShort, formatRupiahCompact } from "../utils/serializers.js";
 
 const contractSchema = z.object({
@@ -22,6 +22,14 @@ const contractSchema = z.object({
 export const contractsRouter = Router();
 
 contractsRouter.use(requireSession);
+contractsRouter.use((_req, res, next) => {
+  try {
+    requireOwnerAccess(res);
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
 
 contractsRouter.get("/", async (_req, res) => {
   const businessId = requireBusiness(res);

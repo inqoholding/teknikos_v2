@@ -1,18 +1,12 @@
 export function formatRupiahCompact(value: number) {
-  const formatter = new Intl.NumberFormat("id-ID", {
+  return new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
     minimumFractionDigits: 0,
-    maximumFractionDigits: 1,
-  });
-
-  if (Math.abs(value) >= 1_000_000) {
-    return `Rp${formatter.format(value / 1_000_000)}jt`;
-  }
-
-  if (Math.abs(value) >= 1_000) {
-    return `Rp${formatter.format(value / 1_000)}rb`;
-  }
-
-  return `Rp${formatter.format(value)}`;
+    maximumFractionDigits: 0,
+  })
+    .format(value)
+    .replace(/\s/g, "");
 }
 
 export function formatDateShort(value: Date | string | number | null | undefined) {

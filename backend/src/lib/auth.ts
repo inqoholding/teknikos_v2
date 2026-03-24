@@ -27,6 +27,13 @@ export const auth: ReturnType<typeof betterAuth> = betterAuth({
     expiresIn: 60 * 60 * 24 * 7,
     updateAge: 60 * 60 * 24,
   },
+  rateLimit: {
+    enabled: false,
+  },
+  advanced: {
+    useSecureCookies: env.BETTER_AUTH_URL.startsWith("https://"),
+    cookiePrefix: "teknikos",
+  },
   user: {
     additionalFields: {
       role: {

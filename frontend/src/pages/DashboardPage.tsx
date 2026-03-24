@@ -14,6 +14,7 @@ import {
 import { PageError, PageLoader } from "../components/PageState";
 import { DeadlineList, ScheduleCalendar } from "../components/ScheduleCalendar";
 import { Badge, DonutSummary, EmptyAction, MiniBarChart, SectionCard, StatCard } from "../components/UI";
+import { formatRupiah } from "../utils/currency";
 import { buildJobProgressMessage, buildTechnicianTaskMessage } from "../utils/whatsapp";
 
 function defaultDueDate() {
@@ -289,7 +290,7 @@ export default function DashboardPage() {
         </div>
       ) : null}
 
-      <div className="dashboard-grid">
+      <div className="cards-grid cards-grid--triple">
         <SectionCard
           title="Kirim Otomatis via WAHA"
           description="Pilih job lalu kirim notifikasi otomatis ke pelanggan atau teknisi memakai template pesan WAHA."
@@ -427,9 +428,9 @@ export default function DashboardPage() {
             </label>
 
             <div className="summary-list">
-              <div><span>Biaya jasa</span><strong>Rp{Number(installationFee || 0).toLocaleString("id-ID")}</strong></div>
-              <div><span>Biaya sparepart</span><strong>Rp{Number(sparepartFee || 0).toLocaleString("id-ID")}</strong></div>
-              <div><span>Total invoice</span><strong>Rp{totalInvoice.toLocaleString("id-ID")}</strong></div>
+              <div><span>Biaya jasa</span><strong>{formatRupiah(Number(installationFee || 0))}</strong></div>
+              <div><span>Biaya sparepart</span><strong>{formatRupiah(Number(sparepartFee || 0))}</strong></div>
+              <div><span>Total invoice</span><strong>{formatRupiah(totalInvoice)}</strong></div>
             </div>
 
             {selectedJob ? (

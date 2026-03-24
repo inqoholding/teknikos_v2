@@ -3,7 +3,7 @@ import { and, desc, eq } from "drizzle-orm";
 import { z } from "zod";
 import { customers, inventory, invoices, jobItems, jobs, technicians } from "../db/app-schema.js";
 import { db } from "../db/index.js";
-import { badRequest, notFound } from "../lib/errors.js";
+import { badRequest, forbidden, notFound } from "../lib/errors.js";
 import { assertPlanFeature, assertMonthlyJobLimit, assertSubscriptionWritable } from "../lib/plans.js";
 import {
   requireCustomerForBusiness,
@@ -11,7 +11,7 @@ import {
   requireJobForBusiness,
   requireTechnicianForBusiness,
 } from "../lib/ownership.js";
-import { getCurrentBusiness, requireBusiness, requireSession } from "../lib/session.js";
+import { getCurrentBusiness, getSessionUser, isTechnicianRole, requireBusiness, requireOwnerAccess, requireSession } from "../lib/session.js";
 import { formatDateShort, formatRupiahCompact, formatSchedule } from "../utils/serializers.js";
 
 const jobItemSchema = z.object({
@@ -57,6 +57,7 @@ const jobSchema = z.object({
   cancelReason: z.string().optional().nullable(),
   items: z.array(jobItemSchema).default([]),
 });
+const jobPatchSchema = jobSchema.partial();
 
 const activeTechnicianStatuses = new Set(["assigned", "on_the_way", "in_progress", "done"]);
 const allowedTransitions: Record<string, string[]> = {
@@ -287,12 +288,87 @@ function serializeJob(
   };
 }
 
+function normalizePhone(value?: string | null) {
+  return (value ?? "").replace(/\D/g, "");
+}
+
+function resolveSessionTechnicianIds(
+  currentUser: ReturnType<typeof getSessionUser>,
+  businessTechnicians: Array<typeof technicians.$inferSelect>,
+) {
+  if (!isTechnicianRole(currentUser.role)) {
+    return [];
+  }
+
+  const currentPhone = normalizePhone(currentUser.phone);
+  if (!currentPhone) {
+    return [];
+  }
+
+  return businessTechnicians
+    .filter((technician) => normalizePhone(technician.phone) === currentPhone)
+    .map((technician) => technician.id);
+}
+
+function filterJobsForTechnician<T extends { job: typeof jobs.$inferSelect }>(
+  rows: T[],
+  accessibleTechnicianIds: string[],
+) {
+  if (accessibleTechnicianIds.length === 0) {
+    return [];
+  }
+
+  return rows.filter((row) => {
+    const assignedIds = getAssignedTechnicianIds(row.job);
+    return assignedIds.some((technicianId) => accessibleTechnicianIds.includes(technicianId));
+  });
+}
+
+function assertTechnicianCanAccessJob(
+  currentUser: ReturnType<typeof getSessionUser>,
+  job: typeof jobs.$inferSelect,
+  businessTechnicians: Array<typeof technicians.$inferSelect>,
+) {
+  if (!isTechnicianRole(currentUser.role)) {
+    return;
+  }
+
+  const accessibleTechnicianIds = resolveSessionTechnicianIds(currentUser, businessTechnicians);
+  const assignedIds = getAssignedTechnicianIds(job);
+  if (!assignedIds.some((technicianId) => accessibleTechnicianIds.includes(technicianId))) {
+    throw forbidden("Akun teknisi hanya boleh membuka job yang memang ditugaskan kepadanya.");
+  }
+}
+
+function sanitizeTechnicianJobPatch(payload: z.infer<typeof jobPatchSchema>) {
+  const forbiddenKeys = [
+    "title",
+    "customerId",
+    "technicianId",
+    "technicianIds",
+    "type",
+    "scheduleAt",
+    "deadlineAt",
+    "price",
+    "priority",
+    "description",
+    "location",
+  ].filter((key) => payload[key as keyof typeof payload] !== undefined);
+
+  if (forbiddenKeys.length > 0) {
+    throw forbidden("Akun teknisi hanya boleh mengubah progres lapangan, dokumentasi, dan item pekerjaan.");
+  }
+
+  return payload;
+}
+
 export const jobsRouter = Router();
 
 jobsRouter.use(requireSession);
 
 jobsRouter.get("/", async (req, res) => {
   const businessId = requireBusiness(res);
+  const currentUser = getSessionUser(res);
   const status = typeof req.query.status === "string" ? req.query.status : "";
   const technicianId = typeof req.query.technicianId === "string" ? req.query.technicianId : "";
   const q = typeof req.query.q === "string" ? req.query.q.trim().toLowerCase() : "";
@@ -310,8 +386,12 @@ jobsRouter.get("/", async (req, res) => {
     db.select().from(technicians).where(eq(technicians.businessId, businessId)),
   ]);
 
+  const scopedRows = isTechnicianRole(currentUser.role)
+    ? filterJobsForTechnician(rows, resolveSessionTechnicianIds(currentUser, businessTechnicians))
+    : rows;
+
   const technicianMap = new Map(businessTechnicians.map((technician) => [technician.id, technician]));
-  const serialized = rows.map((row) => serializeJob(row, technicianMap));
+  const serialized = scopedRows.map((row) => serializeJob(row, technicianMap));
   const filtered = serialized.filter((job) => {
     const matchesTechnician = technicianId ? job.technicianIds.includes(technicianId) : true;
     const haystack = `${job.number} ${job.title} ${job.customer} ${job.location} ${job.technician}`.toLowerCase();
@@ -324,6 +404,7 @@ jobsRouter.get("/", async (req, res) => {
 
 jobsRouter.get("/:id", async (req, res) => {
   const businessId = requireBusiness(res);
+  const currentUser = getSessionUser(res);
   const [row, businessTechnicians] = await Promise.all([
     db
       .select({
@@ -340,6 +421,8 @@ jobsRouter.get("/:id", async (req, res) => {
     res.status(404).json({ error: "NOT_FOUND", message: "Job tidak ditemukan." });
     return;
   }
+
+  assertTechnicianCanAccessJob(currentUser, row[0].job, businessTechnicians);
 
   const technicianMap = new Map(businessTechnicians.map((technician) => [technician.id, technician]));
   const [items, jobInvoice] = await Promise.all([
@@ -368,6 +451,7 @@ jobsRouter.get("/:id", async (req, res) => {
 
 jobsRouter.post("/", async (req, res) => {
   const businessId = requireBusiness(res);
+  requireOwnerAccess(res);
   const business = await getCurrentBusiness(res);
   const payload = jobSchema.parse(req.body);
   assertSubscriptionWritable(business.subscriptionStatus, business.currentPeriodEndsAt);
@@ -432,33 +516,37 @@ jobsRouter.post("/", async (req, res) => {
 
 jobsRouter.patch("/:id", async (req, res) => {
   const businessId = requireBusiness(res);
+  const currentUser = getSessionUser(res);
   const business = await getCurrentBusiness(res);
-  const payload = jobSchema.partial().parse(req.body);
+  const payload = jobPatchSchema.parse(req.body);
+  const safePayload = isTechnicianRole(currentUser.role) ? sanitizeTechnicianJobPatch(payload) : payload;
   assertSubscriptionWritable(business.subscriptionStatus, business.currentPeriodEndsAt);
-  const { items: _items, beforePhotoUrl, afterPhotoUrl, ...jobUpdates } = payload;
+  const businessTechnicians = await db.select().from(technicians).where(eq(technicians.businessId, businessId));
+  const { items: _items, beforePhotoUrl, afterPhotoUrl, ...jobUpdates } = safePayload;
   const currentJob = await requireJobForBusiness(req.params.id, businessId);
+  assertTechnicianCanAccessJob(currentUser, currentJob, businessTechnicians);
 
-  const nextStatus = payload.status ?? currentJob.status;
+  const nextStatus = safePayload.status ?? currentJob.status;
   const currentTechnicianIds = getAssignedTechnicianIds(currentJob);
   const nextTechnicianIds =
-    payload.technicianIds !== undefined
-      ? normalizeTechnicianIds(payload.technicianIds)
-      : payload.technicianId !== undefined
-        ? normalizeTechnicianIds(undefined, payload.technicianId || null)
+    safePayload.technicianIds !== undefined
+      ? normalizeTechnicianIds(safePayload.technicianIds)
+      : safePayload.technicianId !== undefined
+        ? normalizeTechnicianIds(undefined, safePayload.technicianId || null)
         : currentTechnicianIds;
   const nextCancelReason =
-    payload.cancelReason === undefined ? currentJob.cancelReason : payload.cancelReason || null;
-  const nextCustomerId = payload.customerId ?? currentJob.customerId;
-  const nextItems = payload.items ?? null;
-  const nextScheduleAt = payload.scheduleAt ?? currentJob.scheduleAt;
-  const nextDeadlineAt = payload.deadlineAt === undefined ? currentJob.deadlineAt : payload.deadlineAt;
+    safePayload.cancelReason === undefined ? currentJob.cancelReason : safePayload.cancelReason || null;
+  const nextCustomerId = safePayload.customerId ?? currentJob.customerId;
+  const nextItems = safePayload.items ?? null;
+  const nextScheduleAt = safePayload.scheduleAt ?? currentJob.scheduleAt;
+  const nextDeadlineAt = safePayload.deadlineAt === undefined ? currentJob.deadlineAt : safePayload.deadlineAt;
   if (nextTechnicianIds.length > 1) {
     assertPlanFeature(business.plan, "multiTechnicianEnabled");
   }
   assertJobItemPlanAccess(business.plan, nextItems ?? []);
 
-  if (payload.status) {
-    requireValidTransition(currentJob.status, payload.status);
+  if (safePayload.status) {
+    requireValidTransition(currentJob.status, safePayload.status);
   }
 
   validateDeadlineWindow(nextScheduleAt, nextDeadlineAt);
@@ -474,10 +562,10 @@ jobsRouter.patch("/:id", async (req, res) => {
   const resolvedPrice =
     nextItems !== null
       ? getJobTotalPrice(
-          payload.price ?? currentJob.price,
+          safePayload.price ?? currentJob.price,
           nextItems.map((item) => ({ totalPrice: item.quantity * item.unitPrice })),
         )
-      : payload.price ?? currentJob.price;
+      : safePayload.price ?? currentJob.price;
 
   const [updated] = await db
     .update(jobs)
@@ -488,9 +576,9 @@ jobsRouter.patch("/:id", async (req, res) => {
       afterPhotoUrl: afterPhotoUrl === undefined ? undefined : afterPhotoUrl || null,
       technicianId: nextTechnicianIds[0] ?? null,
       assignedTechnicianIds: nextTechnicianIds,
-      deadlineAt: payload.deadlineAt === undefined ? undefined : nextDeadlineAt || null,
+      deadlineAt: safePayload.deadlineAt === undefined ? undefined : nextDeadlineAt || null,
       cancelReason:
-        payload.cancelReason === undefined
+        safePayload.cancelReason === undefined
           ? nextStatus === "cancelled"
             ? nextCancelReason
             : undefined
@@ -498,7 +586,7 @@ jobsRouter.patch("/:id", async (req, res) => {
       completedAt:
         nextStatus === "done"
           ? currentJob.completedAt ?? new Date()
-          : payload.status === "cancelled"
+          : safePayload.status === "cancelled"
             ? null
             : undefined,
       updatedAt: new Date(),
@@ -519,6 +607,7 @@ jobsRouter.patch("/:id", async (req, res) => {
 
 jobsRouter.delete("/:id", async (req, res) => {
   const businessId = requireBusiness(res);
+  requireOwnerAccess(res);
   const business = await getCurrentBusiness(res);
   assertSubscriptionWritable(business.subscriptionStatus, business.currentPeriodEndsAt);
   await requireJobForBusiness(req.params.id, businessId);
@@ -528,6 +617,7 @@ jobsRouter.delete("/:id", async (req, res) => {
 
 jobsRouter.post("/:id/invoice", async (req, res) => {
   const businessId = requireBusiness(res);
+  requireOwnerAccess(res);
   const business = await getCurrentBusiness(res);
   assertSubscriptionWritable(business.subscriptionStatus, business.currentPeriodEndsAt);
   const job = await requireJobForBusiness(req.params.id, businessId);

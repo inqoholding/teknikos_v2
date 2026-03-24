@@ -26,6 +26,11 @@ const provisionTechnicianAccountSchema = z.object({
   password: z.string().min(8).optional(),
 });
 
+const updateTechnicianAccountSchema = z.object({
+  email: z.string().email().optional(),
+  newPassword: z.string().min(8).optional(),
+});
+
 const resetTechnicianPasswordSchema = z.object({
   newPassword: z.string().min(8).optional(),
 });
@@ -309,6 +314,187 @@ techniciansRouter.post("/:id/account/reset-password", async (req, res) => {
       accountEmail: technician.accountEmail,
       temporaryPassword,
       message: "Password akun teknisi berhasil direset.",
+    },
+  });
+});
+
+techniciansRouter.patch("/:id/account", async (req, res) => {
+  const businessId = requireBusiness(res);
+  const business = await getCurrentBusiness(res);
+  const payload = updateTechnicianAccountSchema.parse(req.body);
+  assertSubscriptionWritable(business.subscriptionStatus, business.currentPeriodEndsAt);
+
+  const [technician] = await db
+    .select()
+    .from(technicians)
+    .where(and(eq(technicians.id, req.params.id), eq(technicians.businessId, businessId)));
+
+  if (!technician) {
+    throw notFound("Teknisi tidak ditemukan.");
+  }
+
+  if (!technician.userId) {
+    throw conflict("Teknisi ini belum memiliki akun login. Buat akun login terlebih dahulu.");
+  }
+
+  const [technicianUser] = await db.select().from(user).where(eq(user.id, technician.userId));
+  if (!technicianUser) {
+    throw notFound("User akun teknisi tidak ditemukan.");
+  }
+
+  const nextEmail = payload.email?.trim().toLowerCase();
+  if (nextEmail && nextEmail !== technicianUser.email) {
+    const [emailOwner] = await db.select().from(user).where(eq(user.email, nextEmail));
+    if (emailOwner && emailOwner.id !== technician.userId) {
+      throw conflict("Email ini sudah dipakai akun lain.");
+    }
+  }
+
+  if (payload.newPassword) {
+    const [credentialAccount] = await db
+      .select()
+      .from(account)
+      .where(eq(account.userId, technician.userId));
+
+    if (!credentialAccount) {
+      throw conflict("Akun teknisi belum memiliki login email/password yang bisa diubah.");
+    }
+
+    const hashedPassword = await hashPassword(payload.newPassword);
+    await db
+      .update(account)
+      .set({
+        password: hashedPassword,
+        updatedAt: new Date(),
+      })
+      .where(eq(account.id, credentialAccount.id));
+
+    await db.delete(session).where(eq(session.userId, technician.userId));
+  }
+
+  const resolvedEmail = nextEmail ?? technicianUser.email;
+
+  await db
+    .update(user)
+    .set({
+      email: resolvedEmail,
+      name: technician.name,
+      phone: technician.phone,
+      role: "technician",
+      businessId,
+      updatedAt: new Date(),
+    })
+    .where(eq(user.id, technician.userId));
+
+  await db
+    .update(technicians)
+    .set({
+      accountEmail: resolvedEmail,
+      accountStatus: "active",
+      updatedAt: new Date(),
+    })
+    .where(eq(technicians.id, technician.id));
+
+  res.json({
+    data: {
+      technicianId: technician.id,
+      technicianName: technician.name,
+      accountEmail: resolvedEmail,
+      temporaryPassword: payload.newPassword ?? null,
+      message:
+        payload.newPassword && nextEmail
+          ? "Email dan password akun teknisi berhasil diperbarui."
+          : payload.newPassword
+            ? "Password akun teknisi berhasil diperbarui."
+            : "Email akun teknisi berhasil diperbarui.",
+    },
+  });
+});
+
+techniciansRouter.post("/:id/account/force-logout", async (req, res) => {
+  const businessId = requireBusiness(res);
+  const business = await getCurrentBusiness(res);
+  assertSubscriptionWritable(business.subscriptionStatus, business.currentPeriodEndsAt);
+
+  const [technician] = await db
+    .select()
+    .from(technicians)
+    .where(and(eq(technicians.id, req.params.id), eq(technicians.businessId, businessId)));
+
+  if (!technician) {
+    throw notFound("Teknisi tidak ditemukan.");
+  }
+
+  if (!technician.userId) {
+    throw conflict("Teknisi ini belum memiliki akun login.");
+  }
+
+  await db.delete(session).where(eq(session.userId, technician.userId));
+
+  res.json({
+    data: {
+      technicianId: technician.id,
+      technicianName: technician.name,
+      accountEmail: technician.accountEmail,
+      temporaryPassword: null,
+      message: "Semua sesi login teknisi berhasil diputus.",
+    },
+  });
+});
+
+techniciansRouter.post("/:id/account/disable", async (req, res) => {
+  const businessId = requireBusiness(res);
+  const business = await getCurrentBusiness(res);
+  assertSubscriptionWritable(business.subscriptionStatus, business.currentPeriodEndsAt);
+
+  const [technician] = await db
+    .select()
+    .from(technicians)
+    .where(and(eq(technicians.id, req.params.id), eq(technicians.businessId, businessId)));
+
+  if (!technician) {
+    throw notFound("Teknisi tidak ditemukan.");
+  }
+
+  if (!technician.userId) {
+    throw conflict("Teknisi ini belum memiliki akun login.");
+  }
+
+  const [credentialAccount] = await db
+    .select()
+    .from(account)
+    .where(eq(account.userId, technician.userId));
+
+  if (!credentialAccount) {
+    throw conflict("Akun teknisi belum memiliki login email/password yang bisa dinonaktifkan.");
+  }
+
+  const disabledPasswordHash = await hashPassword(generateTemporaryPassword());
+
+  await db
+    .update(account)
+    .set({
+      password: disabledPasswordHash,
+      updatedAt: new Date(),
+    })
+    .where(eq(account.id, credentialAccount.id));
+
+  await db.delete(session).where(eq(session.userId, technician.userId));
+  await db
+    .update(technicians)
+    .set({
+      accountStatus: "disabled",
+      updatedAt: new Date(),
+    })
+    .where(eq(technicians.id, technician.id));
+
+  res.json({
+    data: {
+      technicianId: technician.id,
+      technicianName: technician.name,
+      accountEmail: technician.accountEmail,
+      temporaryPassword: null,
+      message: "Akun teknisi berhasil dinonaktifkan dan semua sesi login diputus.",
     },
   });
 });

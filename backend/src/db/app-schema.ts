@@ -57,6 +57,7 @@ export const technicians = sqliteTable("technicians", {
   businessId: text("business_id")
     .notNull()
     .references(() => businesses.id, { onDelete: "cascade" }),
+  userId: text("user_id").references(() => user.id, { onDelete: "set null" }).unique(),
   name: text("name").notNull(),
   phone: text("phone").notNull(),
   specialties: text("specialties", { mode: "json" }).$type<string[]>().notNull(),
@@ -65,6 +66,16 @@ export const technicians = sqliteTable("technicians", {
   latitude: real("latitude"),
   longitude: real("longitude"),
   lastSeenAt: integer("last_seen_at", { mode: "timestamp" }),
+  accountEmail: text("account_email"),
+  accountStatus: text("account_status").notNull().default("not_created"),
+  attendanceStatus: text("attendance_status").notNull().default("Belum Check-in"),
+  attendancePhotoUrl: text("attendance_photo_url"),
+  attendanceNote: text("attendance_note"),
+  attendanceJobId: text("attendance_job_id"),
+  attendanceLocationLabel: text("attendance_location_label"),
+  attendanceLatitude: real("attendance_latitude"),
+  attendanceLongitude: real("attendance_longitude"),
+  attendanceUpdatedAt: integer("attendance_updated_at", { mode: "timestamp" }),
   createdAt: integer("created_at", { mode: "timestamp" })
     .$defaultFn(() => new Date())
     .notNull(),

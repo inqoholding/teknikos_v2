@@ -7,6 +7,14 @@ function isStaffRole(role?: string | null) {
   return role === "admin" || role === "moderator";
 }
 
+function isTechnicianRole(role?: string | null) {
+  return role === "technician";
+}
+
+function isTechnicianAllowedPath(pathname: string) {
+  return pathname === "/jobs" || pathname.startsWith("/jobs/") || pathname === "/settings";
+}
+
 function isPendingPayment(status?: string | null) {
   return ["pending_payment", "past_due", "paused", "cancelled"].includes(status ?? "");
 }
@@ -91,8 +99,10 @@ export function OnboardingGuard() {
 }
 
 export function ProtectedAppGuard() {
+  const location = useLocation();
   const sessionQuery = useSessionQuery();
   const isStaff = isStaffRole(sessionQuery.data?.user.role);
+  const isTechnician = isTechnicianRole(sessionQuery.data?.user.role);
   const businessQuery = useBusinessQuery(Boolean(sessionQuery.data) && !isStaff);
 
   if (sessionQuery.isLoading || (sessionQuery.data && businessQuery.isLoading)) {
@@ -121,6 +131,10 @@ export function ProtectedAppGuard() {
 
   if (isPendingPayment(businessQuery.data.subscriptionStatus)) {
     return <Navigate to="/payment-pending" replace />;
+  }
+
+  if (isTechnician && !isTechnicianAllowedPath(location.pathname)) {
+    return <Navigate to="/jobs" replace />;
   }
 
   return <Outlet />;

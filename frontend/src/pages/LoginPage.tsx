@@ -38,6 +38,10 @@ export default function LoginPage() {
             navigate("/admin", { replace: true });
             return;
           }
+          if (currentRole === "technician") {
+            navigate("/jobs", { replace: true });
+            return;
+          }
 
           const result = await businessQuery.refetch();
           if (["pending_payment", "past_due", "paused", "cancelled"].includes(result.data?.subscriptionStatus ?? "")) {

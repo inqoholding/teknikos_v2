@@ -1,7 +1,7 @@
 import type { NextFunction, Request, Response } from "express";
 import { fromNodeHeaders } from "better-auth/node";
-import { eq } from "drizzle-orm";
-import { businesses } from "../db/app-schema.js";
+import { and, eq } from "drizzle-orm";
+import { businesses, technicians } from "../db/app-schema.js";
 import { db } from "../db/index.js";
 import { auth } from "./auth.js";
 import { forbidden, notFound } from "./errors.js";
@@ -40,8 +40,16 @@ export function getSessionUser(res: Response) {
   }).user;
 }
 
+function normalizePhone(value?: string | null) {
+  return (value ?? "").replace(/\D/g, "");
+}
+
 export function isStaffRole(role?: string | null) {
   return role === "admin" || role === "moderator";
+}
+
+export function isTechnicianRole(role?: string | null) {
+  return role === "technician";
 }
 
 export function requireStaffRole(res: Response) {
@@ -51,6 +59,24 @@ export function requireStaffRole(res: Response) {
   }
 
   return currentUser.role!;
+}
+
+export function requireAdminRole(res: Response) {
+  const currentUser = getSessionUser(res);
+  if (currentUser.role !== "admin") {
+    throw forbidden("Akses ini hanya untuk admin.");
+  }
+
+  return currentUser;
+}
+
+export function requireOwnerAccess(res: Response) {
+  const currentUser = getSessionUser(res);
+  if (isTechnicianRole(currentUser.role)) {
+    throw forbidden("Akses ini hanya untuk owner bisnis.");
+  }
+
+  return currentUser;
 }
 
 export function requireBusiness(res: Response) {
@@ -75,4 +101,65 @@ export async function getCurrentBusiness(res: Response) {
 
   res.locals.currentBusiness = business;
   return business;
+}
+
+export async function getCurrentTechnician(res: Response) {
+  const cached = res.locals.currentTechnician as typeof technicians.$inferSelect | null | undefined;
+  if (cached !== undefined) {
+    return cached;
+  }
+
+  const currentUser = getSessionUser(res);
+  const businessId = requireBusiness(res);
+  const phone = normalizePhone(currentUser.phone);
+
+  let technician =
+    currentUser.id
+      ? (
+          await db
+            .select()
+            .from(technicians)
+            .where(and(eq(technicians.businessId, businessId), eq(technicians.userId, currentUser.id)))
+        )[0]
+      : undefined;
+
+  if (!technician && phone) {
+    technician = (
+      await db
+        .select()
+        .from(technicians)
+        .where(and(eq(technicians.businessId, businessId), eq(technicians.phone, currentUser.phone ?? "")))
+    )[0];
+
+    if (!technician) {
+      technician = (
+        await db.select().from(technicians).where(eq(technicians.businessId, businessId))
+      ).find((item) => normalizePhone(item.phone) === phone);
+    }
+
+    if (technician && !technician.userId) {
+      const [linked] = await db
+        .update(technicians)
+        .set({
+          userId: currentUser.id,
+          updatedAt: new Date(),
+        })
+        .where(eq(technicians.id, technician.id))
+        .returning();
+
+      technician = linked ?? technician;
+    }
+  }
+
+  res.locals.currentTechnician = technician ?? null;
+  return technician ?? null;
+}
+
+export async function requireCurrentTechnician(res: Response) {
+  const technician = await getCurrentTechnician(res);
+  if (!technician) {
+    throw notFound("Record teknisi untuk akun ini belum terhubung.");
+  }
+
+  return technician;
 }

@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useTransition } from "react";
 import { Link } from "react-router-dom";
 import { Badge } from "./UI";
 
@@ -43,6 +43,14 @@ function formatMonthLabel(date: Date) {
   }).format(date);
 }
 
+function formatDayLabel(date: Date) {
+  return new Intl.DateTimeFormat("id-ID", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+  }).format(date);
+}
+
 function formatTime(value: string) {
   return new Intl.DateTimeFormat("id-ID", {
     hour: "2-digit",
@@ -69,6 +77,7 @@ export function ScheduleCalendar({
   const initialMonth = items.length > 0 ? new Date(items[0].scheduleAt) : new Date();
   const [currentMonth, setCurrentMonth] = useState(startOfMonth(initialMonth));
   const [selectedDayKey, setSelectedDayKey] = useState(formatDayKey(new Date()));
+  const [isPending, startTransition] = useTransition();
 
   const days = useMemo(() => {
     const start = startOfCalendar(currentMonth);
@@ -96,18 +105,97 @@ export function ScheduleCalendar({
 
   const selectedItems = itemsByDay.get(selectedDayKey) ?? [];
   const today = new Date();
+  const selectedDate = days.find((day) => formatDayKey(day) === selectedDayKey) ?? today;
+  const monthItems = items.filter((item) => {
+    const date = new Date(item.scheduleAt);
+    return date.getMonth() === currentMonth.getMonth() && date.getFullYear() === currentMonth.getFullYear();
+  });
+  const urgentMonthCount = monthItems.filter((item) => item.priority === "Urgent").length;
+  const upcomingDayKeys = Array.from(itemsByDay.keys())
+    .map((key) => ({ key, date: new Date(key) }))
+    .filter(({ date }) => date.getMonth() === currentMonth.getMonth() && date.getFullYear() === currentMonth.getFullYear())
+    .sort((left, right) => left.date.getTime() - right.date.getTime())
+    .slice(0, 4);
 
   return (
     <div className="schedule-calendar">
       <div className="schedule-calendar__toolbar">
-        <button type="button" className="btn btn--secondary" onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1))}>
+        <button
+          type="button"
+          className="btn btn--secondary"
+          onClick={() =>
+            startTransition(() => {
+              setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1));
+            })
+          }
+        >
           Bulan Sebelumnya
         </button>
         <strong>{formatMonthLabel(currentMonth)}</strong>
-        <button type="button" className="btn btn--secondary" onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1))}>
-          Bulan Berikutnya
-        </button>
+        <div className="button-row button-row--left">
+          <button
+            type="button"
+            className="btn btn--secondary"
+            onClick={() =>
+              startTransition(() => {
+                setCurrentMonth(startOfMonth(today));
+                setSelectedDayKey(formatDayKey(today));
+              })
+            }
+          >
+            Hari Ini
+          </button>
+          <button
+            type="button"
+            className="btn btn--secondary"
+            onClick={() =>
+              startTransition(() => {
+                setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1));
+              })
+            }
+          >
+            Bulan Berikutnya
+          </button>
+        </div>
       </div>
+
+      <div className="schedule-calendar__summary">
+        <div className="schedule-calendar__summary-card">
+          <span>Hari dipilih</span>
+          <strong>{formatDayLabel(selectedDate)}</strong>
+          <small>{selectedItems.length} tugas pada tanggal ini</small>
+        </div>
+        <div className="schedule-calendar__summary-card">
+          <span>Agenda bulan ini</span>
+          <strong>{monthItems.length} tugas</strong>
+          <small>{urgentMonthCount} prioritas urgent</small>
+        </div>
+        <div className="schedule-calendar__summary-card">
+          <span>Status tampilan</span>
+          <strong>{isPending ? "Memuat..." : "Siap dipilih"}</strong>
+          <small>Kalender sekarang bisa drill-down per hari</small>
+        </div>
+      </div>
+
+      {upcomingDayKeys.length > 0 ? (
+        <div className="schedule-calendar__shortcut-row">
+          {upcomingDayKeys.map(({ key, date }) => (
+            <button
+              key={key}
+              type="button"
+              className={`schedule-calendar__shortcut ${selectedDayKey === key ? "schedule-calendar__shortcut--active" : ""}`}
+              onClick={() =>
+                startTransition(() => {
+                  setSelectedDayKey(key);
+                })
+              }
+            >
+              <span>{formatDayLabel(date)}</span>
+              <strong>{(itemsByDay.get(key) ?? []).length} tugas</strong>
+            </button>
+          ))}
+        </div>
+      ) : null}
 
       <div className="schedule-calendar__weekdays">
         {["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"].map((label) => (
@@ -125,16 +213,41 @@ export function ScheduleCalendar({
               key={key}
               type="button"
               className={`schedule-calendar__day ${isCurrentMonth ? "" : "schedule-calendar__day--muted"} ${selectedDayKey === key ? "schedule-calendar__day--active" : ""} ${isSameDay(day, today) ? "schedule-calendar__day--today" : ""}`}
-              onClick={() => setSelectedDayKey(key)}
+              onClick={() =>
+                startTransition(() => {
+                  setSelectedDayKey(key);
+                })
+              }
             >
               <span>{day.getDate()}</span>
-              {dayItems.length > 0 ? <small>{dayItems.length} tugas</small> : <small>-</small>}
+              {dayItems.length > 0 ? (
+                <>
+                  <small>{dayItems.length} tugas</small>
+                  <div className="schedule-calendar__day-dots">
+                    {dayItems.slice(0, 3).map((item) => (
+                      <span
+                        key={item.id}
+                        className={`schedule-calendar__day-dot ${item.priority === "Urgent" ? "schedule-calendar__day-dot--urgent" : ""}`}
+                      />
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <small>-</small>
+              )}
             </button>
           );
         })}
       </div>
 
       <div className="schedule-calendar__agenda">
+        <div className="schedule-calendar__agenda-head">
+          <div>
+            <strong>{formatDayLabel(selectedDate)}</strong>
+            <p>{selectedItems.length > 0 ? "Agenda detail hari terpilih." : emptyLabel}</p>
+          </div>
+          {selectedItems.length > 0 ? <Badge tone="info">{selectedItems.length} tugas</Badge> : null}
+        </div>
         {selectedItems.length > 0 ? (
           selectedItems.map((item) => {
             const body = (

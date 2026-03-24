@@ -1,181 +1,168 @@
-import {
-  ArrowRight,
-  Boxes,
-  CalendarClock,
-  CheckCircle2,
-  ClipboardList,
-  MessageSquareQuote,
-  ReceiptText,
-  ShieldCheck,
-  Users,
-  Wrench,
-} from "lucide-react";
-import type { LucideIcon } from "lucide-react";
-import { Link } from "react-router-dom";
+import { ArrowRight, CheckCircle2, MessageCircleMore } from "lucide-react";
+import { FormEvent, type ReactNode, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { LandingHeroTemplate } from "../components/marketing/LandingHeroTemplate";
-import { MarketingFooter } from "../components/Layout";
+import { FeatureIcon } from "../components/Layout";
+import { MarketingFooter } from "../components/ui/marketing-footer";
+import { GlowingEffect } from "../components/ui/glowing-effect";
+import { ShimmerButton } from "../components/ui/shimmer-button";
 
-type FeatureCard = {
-  icon: LucideIcon;
-  title: string;
-  body: string;
-};
+const featureCards = [
+  "Dispatch dan kalender kerja",
+  "Invoice dan billing lebih rapi",
+  "CRM pelanggan yang hidup",
+  "Inventori, kontrak, dan WAHA",
+];
 
-type PricingPlan = {
-  name: string;
-  price: string;
-  summary: string;
-  highlight?: string;
-  featured?: boolean;
-  items: string[];
-};
-
-const outcomes = [
+const narrativeCards = [
   {
-    label: "Jadwal lebih jelas",
-    title: "Owner cepat tahu job yang padat, telat, dan masih menggantung.",
-    body: "Semua pekerjaan dibaca dari board dan kalender, jadi tim tidak lagi bergantung pada chat yang tercecer.",
+    label: "Ruang Dispatch",
+    title: "Owner tahu siapa berangkat ke mana, tanpa bongkar chat satu-satu.",
+    body: "Board operasional dibuat seperti ruang kontrol kecil: urgen terlihat, teknisi aktif terlihat, dan job yang belum ada owner-nya langsung kelihatan.",
   },
   {
-    label: "Billing lebih cepat",
-    title: "Invoice tidak lagi menunggu mood admin atau catatan lapangan.",
-    body: "Job, sparepart, nilai tagihan, dan status pembayaran tersambung dalam satu alur yang lebih rapi.",
+    label: "Ritme Billing",
+    title: "Tagihan tidak lagi datang belakangan setelah kerja lapangan selesai.",
+    body: "Biaya jasa, sparepart, invoice overdue, dan queue siap ditagih ditata agar cashflow ikut terbaca, bukan cuma job count.",
   },
   {
-    label: "Client lebih tenang",
-    title: "Update kerja terasa profesional, bukan improvisasi setiap kali ada pertanyaan.",
-    body: "Riwayat pelanggan, unit, dan progres teknisi tersimpan supaya follow-up tidak mengulang dari nol.",
+    label: "Memori Pelanggan",
+    title: "Pelanggan terasa punya konteks, bukan sekadar nama dan nomor telepon.",
+    body: "Riwayat job, unit, kontrak, kesehatan akun, dan next action disusun supaya follow-up lebih terasa seperti CRM sungguhan.",
   },
 ];
 
-const painPoints = [
-  "Jadwal kerja tercecer di WhatsApp group dan catatan admin.",
-  "Owner telat tahu job mana yang urgent, tertunda, atau belum ditagih.",
-  "Client harus bertanya dulu baru dapat update progres dan invoice.",
-];
-
-const featureCards: FeatureCard[] = [
+const communicationCards = [
   {
-    icon: ClipboardList,
-    title: "Dispatch yang langsung terbaca",
-    body: "Buat job, assign teknisi, lihat status kerja, lalu cek deadline tanpa pindah-pindah alat.",
+    title: "Kirim progres kerja ke client",
+    body: "Owner tinggal buka detail job lalu kirim update status, jadwal, lokasi, dan teknisi lewat WhatsApp manual.",
   },
   {
-    icon: CalendarClock,
-    title: "Kalender operasional harian",
-    body: "Jadwal visit dan tenggat job tampil berdampingan supaya bentrok cepat kelihatan.",
+    title: "Kirim invoice tanpa copy-paste panjang",
+    body: "Nomor invoice, total tagihan, status, dan jatuh tempo sudah disusun otomatis agar lebih enak dibagikan ke client.",
   },
   {
-    icon: ReceiptText,
-    title: "Billing yang ikut alur kerja",
-    body: "Invoice manual atau dari job selesai bisa dipantau per status agar penagihan tidak tertunda.",
-  },
-  {
-    icon: Users,
-    title: "CRM yang punya konteks",
-    body: "Pelanggan, histori servis, unit, kontrak, dan next action tersimpan dalam satu tempat.",
-  },
-  {
-    icon: Boxes,
-    title: "Stok dan sparepart lebih aman",
-    body: "Item yang dipakai di lapangan tercatat supaya owner tahu stok menipis sebelum kehabisan.",
-  },
-  {
-    icon: ShieldCheck,
-    title: "Setup WhatsApp lebih jelas",
-    body: "Rules dan koneksi WAHA dipisah supaya tim paham langkah setup tanpa nebak-nebak menu.",
+    title: "Setup WAHA dibuat step-by-step",
+    body: "Admin tinggal ikuti urutan pilih mode, hubungkan session, scan QR, lalu tes koneksi. Tidak perlu menebak langkah berikutnya.",
   },
 ];
 
-const workflowSteps = [
+const latestFeatureCards = [
   {
-    step: "01",
-    title: "Job masuk dan langsung diassign",
-    body: "Admin buat pekerjaan, pilih pelanggan, lalu assign teknisi dari satu alur yang singkat.",
+    title: "Kalender jadwal dan deadline",
+    body: "Dashboard owner dan admin sekarang bisa melihat seluruh jadwal kerja dan deadline job tanpa buka satu per satu.",
   },
   {
-    step: "02",
-    title: "Owner pantau progres tanpa bongkar chat",
-    body: "Status kerja, jadwal, deadline, dan catatan lapangan terlihat dari dashboard yang sama.",
+    title: "Panel WAHA yang lebih jelas",
+    body: "Halaman pengaturan sudah dipisah jadi rules dan setup WAHA, lengkap dengan langkah hubungkan session, QR, dan tes koneksi.",
   },
   {
-    step: "03",
-    title: "Invoice keluar saat pekerjaan selesai",
-    body: "Penagihan mengikuti job yang selesai supaya cashflow tidak tertinggal di belakang operasional.",
+    title: "Detail job lebih operasional",
+    body: "Di detail job sekarang ada deadline, before-after photo, item sparepart, invoice, dan panel tindakan yang lebih lengkap.",
   },
 ];
 
-const roleCards = [
+const livePanelPreview = [
   {
-    title: "Bengkel AC dan HVAC",
-    body: "Cocok untuk tim yang menangani service rutin, komplain mendadak, dan kontrak maintenance.",
+    title: "Kokpit Operasional",
+    body: "Queue dispatch, billing, dan CRM follow up dibaca dari satu panel yang langsung bisa ditindak.",
   },
   {
-    title: "Plumbing dan electrical service",
-    body: "Dipakai saat owner perlu kontrol dispatch cepat, teknisi lapangan, dan tagihan per pekerjaan.",
+    title: "Kalender & Deadline",
+    body: "Jadwal kerja dan tenggat job terlihat berdampingan, jadi owner tidak cuma melihat list job.",
   },
   {
-    title: "Kontraktor jasa multi-tim",
-    body: "Lebih aman untuk bisnis yang mulai punya banyak job aktif dan butuh visibilitas lintas tim.",
-  },
-];
-
-const testimonialCards = [
-  {
-    title: "Tim lebih cepat paham",
-    body: "Bahasa dan alurnya dibuat sederhana agar owner dan admin langsung tahu apa yang harus ditindak hari ini.",
-  },
-  {
-    title: "Client lebih cepat dapat kabar",
-    body: "Status kerja, invoice, dan histori pelanggan tersusun lebih rapi sehingga follow-up tidak perlu improvisasi terus.",
-  },
-  {
-    title: "Owner tetap pegang kontrol",
-    body: "Saat job bertambah, owner tetap bisa membaca prioritas, teknisi aktif, dan pekerjaan yang belum ditagih dari satu dashboard.",
+    title: "Setup WAHA",
+    body: "Rules WhatsApp dan langkah connect WAHA dipisah supaya setup lebih mudah dipahami client.",
   },
 ];
 
-const pricingPlans: PricingPlan[] = [
+const chatbotFaq = [
   {
-    name: "Starter",
-    price: "Rp0",
-    summary: "Untuk teknisi solo atau bisnis kecil yang mau mulai rapi dulu.",
-    items: ["Job dasar", "Data pelanggan", "Invoice manual"],
+    question: "TeknikOS bisa dipakai untuk apa?",
+    answer:
+      "Untuk mengatur job, teknisi, pelanggan, invoice, inventori, dan kontrak servis dalam satu dashboard owner.",
   },
   {
-    name: "Pro",
-    price: "Rp249K",
-    summary: "Plan utama untuk tim aktif yang butuh kontrol harian tanpa ribet.",
-    highlight: "Paling cocok untuk operasional harian",
-    featured: true,
-    items: ["Dashboard owner", "Dispatch + kalender", "CRM, stok, kontrak"],
+    question: "Apakah bisa untuk tim kecil dulu?",
+    answer:
+      "Bisa. Paket Starter cocok untuk mulai rapi dulu, lalu upgrade saat teknisi dan job makin banyak.",
   },
   {
-    name: "Bisnis",
-    price: "Rp499K",
-    summary: "Untuk tim yang lebih besar dan perlu visibilitas lebih luas.",
-    items: ["Kontrol multi tim", "Monitoring lebih luas", "Skala operasional lebih aman"],
+    question: "Bagaimana alur invoice-nya?",
+    answer:
+      "Kamu bisa buat invoice manual, tarik dari job, lalu pantau status pembayaran tanpa catatan terpisah.",
+  },
+  {
+    question: "Apa bedanya Pro dan Bisnis?",
+    answer:
+      "Pro cocok untuk operasional tim aktif sehari-hari. Bisnis lebih pas untuk tim lebih besar dan monitoring lebih luas.",
   },
 ];
 
-const faqItems = [
-  {
-    question: "Apakah TeknikOS cocok untuk tim kecil dulu?",
-    answer: "Cocok. Mulai dari Starter untuk membereskan job dan pelanggan dulu, lalu upgrade saat operasional makin padat.",
-  },
-  {
-    question: "Apakah invoice harus dibuat manual semua?",
-    answer: "Tidak. Invoice bisa dibuat manual atau mengikuti alur job yang sudah selesai agar proses tagih lebih cepat.",
-  },
-  {
-    question: "Kalau masih pakai WhatsApp, apa tetap relevan?",
-    answer: "Ya. TeknikOS justru membantu tim yang masih mengandalkan WhatsApp agar informasi operasionalnya tidak tercecer.",
-  },
-  {
-    question: "Berapa cepat tim bisa mulai pakai?",
-    answer: "Untuk use case awal, tim bisa mulai dari setup bisnis, input pelanggan, lalu membuat job pertama dalam waktu singkat.",
-  },
-];
+function resolveChatAnswer(question: string) {
+  const trimmedQuestion = question.trim();
+  const normalized = trimmedQuestion.toLowerCase();
+
+  const exactMatch = chatbotFaq.find((item) => item.question.toLowerCase() === normalized);
+  if (exactMatch) {
+    return exactMatch;
+  }
+
+  if (normalized.includes("job") || normalized.includes("teknisi") || normalized.includes("dispatch")) {
+    return {
+      question: trimmedQuestion || "Bagaimana job dan teknisi diatur?",
+      answer:
+        "TeknikOS membantu bikin job, assign satu atau beberapa teknisi, lalu pantau status kerja dari berangkat sampai selesai dalam satu board.",
+    };
+  }
+
+  if (normalized.includes("invoice") || normalized.includes("tagih") || normalized.includes("bayar")) {
+    return {
+      question: trimmedQuestion || "Bagaimana invoice dan pembayaran berjalan?",
+      answer:
+        "Invoice bisa dibuat manual atau dari job, lalu status pembayarannya dipantau terpisah supaya owner tahu mana yang sudah dibayar dan mana yang masih perlu follow up.",
+    };
+  }
+
+  if (normalized.includes("stok") || normalized.includes("inventory") || normalized.includes("sparepart")) {
+    return {
+      question: trimmedQuestion || "Apakah stok sparepart ikut tercatat?",
+      answer:
+        "Ya. Sparepart yang dipakai di pekerjaan bisa dicatat, stok inventori ikut berkurang, dan owner bisa lihat item mana yang mulai menipis.",
+    };
+  }
+
+  if (normalized.includes("pelanggan") || normalized.includes("crm") || normalized.includes("customer")) {
+    return {
+      question: trimmedQuestion || "Apa yang disimpan untuk pelanggan?",
+      answer:
+        "Data pelanggan, alamat, histori job, unit yang pernah ditangani, invoice, dan kontrak servis disimpan supaya follow up terasa lebih rapi.",
+    };
+  }
+
+  if (normalized.includes("kontrak") || normalized.includes("maintenance")) {
+    return {
+      question: trimmedQuestion || "Bisa untuk kontrak maintenance?",
+      answer:
+        "Bisa. Paket Pro dan Bisnis mendukung kontrak servis berkala supaya owner bisa pantau jadwal visit berikutnya dan renewal yang mendekat.",
+    };
+  }
+
+  if (normalized.includes("plan") || normalized.includes("pro") || normalized.includes("bisnis") || normalized.includes("starter")) {
+    return {
+      question: trimmedQuestion || "Plan mana yang cocok untuk saya?",
+      answer:
+        "Starter cocok untuk mulai gratis. Pro pas untuk operasional harian yang sudah aktif. Bisnis cocok jika tim dan kontrol owner sudah lebih besar.",
+    };
+  }
+
+  return {
+    question: trimmedQuestion || "Fitur apa yang paling sering dipakai?",
+    answer:
+      "Yang paling sering dipakai owner biasanya dashboard harian, job board, pelanggan, invoice, inventori, dan kontrak. Kalau mau, mulai dulu dari pertanyaan tentang job, invoice, atau plan.",
+  };
+}
 
 function buildPlanRegisterLink(plan: string) {
   return `/register?plan=${encodeURIComponent(plan)}`;
@@ -184,302 +171,419 @@ function buildPlanRegisterLink(plan: string) {
 const SALES_WHATSAPP_LINK =
   "https://wa.me/6281354444967?text=Halo%20sales%20TeknikOS,%20saya%20ingin%20tanya%20demo%20dan%20langganan.";
 
-export default function HomePage() {
+function InteractiveInfoCard({
+  className,
+  children,
+  variant = "default",
+  spread = 30,
+  proximity = 90,
+  inactiveZone = 0.42,
+}: {
+  className: string;
+  children: ReactNode;
+  variant?: "default" | "white";
+  spread?: number;
+  proximity?: number;
+  inactiveZone?: number;
+}) {
   return (
-    <div className="landing-page">
+    <article className={`${className} group relative overflow-hidden transition-transform duration-300 ease-out hover:-translate-y-1`}>
+      <GlowingEffect
+        spread={spread}
+        blur={0}
+        inactiveZone={inactiveZone}
+        proximity={proximity}
+        variant={variant}
+        glow
+        disabled={false}
+        borderWidth={2}
+        movementDuration={0.85}
+        className="rounded-[inherit]"
+      />
+      <div className="relative">{children}</div>
+    </article>
+  );
+}
+
+export default function HomePage() {
+  const navigate = useNavigate();
+  const [draftQuestion, setDraftQuestion] = useState("");
+  const [activeChat, setActiveChat] = useState(chatbotFaq[0]);
+
+  function handleChatSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setActiveChat(resolveChatAnswer(draftQuestion));
+  }
+
+  return (
+    <div className="landing-page bg-[radial-gradient(circle_at_top,#eff8f1_0%,#f7f6ef_48%,#eef6f1_100%)] text-[#10231b]">
       <LandingHeroTemplate salesWhatsappLink={SALES_WHATSAPP_LINK} />
 
-      <section className="grid gap-4 lg:grid-cols-3">
-        {outcomes.map((item) => (
-          <article
-            key={item.title}
-            className="rounded-[28px] border border-[rgba(12,30,25,0.1)] bg-white/88 p-6 shadow-[0_18px_50px_rgba(14,52,43,0.08)] backdrop-blur-sm"
+      <section className="mx-auto grid w-full max-w-7xl gap-6 px-6 py-6 lg:grid-cols-3">
+        {narrativeCards.map((item, index) => (
+          <InteractiveInfoCard
+            key={item.label}
+            className={`rounded-[30px] border p-6 shadow-[0_24px_80px_rgba(18,66,49,0.10)] ${
+              index === 0
+                ? "border-[#b9dbc7] bg-white/80"
+                : index === 1
+                  ? "border-[#d7eadc] bg-[#edf7ef]"
+                  : "border-[#bfe6cf] bg-[linear-gradient(180deg,#f5fff7,#e7f7ee)]"
+            }`}
           >
-            <span className="eyebrow">{item.label}</span>
-            <h2 className="mt-3 font-['Space_Grotesk'] text-[1.45rem] leading-[1.08] tracking-[-0.04em] text-[#171a17]">
-              {item.title}
-            </h2>
-            <p className="mt-3 text-sm leading-7 text-[#5b605c]">{item.body}</p>
-          </article>
+            <span className="text-[11px] uppercase tracking-[0.18em] text-[#2d7b5f]">{item.label}</span>
+            <h3 className="mt-4 font-['Space_Grotesk'] text-2xl font-semibold tracking-[-0.04em] text-[#10231b]">{item.title}</h3>
+            <p className="mt-3 text-sm leading-7 text-[#54655c]">{item.body}</p>
+          </InteractiveInfoCard>
         ))}
       </section>
 
-      <section
-        id="fitur"
-        className="grid gap-5 rounded-[32px] border border-[rgba(12,30,25,0.1)] bg-[linear-gradient(135deg,#09231d,#10352d_52%,#165444)] p-6 text-white shadow-[0_32px_90px_rgba(11,49,39,0.16)] lg:grid-cols-[0.9fr_1.1fr] lg:p-8"
-      >
-        <div>
-          <span className="inline-flex min-h-8 items-center rounded-full border border-white/12 bg-white/8 px-4 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#c9efdf]">
-            Masalah yang paling sering bikin chaos
-          </span>
-          <h2 className="mt-4 max-w-xl font-['Space_Grotesk'] text-3xl leading-[1.02] tracking-[-0.05em] md:text-5xl">
-            Bukan kekurangan kerjaan. Yang bikin berat biasanya informasi operasionalnya pecah ke banyak tempat.
-          </h2>
-          <p className="mt-4 max-w-lg text-sm leading-7 text-white/72 md:text-base">
-            TeknikOS merapikan alur kerja harian supaya owner, admin, dan teknisi membaca konteks yang sama
-            tanpa mengejar info dari chat, catatan manual, dan spreadsheet terpisah.
-          </p>
-        </div>
-        <div className="grid gap-3">
-          {painPoints.map((item) => (
-            <div key={item} className="rounded-3xl border border-white/10 bg-white/8 px-5 py-4 text-sm leading-7 text-white/88">
-              {item}
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section className="rounded-[32px] border border-[rgba(12,30,25,0.1)] bg-white/84 p-6 shadow-[0_18px_50px_rgba(14,52,43,0.08)] md:p-8">
-        <div className="max-w-3xl">
-          <span className="eyebrow">Fitur Inti</span>
-          <h2 className="mt-3 font-['Space_Grotesk'] text-3xl leading-[1.02] tracking-[-0.05em] text-[#171a17] md:text-5xl">
-            Modul inti yang paling sering dipakai owner untuk menjalankan operasional harian.
-          </h2>
-          <p className="mt-4 text-sm leading-7 text-[#5b605c] md:text-base">
-            Fokusnya bukan menambah menu. Fokusnya membuat job lebih cepat dijalankan, billing lebih cepat
-            keluar, dan komunikasi client lebih konsisten.
-          </p>
-        </div>
-
-        <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {featureCards.map((item) => {
-            const Icon = item.icon;
-
-            return (
-              <article
-                key={item.title}
-                className="rounded-[26px] border border-[rgba(12,30,25,0.08)] bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(244,249,246,0.88))] p-6 transition-transform duration-200 hover:-translate-y-1"
-              >
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#dff7ee] text-[#0b5f4e]">
-                  <Icon size={22} />
-                </div>
-                <h3 className="mt-4 font-['Space_Grotesk'] text-xl leading-tight tracking-[-0.03em] text-[#171a17]">
-                  {item.title}
-                </h3>
-                <p className="mt-3 text-sm leading-7 text-[#5b605c]">{item.body}</p>
-              </article>
-            );
-          })}
-        </div>
-      </section>
-
-      <section className="grid gap-5 lg:grid-cols-[0.86fr_1.14fr]">
-        <article className="rounded-[30px] border border-[rgba(12,30,25,0.1)] bg-[linear-gradient(180deg,rgba(255,255,255,0.92),rgba(249,252,250,0.86))] p-6 shadow-[0_18px_50px_rgba(14,52,43,0.08)] md:p-8">
-          <span className="eyebrow">Workflow</span>
-          <h2 className="mt-3 font-['Space_Grotesk'] text-3xl leading-[1.02] tracking-[-0.05em] text-[#171a17] md:text-5xl">
-            Dari job masuk sampai invoice lunas, alurnya tetap pendek.
-          </h2>
-          <p className="mt-4 text-sm leading-7 text-[#5b605c] md:text-base">
-            Ini bagian yang penting untuk calon client: mereka tidak perlu mempelajari semua modul dulu.
-            Cukup lihat alur kerja utamanya dan pahami bahwa sistem ini dibuat untuk operasional harian.
-          </p>
-        </article>
-
-        <div className="grid gap-4">
-          {workflowSteps.map((item) => (
-            <article
-              key={item.step}
-              className="rounded-[28px] border border-[rgba(12,30,25,0.08)] bg-white/88 p-6 shadow-[0_18px_50px_rgba(14,52,43,0.08)]"
-            >
-              <div className="flex items-start gap-4">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#dff7ee] font-['Space_Grotesk'] text-lg font-bold text-[#0b5f4e]">
-                  {item.step}
-                </div>
-                <div>
-                  <h3 className="font-['Space_Grotesk'] text-xl leading-tight tracking-[-0.03em] text-[#171a17]">
-                    {item.title}
-                  </h3>
-                  <p className="mt-3 text-sm leading-7 text-[#5b605c]">{item.body}</p>
-                </div>
-              </div>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section className="grid gap-4 lg:grid-cols-3">
-        {roleCards.map((item) => (
-          <article
-            key={item.title}
-            className="rounded-[28px] border border-[rgba(12,30,25,0.1)] bg-[linear-gradient(180deg,rgba(255,249,236,0.95),rgba(255,255,255,0.92))] p-6 shadow-[0_18px_50px_rgba(14,52,43,0.08)]"
-          >
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#fff0d8] text-[#8a5a10]">
-              <Wrench size={20} />
-            </div>
-            <h2 className="mt-4 font-['Space_Grotesk'] text-[1.35rem] leading-tight tracking-[-0.03em] text-[#171a17]">
-              {item.title}
-            </h2>
-            <p className="mt-3 text-sm leading-7 text-[#5b605c]">{item.body}</p>
-          </article>
-        ))}
-      </section>
-
-      <section className="rounded-[32px] border border-[rgba(12,30,25,0.1)] bg-white/86 p-6 shadow-[0_18px_50px_rgba(14,52,43,0.08)] md:p-8">
-        <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-          <div className="max-w-3xl">
-            <span className="eyebrow">Kenapa Tim Service Cepat Cocok</span>
-            <h2 className="mt-3 font-['Space_Grotesk'] text-3xl leading-[1.02] tracking-[-0.05em] text-[#171a17] md:text-5xl">
-              Dibuat untuk bisnis jasa teknik yang butuh kontrol cepat, bukan sistem yang terasa berat dipelajari.
+      <section className="mx-auto w-full max-w-7xl px-6 py-6">
+        <div className="mb-6 flex items-end justify-between gap-6">
+          <div>
+            <span className="text-[11px] uppercase tracking-[0.18em] text-[#2d7b5f]">Pembaruan produk</span>
+            <h2 className="mt-3 font-['Space_Grotesk'] text-3xl font-semibold tracking-[-0.05em] text-[#10231b] md:text-4xl">
+              Landing sekarang mengikuti wajah app yang benar-benar dipakai.
             </h2>
           </div>
-          <Link
-            to="/demo-owner-dashboard"
-            className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-[#0b5f4e] px-6 text-sm font-semibold text-white transition hover:-translate-y-0.5"
-          >
-            Lihat Demo Dashboard
-            <ArrowRight size={16} />
-          </Link>
+          <p className="hidden max-w-xl text-sm leading-7 text-[#56665e] lg:block">
+            Bukan lagi halaman promo generik. Kalender, deadline, WAHA, dan alur owner sekarang
+            dibawa ke permukaan supaya calon user melihat konteks operasional yang nyata.
+          </p>
         </div>
-
-        <div className="mt-8 grid gap-4 lg:grid-cols-3">
-          {testimonialCards.map((item) => (
-            <article
-              key={item.title}
-              className="rounded-[26px] border border-[rgba(12,30,25,0.08)] bg-[linear-gradient(180deg,rgba(239,247,243,0.96),rgba(255,255,255,0.92))] p-6"
-            >
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#dff7ee] text-[#0b5f4e]">
-                <MessageSquareQuote size={20} />
-              </div>
-              <h3 className="mt-4 font-['Space_Grotesk'] text-xl leading-tight tracking-[-0.03em] text-[#171a17]">
-                {item.title}
-              </h3>
-              <p className="mt-3 text-sm leading-7 text-[#5b605c]">{item.body}</p>
-            </article>
+        <div className="grid gap-5 lg:grid-cols-3">
+          {latestFeatureCards.map((item) => (
+            <InteractiveInfoCard key={item.title} className="rounded-[28px] border border-[#d4e8da] bg-white/82 p-6 shadow-[0_20px_60px_rgba(18,66,49,0.08)]">
+              <span className="text-[11px] uppercase tracking-[0.18em] text-[#2d7b5f]">Fitur terbaru</span>
+              <h3 className="mt-4 font-['Space_Grotesk'] text-2xl font-semibold tracking-[-0.04em] text-[#10231b]">{item.title}</h3>
+              <p className="mt-3 text-sm leading-7 text-[#56665e]">{item.body}</p>
+            </InteractiveInfoCard>
           ))}
         </div>
       </section>
 
-      <section
-        id="harga"
-        className="rounded-[32px] border border-[rgba(12,30,25,0.1)] bg-[linear-gradient(180deg,rgba(255,255,255,0.94),rgba(250,252,249,0.84))] p-6 shadow-[0_18px_50px_rgba(14,52,43,0.08)] md:p-8"
-      >
-        <div className="grid gap-5 lg:grid-cols-[1.5fr_0.9fr] lg:items-end">
-          <div className="max-w-3xl">
-            <span className="eyebrow">Harga</span>
-            <h2 className="mt-3 font-['Space_Grotesk'] text-3xl leading-[1.02] tracking-[-0.05em] text-[#171a17] md:text-5xl">
-              Mulai gratis. Upgrade saat operasional memang sudah butuh kontrol lebih besar.
-            </h2>
-          </div>
-          <p className="text-sm leading-7 text-[#5b605c] md:text-base">
-            Naming dan copy plan dibuat lebih outcome-driven: mulai rapi, kontrol harian, lalu skala lebih luas.
+      <section className="mx-auto grid w-full max-w-7xl gap-6 px-6 py-6 lg:grid-cols-[0.95fr_1.05fr]">
+        <div className="landing-anchor-section rounded-[32px] border border-[#d4e8da] bg-white/84 p-7 shadow-[0_24px_80px_rgba(18,66,49,0.08)]">
+          <span className="text-[11px] uppercase tracking-[0.18em] text-[#2d7b5f]">Preview dashboard live</span>
+          <h2 className="mt-4 font-['Space_Grotesk'] text-3xl font-semibold tracking-[-0.05em] text-[#10231b]">
+            Yang dilihat calon user di landing sekarang lebih dekat ke dashboard live.
+          </h2>
+          <p className="mt-4 text-sm leading-7 text-[#56665e]">
+            Struktur panel, istilah, dan prioritas sekarang sengaja dibuat mirip dengan workspace owner.
+            Ini membantu user memahami TeknikOS sebagai tool operasional, bukan sekadar katalog fitur.
           </p>
+          <div className="mt-8 space-y-3">
+            {livePanelPreview.map((item, index) => (
+              <InteractiveInfoCard key={item.title} className="rounded-[24px] border border-[#d7eadc] bg-[#f4fbf5] px-4 py-4 shadow-[0_12px_30px_rgba(18,66,49,0.05)]">
+                <span className="text-[11px] uppercase tracking-[0.18em] text-[#2d7b5f]">Live 0{index + 1}</span>
+                <h3 className="mt-2 text-lg font-semibold text-[#10231b]">{item.title}</h3>
+                <p className="mt-2 text-sm leading-6 text-[#56665e]">{item.body}</p>
+              </InteractiveInfoCard>
+            ))}
+          </div>
         </div>
 
-        <div className="mt-8 grid gap-4 xl:grid-cols-3">
-          {pricingPlans.map((plan) => (
-            <article
-              key={plan.name}
-              className={`relative flex flex-col gap-4 rounded-[28px] border p-6 ${
-                plan.featured
-                  ? "border-[#0b5f4e] bg-[#0b5f4e] text-white shadow-[0_32px_90px_rgba(11,49,39,0.16)]"
-                  : "border-[rgba(12,30,25,0.08)] bg-white/92 text-[#171a17]"
-              }`}
-            >
-              {plan.highlight ? (
-                <span className={`inline-flex w-fit rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] ${
-                  plan.featured ? "bg-white/12 text-white/88" : "bg-[#dff7ee] text-[#0b5f4e]"
-                }`}>
-                  {plan.highlight}
-                </span>
-              ) : null}
+        <div className="rounded-[32px] border border-[#c8ead5] bg-[linear-gradient(180deg,#eff9f1,#e3f4ea)] p-7 shadow-[0_24px_80px_rgba(18,66,49,0.08)]">
+          <span className="text-[11px] uppercase tracking-[0.18em] text-[#2d7b5f]">Komunikasi lapangan</span>
+          <h2 className="mt-4 font-['Space_Grotesk'] text-3xl font-semibold tracking-[-0.05em] text-[#10231b]">
+            WhatsApp tetap dipakai, tapi format komunikasinya sekarang jauh lebih rapi.
+          </h2>
+          <p className="mt-4 text-sm leading-7 text-[#56665e]">
+            Cocok untuk fase sekarang: owner belum perlu bot penuh, tapi sudah punya pola kirim progres,
+            invoice, dan reminder tugas yang tidak improvisasi terus.
+          </p>
+          <div className="mt-8 grid gap-4 md:grid-cols-3">
+            {communicationCards.map((item, index) => (
+              <InteractiveInfoCard key={item.title} className="rounded-[24px] border border-[#d1e7d7] bg-white/78 p-5 shadow-[0_12px_30px_rgba(18,66,49,0.05)]">
+                <span className="text-[11px] uppercase tracking-[0.18em] text-[#2d7b5f]">0{index + 1}</span>
+                <h3 className="mt-3 text-lg font-semibold text-[#10231b]">{item.title}</h3>
+                <p className="mt-2 text-sm leading-6 text-[#56665e]">{item.body}</p>
+              </InteractiveInfoCard>
+            ))}
+          </div>
+        </div>
+      </section>
 
+      <section className="mx-auto grid w-full max-w-7xl gap-6 px-6 py-6 lg:grid-cols-[0.92fr_1.08fr]">
+        <div className="rounded-[32px] border border-[#c8ead5] bg-[linear-gradient(160deg,#0f392c,#134735_55%,#185642)] p-7 shadow-[0_24px_80px_rgba(10,52,39,0.22)]">
+          <span className="text-[11px] uppercase tracking-[0.18em] text-[#bfe9d7]">Tanya fitur</span>
+          <h2 className="mt-4 font-['Space_Grotesk'] text-3xl font-semibold tracking-[-0.05em] text-white">
+            Masih bingung TeknikOS cocok untuk apa? Tanya cepat di sini.
+          </h2>
+          <p className="mt-4 text-sm leading-7 text-white/62">
+            Saya ringkas dengan bahasa yang mudah dipahami, jadi calon client tidak perlu menebak-nebak
+            fungsi setiap menu di aplikasi.
+          </p>
+          <div className="mt-8 rounded-[26px] border border-white/8 bg-black/20 p-5">
+            <div className="flex items-center gap-3">
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#dff7ee] text-[#0b5f4e]">
+                <MessageCircleMore size={18} />
+              </div>
               <div>
-                <h3 className="font-['Space_Grotesk'] text-2xl tracking-[-0.03em]">{plan.name}</h3>
-                <strong className="mt-2 block font-['Space_Grotesk'] text-5xl leading-none tracking-[-0.06em]">
-                  {plan.price}
-                </strong>
+                <strong className="block text-white">Asisten Fitur TeknikOS</strong>
+                <p className="text-sm text-white/54">Pilih pertanyaan yang paling sering ditanyakan owner.</p>
               </div>
-
-              <p className={`text-sm leading-7 ${plan.featured ? "text-white/78" : "text-[#5b605c]"}`}>{plan.summary}</p>
-
-              <div className="grid gap-3">
-                {plan.items.map((item) => (
-                  <div
-                    key={item}
-                    className={`flex items-center gap-3 rounded-2xl border px-4 py-3 text-sm ${
-                      plan.featured
-                        ? "border-white/10 bg-white/8 text-white/88"
-                        : "border-[rgba(12,30,25,0.08)] bg-[rgba(247,251,248,0.88)] text-[#171a17]"
-                    }`}
-                  >
-                    <CheckCircle2 size={16} className={plan.featured ? "text-[#c9efdf]" : "text-[#0b5f4e]"} />
-                    <span>{item}</span>
-                  </div>
-                ))}
-              </div>
-
-              <Link
-                className={`mt-2 inline-flex min-h-12 items-center justify-center rounded-2xl px-5 text-sm font-semibold transition hover:-translate-y-0.5 ${
-                  plan.featured
-                    ? "bg-white text-[#0b5f4e]"
-                    : "border border-[rgba(12,30,25,0.12)] bg-white text-[#171a17]"
-                }`}
-                to={buildPlanRegisterLink(plan.name)}
-              >
-                Pilih {plan.name}
-              </Link>
-            </article>
-          ))}
+            </div>
+            <div className="mt-5 flex flex-wrap gap-3">
+              {chatbotFaq.map((item) => (
+                <button
+                  key={item.question}
+                  type="button"
+                  className={`rounded-full border px-4 py-2 text-sm transition ${
+                    activeChat?.question === item.question
+                      ? "border-[#61d0a8] bg-[#61d0a8]/16 text-white"
+                      : "border-white/12 bg-white/8 text-white/72 hover:border-white/24 hover:text-white"
+                  }`}
+                  onClick={() => {
+                    setDraftQuestion(item.question);
+                    setActiveChat(item);
+                  }}
+                >
+                  {item.question}
+                </button>
+              ))}
+            </div>
+            <form className="mt-5 flex flex-col gap-3 sm:flex-row" onSubmit={handleChatSubmit}>
+              <input
+                type="text"
+                value={draftQuestion}
+                onChange={(event) => setDraftQuestion(event.target.value)}
+                placeholder="Contoh: bisa atur stok sparepart?"
+                className="min-h-12 flex-1 rounded-2xl border border-white/10 bg-black/25 px-4 text-white outline-none placeholder:text-white/35 focus:border-[#61d0a8]/40"
+              />
+              <button type="submit" className="inline-flex min-h-12 items-center justify-center rounded-2xl bg-[#dff7ee] px-6 text-sm font-semibold text-[#0d523f]">
+                Tanya
+              </button>
+            </form>
+            <div className="mt-5 rounded-[24px] border border-white/8 bg-white/[0.03] p-5">
+              <span className="text-[11px] uppercase tracking-[0.18em] text-white/42">Jawaban</span>
+              <strong className="mt-3 block text-lg text-white">{activeChat?.question}</strong>
+              <p className="mt-2 text-sm leading-7 text-white/60">{activeChat?.answer}</p>
+            </div>
+          </div>
         </div>
+
+        <section id="fitur" className="landing-anchor-section scroll-mt-28 rounded-[32px] border border-[#d4e8da] bg-white/84 p-7 shadow-[0_24px_80px_rgba(18,66,49,0.08)]">
+          <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
+            <article className="rounded-[28px] border border-[#d7eadc] bg-[linear-gradient(180deg,#f4fbf5,#ecf8ef)] p-6">
+              <span className="text-[11px] uppercase tracking-[0.18em] text-[#2d7b5f]">Masalah lama</span>
+              <h2 className="mt-4 font-['Space_Grotesk'] text-3xl font-semibold tracking-[-0.05em] text-[#10231b]">
+                WhatsApp group, catatan manual, dan spreadsheet bikin bisnis susah scale.
+              </h2>
+              <ul className="mt-5 space-y-3 text-sm leading-7 text-[#56665e]">
+                <li>Double booking karena jadwal tersebar di chat.</li>
+                <li>Owner tidak tahu teknisi mana yang produktif.</li>
+                <li>Invoice dan kontrak servis sering telat ditagih.</li>
+              </ul>
+            </article>
+
+            <div className="grid gap-4 md:grid-cols-2">
+              {featureCards.map((card) => (
+                <InteractiveInfoCard key={card} className="rounded-[24px] border border-[#d7eadc] bg-[#f8fcf8] p-5 shadow-[0_12px_30px_rgba(18,66,49,0.05)]">
+                  <FeatureIcon />
+                  <h3 className="mt-4 text-xl font-semibold text-[#10231b]">{card}</h3>
+                  <p className="mt-3 text-sm leading-7 text-[#56665e]">
+                    {card === "Dispatch dan kalender kerja" &&
+                      "Job dibuat, di-assign, dipantau, lalu dibaca juga dari kalender dan daftar deadline."}
+                    {card === "Invoice dan billing lebih rapi" &&
+                      "Invoice manual dan auto-generate dari job selesai, tanpa tulis ulang."}
+                    {card === "CRM pelanggan yang hidup" &&
+                      "Alamat, unit AC, job history, dan kontrak aktif tersimpan rapi."}
+                    {card === "Inventori, kontrak, dan WAHA" &&
+                      "Owner tahu item hampir habis, kontrak mana yang mendekat, dan nomor bisnis bisa disiapkan ke WAHA."}
+                  </p>
+                </InteractiveInfoCard>
+              ))}
+            </div>
+          </div>
+        </section>
       </section>
 
-      <section className="grid gap-4 lg:grid-cols-2">
-        {faqItems.map((item) => (
-          <article
-            key={item.question}
-            className="rounded-[28px] border border-[rgba(12,30,25,0.1)] bg-white/88 p-6 shadow-[0_18px_50px_rgba(14,52,43,0.08)]"
-          >
-            <h2 className="font-['Space_Grotesk'] text-[1.3rem] leading-tight tracking-[-0.03em] text-[#171a17]">
-              {item.question}
-            </h2>
-            <p className="mt-3 text-sm leading-7 text-[#5b605c]">{item.answer}</p>
-          </article>
-        ))}
-      </section>
+      <section className="mx-auto grid w-full max-w-7xl gap-6 px-6 py-6 lg:grid-cols-[0.88fr_1.12fr]">
+        <section id="workflow" className="landing-anchor-section scroll-mt-28 rounded-[32px] border border-[#c8ead5] bg-[linear-gradient(160deg,#113c2e,#19503d_55%,#1d5b45)] p-7 shadow-[0_24px_80px_rgba(10,52,39,0.22)]">
+          <span className="text-[11px] uppercase tracking-[0.18em] text-[#bfe9d7]">Alur inti</span>
+          <h2 className="mt-4 font-['Space_Grotesk'] text-3xl font-semibold tracking-[-0.05em] text-white">
+            Dari job masuk sampai invoice lunas, owner tetap pegang kontrol.
+          </h2>
+          <div className="mt-7 space-y-4">
+            {[
+              "Buat job dan assign teknisi dalam hitungan detik.",
+              "Pantau status pending, on the way, in progress, done, atau cancelled.",
+              "Baca jadwal dari kalender, cek deadline, lalu lanjutkan ke invoice atau follow up pembayaran.",
+            ].map((text, index) => (
+              <div key={text} className="group relative overflow-hidden rounded-[24px] border border-white/8 bg-black/20 p-5 shadow-[0_12px_30px_rgba(5,24,19,0.14)] transition-transform duration-300 ease-out hover:-translate-y-1">
+                <GlowingEffect
+                  spread={32}
+                  proximity={100}
+                  inactiveZone={0.35}
+                  variant="white"
+                  glow
+                  disabled={false}
+                  borderWidth={2}
+                  movementDuration={0.9}
+                  className="rounded-[24px]"
+                />
+                <div className="relative flex items-start gap-4">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white text-sm font-bold text-black">
+                  {index + 1}
+                </span>
+                <p className="text-sm leading-7 text-white/62">{text}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
 
-      <section className="rounded-[32px] border border-[#8bcfae] bg-[linear-gradient(135deg,#176347,#23906a_58%,#6fd0a2)] p-6 text-white shadow-[0_32px_90px_rgba(11,49,39,0.18)] md:p-8">
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-          <div className="max-w-2xl">
-            <span className="text-[11px] uppercase tracking-[0.18em] text-white/70">Siap pindah</span>
-            <h2 className="mt-4 font-['Space_Grotesk'] text-3xl font-semibold tracking-[-0.05em] text-white md:text-4xl">
-              Kalau bisnis jasa teknik Anda sudah capek hidup di chat, waktunya pindah ke sistem.
+        <section id="harga" className="landing-anchor-section scroll-mt-28 rounded-[32px] border border-[#d4e8da] bg-white/88 p-7 shadow-[0_24px_80px_rgba(18,66,49,0.08)]">
+          <div className="mb-6">
+            <span className="text-[11px] uppercase tracking-[0.18em] text-[#2d7b5f]">Harga sederhana</span>
+            <h2 className="mt-4 font-['Space_Grotesk'] text-3xl font-semibold tracking-[-0.05em] text-[#10231b]">
+              Mulai gratis, upgrade saat bisnis makin sibuk.
             </h2>
-            <p className="mt-4 text-sm leading-7 text-white/82">
-              Mulai dari job pertama, tambah teknisi, dan lihat operasional lebih tenang minggu ini juga.
+            <p className="mt-4 text-sm leading-7 text-[#56665e]">
+              Dirancang untuk bengkel kecil sampai tim multi-cabang dengan harga yang tidak menakutkan.
             </p>
           </div>
-
-          <div className="flex flex-col gap-3 sm:flex-row">
-            <Link
-              to="/register"
-              className="inline-flex min-h-12 items-center justify-center rounded-2xl border border-[#d8f6e8]/30 bg-[linear-gradient(135deg,#0f5f46,#15805d)] px-6 text-sm font-semibold text-white shadow-[0_18px_40px_rgba(8,57,42,0.28)] transition hover:-translate-y-0.5 hover:border-[#e6fff3]/40 hover:bg-[linear-gradient(135deg,#127353,#189468)]"
-            >
-              Coba Gratis Sekarang
-            </Link>
-            <Link
-              to="/demo-owner-dashboard"
-              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl border border-[#d8f6e8]/24 bg-[#0d4c39]/34 px-6 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-[#0d4c39]/46"
-            >
-              Lihat demo owner dashboard
-              <ArrowRight size={16} />
-            </Link>
+          <div className="grid gap-4 lg:grid-cols-3">
+            <article className="relative overflow-hidden rounded-[28px] border border-[#d7eadc] bg-[#f7fbf8] p-5 shadow-[0_18px_60px_rgba(18,66,49,0.08)]">
+              <GlowingEffect
+                spread={28}
+                blur={0}
+                inactiveZone={0.4}
+                proximity={80}
+                glow
+                disabled={false}
+                className="rounded-[28px]"
+              />
+              <div className="relative">
+              <h3 className="text-xl font-semibold text-[#10231b]">Starter</h3>
+              <strong className="mt-3 block font-['Space_Grotesk'] text-4xl text-[#10231b]">Rp0</strong>
+              <p className="mt-2 text-sm text-[#56665e]">Solo teknisi yang baru mulai rapi.</p>
+              <ul className="mt-4 space-y-2 text-sm text-[#56665e]">
+                <li>Job dasar</li>
+                <li>Pelanggan</li>
+                <li>Invoice manual</li>
+              </ul>
+              <button
+                type="button"
+                className="mt-6 inline-flex min-h-11 w-full items-center justify-center rounded-2xl border border-[#cfe4d5] bg-white px-4 text-sm font-semibold text-[#0d523f]"
+                onClick={() => navigate(buildPlanRegisterLink("Starter"))}
+              >
+                Pilih Starter
+              </button>
+              </div>
+            </article>
+            <article className="relative overflow-hidden rounded-[28px] border border-[#7ccfad] bg-[linear-gradient(180deg,#1f7b59,#0d5a44_70%,#0a4837)] p-5 shadow-[0_24px_80px_rgba(22,157,115,0.28)]">
+              <GlowingEffect
+                spread={40}
+                blur={0}
+                inactiveZone={0.25}
+                proximity={120}
+                glow
+                disabled={false}
+                className="rounded-[28px]"
+              />
+              <div className="relative">
+              <div className="inline-flex rounded-full bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#0b5f4e]">
+                Primary
+              </div>
+              <h3 className="mt-4 text-xl font-semibold text-white">Pro</h3>
+              <strong className="mt-3 block font-['Space_Grotesk'] text-4xl text-white">Rp249.000</strong>
+              <p className="mt-2 text-sm text-white/72">Untuk bengkel AC 4 teknisi seperti persona utama.</p>
+              <ul className="mt-4 space-y-2 text-sm text-white/78">
+                <li>Dashboard penuh</li>
+                <li>Job board</li>
+                <li>CRM, stok, kontrak</li>
+              </ul>
+              <ShimmerButton
+                type="button"
+                onClick={() => navigate(buildPlanRegisterLink("Pro"))}
+                shimmerColor="#dff7ee"
+                background="rgba(255,255,255,0.14)"
+                className="mt-6 min-h-11 w-full rounded-2xl px-4 text-sm font-semibold text-white"
+              >
+                Pilih Plan Pro
+              </ShimmerButton>
+              </div>
+            </article>
+            <article className="relative overflow-hidden rounded-[28px] border border-[#d7eadc] bg-[#f7fbf8] p-5 shadow-[0_18px_60px_rgba(18,66,49,0.08)]">
+              <GlowingEffect
+                spread={28}
+                blur={0}
+                inactiveZone={0.4}
+                proximity={80}
+                glow
+                disabled={false}
+                className="rounded-[28px]"
+              />
+              <div className="relative">
+              <h3 className="text-xl font-semibold text-[#10231b]">Bisnis</h3>
+              <strong className="mt-3 block font-['Space_Grotesk'] text-4xl text-[#10231b]">Rp499.000</strong>
+              <p className="mt-2 text-sm text-[#56665e]">Untuk multi-cabang yang butuh visibilitas lebih luas.</p>
+              <ul className="mt-4 space-y-2 text-sm text-[#56665e]">
+                <li>Multi tim</li>
+                <li>Laporan konsolidasi</li>
+                <li>Visibility lintas kota</li>
+              </ul>
+              <button
+                type="button"
+                className="mt-6 inline-flex min-h-11 w-full items-center justify-center rounded-2xl border border-[#cfe4d5] bg-white px-4 text-sm font-semibold text-[#0d523f]"
+                onClick={() => navigate(buildPlanRegisterLink("Bisnis"))}
+              >
+                Pilih Plan Bisnis
+              </button>
+              </div>
+            </article>
           </div>
-        </div>
+        </section>
+      </section>
 
-        <div className="mt-8 grid gap-3 md:grid-cols-3">
-          {[
-            "Setup bisnis kurang dari 10 menit",
-            "UI lokal yang mudah dipahami owner",
-            "Siap dikembangkan ke BetterAuth dan API backend",
-          ].map((item) => (
-            <div
-              key={item}
-              className="flex items-center gap-3 rounded-2xl border border-[#d8f6e8]/18 bg-[#0d4c39]/26 px-4 py-4 text-sm text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]"
-            >
-              <CheckCircle2 size={18} className="shrink-0 text-[#dff7ee]" />
-              <span>{item}</span>
+      <section className="mx-auto w-full max-w-7xl px-6 py-6">
+        <div className="rounded-[32px] border border-[#8fceab] bg-[linear-gradient(135deg,#1a684b,#238b66_58%,#63c997)] p-8 shadow-[0_30px_100px_rgba(12,96,78,0.24)]">
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+            <div className="max-w-2xl">
+              <span className="text-[11px] uppercase tracking-[0.18em] text-white/70">Siap pindah</span>
+              <h2 className="mt-4 font-['Space_Grotesk'] text-3xl font-semibold tracking-[-0.05em] text-white md:text-4xl">
+                Kalau bisnis jasa teknikmu sudah capek hidup di chat, waktunya pindah ke sistem.
+              </h2>
+              <p className="mt-4 text-sm leading-7 text-white/82">
+                Mulai dari job pertama, tambah teknisi, dan lihat operasional lebih tenang minggu ini juga.
+              </p>
             </div>
-          ))}
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <ShimmerButton
+                type="button"
+                onClick={() => navigate("/register")}
+                shimmerColor="#dff7ee"
+                background="linear-gradient(135deg,#0f5f46,#15805d)"
+                className="min-h-12 rounded-2xl border border-[#d8f6e8]/30 px-6 text-sm font-semibold text-white shadow-[0_18px_40px_rgba(8,57,42,0.28)]"
+              >
+                Coba Gratis Sekarang
+              </ShimmerButton>
+              <Link
+                to="/demo-owner-dashboard"
+                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl border border-[#d8f6e8]/24 bg-[#0d4c39]/26 px-6 text-sm font-semibold text-white transition hover:bg-[#0d4c39]/38"
+              >
+                Lihat demo owner dashboard
+                <ArrowRight size={16} />
+              </Link>
+            </div>
+          </div>
+          <div className="mt-8 grid gap-3 md:grid-cols-3">
+            {[
+              "Setup bisnis kurang dari 10 menit",
+              "UI lokal yang mudah dipahami owner",
+              "Siap dikembangkan ke BetterAuth dan API backend",
+            ].map((item) => (
+              <div
+                key={item}
+                className="flex items-center gap-3 rounded-2xl border border-[#d8f6e8]/18 bg-[#0d4c39]/24 px-4 py-4 text-sm text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]"
+              >
+                <CheckCircle2 size={18} className="shrink-0 text-[#dff7ee]" />
+                <span>{item}</span>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 

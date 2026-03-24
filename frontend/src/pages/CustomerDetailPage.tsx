@@ -38,18 +38,41 @@ export default function CustomerDetailPage() {
 
   return (
     <div className="page-stack">
-      <div className="detail-grid">
-        <div className="detail-grid__main">
-          <SectionCard
-            title={customer.name}
-            action={<Link className="btn btn--primary" to={`/jobs?create=1&customerId=${customer.id}`}>Buat Job Baru</Link>}
-          >
-            <div className="detail-pair">
-              <span>{customer.phone} · {customer.email}</span>
-              <span>{customer.address}</span>
-            </div>
-          </SectionCard>
+      <SectionCard
+        title={customer.name}
+        action={<Link className="btn btn--primary" to={`/jobs?create=1&customerId=${customer.id}`}>Buat Job Baru</Link>}
+      >
+        <div className="detail-pair">
+          <span>{customer.phone} · {customer.email}</span>
+          <span>{customer.address}</span>
+        </div>
+      </SectionCard>
 
+      <div className="cards-grid cards-grid--detail-summary">
+        <article className="sub-card">
+          <span>Total job</span>
+          <strong>{customer.totalJobs}</strong>
+          <small>Servis terakhir {customer.lastService}</small>
+        </article>
+        <article className="sub-card">
+          <span>Piutang</span>
+          <strong>{customer.balanceDue}</strong>
+          <small>{customer.openInvoices} invoice aktif</small>
+        </article>
+        <article className="sub-card">
+          <span>Health</span>
+          <strong>{customer.health}</strong>
+          <small>{customer.nextAction}</small>
+        </article>
+        <article className="sub-card">
+          <span>Kontrak</span>
+          <strong>{customer.contracts.length}</strong>
+          <small>{customer.contracts.length > 0 ? customer.contracts[0]?.status : "Belum ada kontrak"}</small>
+        </article>
+      </div>
+
+      <div className="detail-grid detail-grid--soft">
+        <div className="detail-grid__main">
           <SectionCard title="Unit Info">
             <div className="cards-grid cards-grid--two">
               {customer.units.map((unit) => (
@@ -116,7 +139,7 @@ export default function CustomerDetailPage() {
                 onClick={() => void handleSendAutomaticFollowUp()}
                 disabled={!canUseWahaAutomation || sendBusinessWhatsappMutation.isPending || !customer.phone}
               >
-                {sendBusinessWhatsappMutation.isPending ? "Mengirim..." : "Kirim WAHA Otomatis"}
+                {sendBusinessWhatsappMutation.isPending ? "Mengirim..." : "Kirim Pesan Otomatis"}
               </EmptyAction>
               <a className="btn btn--secondary" href={`https://www.google.com/maps/search/?api=1&query=${mapQuery}`} target="_blank" rel="noreferrer">
                 Buka Maps

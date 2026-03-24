@@ -2,7 +2,7 @@ import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import type { Business, Invoice, JobDetail } from "../api/types";
 
-export function printInvoice(input: {
+export type InvoicePrintInput = {
   business?: Business | null;
   invoice: Pick<Invoice, "number" | "customer" | "job" | "total" | "status" | "dueDate">;
   job?:
@@ -21,7 +21,9 @@ export function printInvoice(input: {
         }>;
       }
     | null;
-}) {
+};
+
+function buildInvoiceDocument(input: InvoicePrintInput) {
   const { business, invoice, job } = input;
   const doc = new jsPDF({
     unit: "pt",
@@ -129,5 +131,32 @@ export function printInvoice(input: {
   doc.setTextColor(107, 114, 128);
   doc.text("Invoice dibuat dari TeknikOS. Pembayaran invoice dipisahkan dari status operasional job.", 40, 780);
 
-  doc.save(`${invoice.number}.pdf`);
+  return doc;
+}
+
+export function buildInvoicePdfFileName(invoiceNumber: string) {
+  return `${invoiceNumber}.pdf`;
+}
+
+export function downloadInvoicePdf(input: InvoicePrintInput) {
+  const doc = buildInvoiceDocument(input);
+  const blob = doc.output("blob");
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = buildInvoicePdfFileName(input.invoice.number);
+  anchor.rel = "noopener";
+  anchor.click();
+  window.setTimeout(() => URL.revokeObjectURL(url), 4000);
+}
+
+export function openInvoicePdfPreview(input: InvoicePrintInput) {
+  const doc = buildInvoiceDocument(input);
+  const url = URL.createObjectURL(doc.output("blob"));
+  window.open(url, "_blank", "noopener,noreferrer");
+  window.setTimeout(() => URL.revokeObjectURL(url), 15000);
+}
+
+export function printInvoice(input: InvoicePrintInput) {
+  downloadInvoicePdf(input);
 }

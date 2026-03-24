@@ -3,6 +3,7 @@ import { getErrorMessage, isApiErrorStatus } from "../api/client";
 import { useBusinessQuery, useContractsQuery, useCreateContractMutation, useCustomersQuery } from "../api/hooks";
 import { PageError, PageLoader } from "../components/PageState";
 import { Badge, EmptyAction, SectionCard, StatCard } from "../components/UI";
+import { formatRupiah } from "../utils/currency";
 
 const presets = [
   { label: "Maintenance AC Bulanan", interval: "Bulanan", unitCount: "4", value: "1200000" },
@@ -94,7 +95,7 @@ export default function ContractsPage() {
                 }}
               >
                 <strong>{preset.label}</strong>
-                <p>{preset.interval} · {preset.unitCount} unit · Rp{Number(preset.value).toLocaleString("id-ID")}</p>
+                <p>{preset.interval} · {preset.unitCount} unit · {formatRupiah(Number(preset.value))}</p>
               </button>
             ))}
           </div>

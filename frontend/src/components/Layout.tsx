@@ -15,7 +15,7 @@ import {
 import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useBusinessQuery, useLogoutMutation, useSessionQuery } from "../api/hooks";
 
-const appNav = [
+const appNav: Array<{ label: string; to: string; feature?: string }> = [
   { label: "Dashboard", to: "/dashboard" },
   { label: "Job Order", to: "/jobs" },
   { label: "Teknisi", to: "/technicians" },
@@ -23,6 +23,11 @@ const appNav = [
   { label: "Invoice", to: "/invoices" },
   { label: "Inventori", to: "/inventory", feature: "inventoryEnabled" },
   { label: "Kontrak", to: "/contracts", feature: "contractsEnabled" },
+  { label: "Pengaturan", to: "/settings" },
+];
+
+const technicianNav: Array<{ label: string; to: string; feature?: string }> = [
+  { label: "Job Order", to: "/jobs" },
   { label: "Pengaturan", to: "/settings" },
 ];
 
@@ -89,20 +94,6 @@ function resolveHeading(pathname: string) {
     };
   }
 
-  if (pathname.startsWith("/settings/whatsapp-rules")) {
-    return {
-      title: "Rules WhatsApp",
-      subtitle: "Panduan singkat penggunaan WhatsApp agar lebih aman dipakai di TeknikOS",
-    };
-  }
-
-  if (pathname.startsWith("/settings/whatsapp-connect")) {
-    return {
-      title: "Hubungkan WAHA",
-      subtitle: "Sambungkan nomor bisnis ke WAHA dan kelola status koneksinya",
-    };
-  }
-
   return titleMap[pathname] ?? titleMap["/dashboard"];
 }
 
@@ -115,6 +106,7 @@ export function AppShellLayout() {
   const logoutMutation = useLogoutMutation();
   const business = businessQuery.data;
   const owner = sessionQuery.data?.user;
+  const isTechnician = owner?.role === "technician";
   const entitlements = business?.entitlements;
   const initials =
     owner?.name
@@ -123,6 +115,8 @@ export function AppShellLayout() {
       .join("")
       .slice(0, 2)
       .toUpperCase() ?? "TS";
+
+  const visibleNav = isTechnician ? technicianNav : appNav;
 
   async function handleLogout() {
     await logoutMutation.mutateAsync();
@@ -147,7 +141,7 @@ export function AppShellLayout() {
           </small>
         </div>
         <nav className="app-nav">
-          {appNav.map((item) => {
+          {visibleNav.map((item) => {
             const Icon = navIcons[item.label as keyof typeof navIcons];
             const isLocked =
               item.feature && entitlements ? !entitlements[item.feature as keyof typeof entitlements] : false;
@@ -180,7 +174,7 @@ export function AppShellLayout() {
           <div className="avatar">{initials}</div>
           <div>
             <strong>{owner?.name ?? "Owner"}</strong>
-            <span>Owner</span>
+            <span>{isTechnician ? "Teknisi" : "Owner"}</span>
           </div>
           <button className="ghost-button" onClick={handleLogout} disabled={logoutMutation.isPending}>
             <LogOut size={16} />
@@ -196,6 +190,11 @@ export function AppShellLayout() {
             </span>
             <h1>{heading.title}</h1>
             <p>{heading.subtitle}</p>
+            {business?.whatsapp?.canUseAutomation ? (
+              <div className="form-helper" style={{ marginTop: 8 }}>
+                WhatsApp bisnis sudah terhubung. Tombol kirim otomatis siap dipakai dari job dan invoice.
+              </div>
+            ) : null}
           </div>
           <div className="topbar-actions">
             <div className="status-pill">
@@ -209,7 +208,9 @@ export function AppShellLayout() {
               <div className="avatar avatar--small">{initials}</div>
               <div>
                 <strong>{owner?.name ?? "Owner"}</strong>
-                <span>{business?.city ?? business?.address ?? "Makassar"}</span>
+                <span>
+                  {isTechnician ? "Akun Teknisi" : business?.city ?? business?.address ?? "Makassar"}
+                </span>
               </div>
             </div>
           </div>
@@ -218,9 +219,9 @@ export function AppShellLayout() {
           <Outlet />
         </main>
         <div className="mobile-nav">
-          <NavLink to="/dashboard">Home</NavLink>
+          <NavLink to={isTechnician ? "/jobs" : "/dashboard"}>Home</NavLink>
           <NavLink to="/jobs">Jobs</NavLink>
-          <NavLink to="/customers">CRM</NavLink>
+          {!isTechnician ? <NavLink to="/customers">CRM</NavLink> : null}
           <NavLink to="/settings">Menu</NavLink>
         </div>
       </div>
@@ -350,6 +351,20 @@ export function AuthScaffold({
             <span>Kontrak Aktif</span>
             <strong>Backend Sync</strong>
             <small>Owner dashboard tersambung</small>
+          </div>
+        </div>
+        <div className="auth-hero-list">
+          <div className="auth-hero-list__item">
+            <strong>Dispatch, invoice, dan CRM</strong>
+            <p>Masuk ke satu workspace yang menyatukan antrian job, teknisi, billing, dan follow-up pelanggan.</p>
+          </div>
+          <div className="auth-hero-list__item">
+            <strong>Workflow WhatsApp yang jelas</strong>
+            <p>Testing koneksi WAHA, kirim notifikasi otomatis, dan pantau komunikasi operasional dari panel yang lebih rapi.</p>
+          </div>
+          <div className="auth-hero-list__item">
+            <strong>Konteks operasional lengkap</strong>
+            <p>Deadline, foto before-after, item pekerjaan, dan status invoice terbaca dari alur kerja yang lebih mudah dipahami.</p>
           </div>
         </div>
       </div>

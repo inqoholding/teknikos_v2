@@ -3,6 +3,7 @@ import { getErrorMessage, isApiErrorStatus } from "../api/client";
 import { useAdjustInventoryMutation, useBusinessQuery, useCreateInventoryMutation, useInventoryQuery } from "../api/hooks";
 import { PageError, PageLoader } from "../components/PageState";
 import { Badge, EmptyAction, SectionCard, StatCard } from "../components/UI";
+import { formatRupiah } from "../utils/currency";
 
 export default function InventoryPage() {
   const businessQuery = useBusinessQuery();
@@ -73,7 +74,7 @@ export default function InventoryPage() {
         <StatCard label="Total Item" value={String(inventory.length)} hint="Katalog aktif" />
         <StatCard label="Kategori" value={String(categoryCount)} hint="Jenis stok tercatat" />
         <StatCard label="Stok Rendah" value={String(lowStockItems.length)} hint="Perlu reorder" tone="warning" />
-        <StatCard label="Nilai Stok" value={`Rp${inventoryValue.toLocaleString("id-ID")}`} hint="Estimasi modal inventori" tone="success" />
+        <StatCard label="Nilai Stok" value={formatRupiah(inventoryValue)} hint="Estimasi modal inventori" tone="success" />
       </div>
 
       {showCreate ? (

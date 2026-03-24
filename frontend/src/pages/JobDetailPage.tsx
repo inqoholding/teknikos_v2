@@ -7,6 +7,7 @@ import {
   useCustomersQuery,
   useInventoryQuery,
   useJobQuery,
+  useSessionQuery,
   useSendBusinessWhatsappMutation,
   useTechniciansQuery,
   useUpdateJobMutation,
@@ -14,6 +15,7 @@ import {
 import type { JobDetail } from "../api/types";
 import { Badge, EmptyAction, SectionCard } from "../components/UI";
 import { PageError, PageLoader } from "../components/PageState";
+import { formatRupiah } from "../utils/currency";
 import { printInvoice } from "../utils/invoicePrint";
 import { createClientId } from "../utils/ids";
 import { buildInvoiceMessage, buildJobProgressMessage, buildTechnicianTaskMessage, buildWhatsAppLink } from "../utils/whatsapp";
@@ -72,14 +74,6 @@ function createBlankItem(): EditableItem {
   };
 }
 
-function formatCurrency(value: number) {
-  return new Intl.NumberFormat("id-ID", {
-    style: "currency",
-    currency: "IDR",
-    maximumFractionDigits: 0,
-  }).format(value);
-}
-
 async function fileToDataUrl(file: File) {
   return new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
@@ -91,12 +85,14 @@ async function fileToDataUrl(file: File) {
 
 export default function JobDetailPage() {
   const { id } = useParams();
+  const sessionQuery = useSessionQuery();
+  const isTechnician = sessionQuery.data?.user.role === "technician";
   const jobQuery = useJobQuery(id);
   const updateJobMutation = useUpdateJobMutation(id);
   const createInvoiceMutation = useCreateInvoiceFromJobMutation(id);
-  const techniciansQuery = useTechniciansQuery();
-  const customersQuery = useCustomersQuery();
-  const inventoryQuery = useInventoryQuery();
+  const techniciansQuery = useTechniciansQuery(!isTechnician);
+  const customersQuery = useCustomersQuery(undefined, !isTechnician);
+  const inventoryQuery = useInventoryQuery(!isTechnician);
   const businessQuery = useBusinessQuery();
   const sendBusinessWhatsappMutation = useSendBusinessWhatsappMutation();
 
@@ -236,16 +232,26 @@ export default function JobDetailPage() {
         note: item.note?.trim() || undefined,
       }));
 
-    await updateJobMutation.mutateAsync({
-      status,
-      technicianIds,
-      cancelReason: status === "cancelled" ? cancelReason : null,
-      deadlineAt: deadlineAt || null,
-      beforePhotoUrl,
-      afterPhotoUrl,
-      items: payloadItems,
-      price: totalItemsValue > 0 ? totalItemsValue : undefined,
-    });
+    const payload = isTechnician
+      ? {
+          status,
+          cancelReason: status === "cancelled" ? cancelReason : null,
+          beforePhotoUrl,
+          afterPhotoUrl,
+          items: payloadItems,
+        }
+      : {
+          status,
+          technicianIds,
+          cancelReason: status === "cancelled" ? cancelReason : null,
+          deadlineAt: deadlineAt || null,
+          beforePhotoUrl,
+          afterPhotoUrl,
+          items: payloadItems,
+          price: totalItemsValue > 0 ? totalItemsValue : undefined,
+        };
+
+    await updateJobMutation.mutateAsync(payload);
   }
 
   async function handleCreateInvoice() {
@@ -282,7 +288,7 @@ export default function JobDetailPage() {
             businessName: businessQuery.data?.name,
             customerName: customer.name ?? job.customer,
             invoiceNumber: job.invoice?.number ?? `${job.number}-INV`,
-            total: job.invoice?.totalLabel ?? formatCurrency(totalItemsValue || 0),
+            total: job.invoice?.totalLabel ?? formatRupiah(totalItemsValue || 0),
             dueDate: job.invoice?.dueDateLabel ?? "Segera",
             status: job.invoice?.status ?? "Belum dibuat",
             jobLabel: `${job.number} · ${job.title}`,
@@ -327,164 +333,191 @@ export default function JobDetailPage() {
 
   return (
     <div className="page-stack">
-      <div className="detail-grid">
-        <div className="detail-grid__main">
-          <SectionCard
-            title={`${job.number} · ${job.title}`}
-            action={
-              <div className="badge-row">
-                <Badge tone={job.status === "done" || job.status === "paid" ? "success" : job.status === "cancelled" ? "danger" : "info"}>
-                  {statusLabels[job.status] ?? job.status}
-                </Badge>
-                <Badge tone="warning">{job.priority ?? "Normal"}</Badge>
-              </div>
-            }
-          >
-            <p className="lead-text">{job.description || "Belum ada deskripsi pekerjaan."}</p>
-          </SectionCard>
-
-          <div className="split-grid">
-            <SectionCard title="Pelanggan">
-              <div className="detail-pair">
-                <strong>{job.customer}</strong>
-                <span>{job.schedule}</span>
-                <span>{job.location}</span>
-              </div>
-            </SectionCard>
-            <SectionCard title="Teknisi">
-              <div className="detail-pair">
-                <strong>{job.technicians.length > 0 ? job.technicians.join(", ") : "Belum ditugaskan"}</strong>
-                <span>Jenis pekerjaan: {job.type}</span>
-                <span>Priority: {job.priority}</span>
-              </div>
-            </SectionCard>
+      <SectionCard
+        title={`${job.number} · ${job.title}`}
+        action={
+          <div className="badge-row">
+            <Badge tone={job.status === "done" || job.status === "paid" ? "success" : job.status === "cancelled" ? "danger" : "info"}>
+              {statusLabels[job.status] ?? job.status}
+            </Badge>
+            <Badge tone="warning">{job.priority ?? "Normal"}</Badge>
           </div>
+        }
+      >
+        <p className="lead-text">{job.description || "Belum ada deskripsi pekerjaan."}</p>
+      </SectionCard>
 
-          <SectionCard title="Timeline">
-            <div className="timeline-list">
-              {timeline.map(([label, time]) => (
-                <div key={label} className="timeline-list__item">
-                  <span className="timeline-list__dot" />
-                  <div>
-                    <strong>{label}</strong>
-                    <small>{time || "-"}</small>
+      <div className="cards-grid cards-grid--detail-summary">
+        <article className="sub-card">
+          <span>Pelanggan</span>
+          <strong>{job.customer}</strong>
+          <small>{job.location}</small>
+        </article>
+        <article className="sub-card">
+          <span>Teknisi</span>
+          <strong>{job.technicians.length > 0 ? job.technicians.join(", ") : "Belum ditugaskan"}</strong>
+          <small>{job.type}</small>
+        </article>
+        <article className="sub-card">
+          <span>Invoice</span>
+          <strong>{job.invoice?.number ?? "Belum ada"}</strong>
+          <small>{job.invoice?.status ?? "Belum dibuat"}</small>
+        </article>
+        <article className="sub-card">
+          <span>Nilai job</span>
+          <strong>{formatRupiah(totalItemsValue || 0)}</strong>
+          <small>{job.schedule}</small>
+        </article>
+      </div>
+
+      <div className="page-stack">
+        <div className="split-grid">
+          <SectionCard
+            title="Pelanggan"
+          >
+            <div className="detail-pair">
+              <strong>{job.customer}</strong>
+              <span>{job.schedule}</span>
+              <span>{job.location}</span>
+            </div>
+          </SectionCard>
+          <SectionCard title="Teknisi">
+            <div className="detail-pair">
+              <strong>{job.technicians.length > 0 ? job.technicians.join(", ") : "Belum ditugaskan"}</strong>
+              <span>Jenis pekerjaan: {job.type}</span>
+              <span>Priority: {job.priority}</span>
+            </div>
+          </SectionCard>
+        </div>
+
+        <div className="detail-grid detail-grid--soft">
+          <div className="detail-grid__main">
+            <SectionCard title="Timeline">
+              <div className="timeline-list">
+                {timeline.map(([label, time]) => (
+                  <div key={label} className="timeline-list__item">
+                    <span className="timeline-list__dot" />
+                    <div>
+                      <strong>{label}</strong>
+                      <small>{time || "-"}</small>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </SectionCard>
+
+            <SectionCard title="Before / After Photo" description="Upload dokumentasi kerja agar owner dan pelanggan punya bukti visual yang rapi.">
+              <div className="photo-grid">
+                <div className="photo-card">
+                  {beforePhotoUrl ? <img src={beforePhotoUrl} alt="Before service" className="photo-card__image" /> : <div className="photo-box">Before</div>}
+                  <div className="photo-card__actions">
+                    <label className="btn btn--secondary">
+                      Upload Before
+                      <input type="file" accept="image/*" hidden onChange={(event) => void handlePhotoUpload(event, "before")} />
+                    </label>
+                    {beforePhotoUrl ? (
+                      <EmptyAction onClick={() => setBeforePhotoUrl(null)}>Hapus</EmptyAction>
+                    ) : null}
                   </div>
                 </div>
-              ))}
-            </div>
-          </SectionCard>
-
-          <SectionCard title="Before / After Photo" description="Upload dokumentasi kerja agar owner dan pelanggan punya bukti visual yang rapi.">
-            <div className="photo-grid">
-              <div className="photo-card">
-                {beforePhotoUrl ? <img src={beforePhotoUrl} alt="Before service" className="photo-card__image" /> : <div className="photo-box">Before</div>}
-                <div className="photo-card__actions">
-                  <label className="btn btn--secondary">
-                    Upload Before
-                    <input type="file" accept="image/*" hidden onChange={(event) => void handlePhotoUpload(event, "before")} />
-                  </label>
-                  {beforePhotoUrl ? (
-                    <EmptyAction onClick={() => setBeforePhotoUrl(null)}>Hapus</EmptyAction>
-                  ) : null}
-                </div>
-              </div>
-              <div className="photo-card">
-                {afterPhotoUrl ? <img src={afterPhotoUrl} alt="After service" className="photo-card__image" /> : <div className="photo-box photo-box--success">After</div>}
-                <div className="photo-card__actions">
-                  <label className="btn btn--secondary">
-                    Upload After
-                    <input type="file" accept="image/*" hidden onChange={(event) => void handlePhotoUpload(event, "after")} />
-                  </label>
-                  {afterPhotoUrl ? (
-                    <EmptyAction onClick={() => setAfterPhotoUrl(null)}>Hapus</EmptyAction>
-                  ) : null}
-                </div>
-              </div>
-            </div>
-          </SectionCard>
-
-          <SectionCard title="Item Service & Sparepart" description="Tambahkan jasa dan sparepart yang dipakai. Sparepart akan otomatis mengurangi stok inventori.">
-            <div className="job-items-editor">
-              {lineItems.map((item) => (
-                <div key={item.id} className="job-item-card">
-                  <div className="field-grid">
-                    <label className="field">
-                      <span>Tipe</span>
-                      <select
-                        value={item.kind}
-                        onChange={(event) => updateLineItem(item.id, { kind: event.target.value as "service" | "sparepart" })}
-                      >
-                        <option value="service">Service</option>
-                        <option value="sparepart">Sparepart</option>
-                      </select>
+                <div className="photo-card">
+                  {afterPhotoUrl ? <img src={afterPhotoUrl} alt="After service" className="photo-card__image" /> : <div className="photo-box photo-box--success">After</div>}
+                  <div className="photo-card__actions">
+                    <label className="btn btn--secondary">
+                      Upload After
+                      <input type="file" accept="image/*" hidden onChange={(event) => void handlePhotoUpload(event, "after")} />
                     </label>
-                    {item.kind === "sparepart" ? (
+                    {afterPhotoUrl ? (
+                      <EmptyAction onClick={() => setAfterPhotoUrl(null)}>Hapus</EmptyAction>
+                    ) : null}
+                  </div>
+                </div>
+              </div>
+            </SectionCard>
+
+            <SectionCard title="Item Service & Sparepart" description="Tambahkan jasa dan sparepart yang dipakai. Sparepart akan otomatis mengurangi stok inventori.">
+              <div className="job-items-editor">
+                {lineItems.map((item) => (
+                  <div key={item.id} className="job-item-card">
+                    <div className="field-grid">
                       <label className="field">
-                        <span>Barang inventori</span>
-                        <select value={item.inventoryId ?? ""} onChange={(event) => handleInventorySelect(item.id, event.target.value)}>
-                          <option value="">Pilih sparepart</option>
-                          {inventoryItems.map((inventoryItem) => (
-                            <option key={inventoryItem.id} value={inventoryItem.id}>
-                              {inventoryItem.name} · stok {inventoryItem.stock}
-                            </option>
-                          ))}
+                        <span>Tipe</span>
+                        <select
+                          value={item.kind}
+                          onChange={(event) => updateLineItem(item.id, { kind: event.target.value as "service" | "sparepart" })}
+                        >
+                          <option value="service">Service</option>
+                          <option value="sparepart">Sparepart</option>
                         </select>
                       </label>
-                    ) : (
+                      {item.kind === "sparepart" && !isTechnician && inventoryItems.length > 0 ? (
+                        <label className="field">
+                          <span>Barang inventori</span>
+                          <select value={item.inventoryId ?? ""} onChange={(event) => handleInventorySelect(item.id, event.target.value)}>
+                            <option value="">Pilih sparepart</option>
+                            {inventoryItems.map((inventoryItem) => (
+                              <option key={inventoryItem.id} value={inventoryItem.id}>
+                                {inventoryItem.name} · stok {inventoryItem.stock}
+                              </option>
+                            ))}
+                          </select>
+                        </label>
+                      ) : (
+                        <label className="field">
+                          <span>Nama item</span>
+                          <input value={item.name} onChange={(event) => updateLineItem(item.id, { name: event.target.value })} />
+                        </label>
+                      )}
+                    </div>
+                    <div className="field-grid">
                       <label className="field">
-                        <span>Nama item</span>
+                        <span>{item.kind === "sparepart" ? "Nama tampilan" : "Nama item"}</span>
                         <input value={item.name} onChange={(event) => updateLineItem(item.id, { name: event.target.value })} />
                       </label>
-                    )}
+                      <label className="field">
+                        <span>Qty</span>
+                        <input
+                          type="number"
+                          min="1"
+                          value={item.quantity}
+                          onChange={(event) => updateLineItem(item.id, { quantity: Number(event.target.value) || 1 })}
+                        />
+                      </label>
+                    </div>
+                    <div className="field-grid">
+                      <label className="field">
+                        <span>Harga satuan</span>
+                        <input
+                          type="number"
+                          min="0"
+                          value={item.unitPrice}
+                          onChange={(event) => updateLineItem(item.id, { unitPrice: Number(event.target.value) || 0 })}
+                        />
+                      </label>
+                      <label className="field">
+                        <span>Catatan</span>
+                        <input value={item.note ?? ""} onChange={(event) => updateLineItem(item.id, { note: event.target.value })} />
+                      </label>
+                    </div>
+                    <div className="job-item-card__footer">
+                      <strong>{formatRupiah(item.quantity * item.unitPrice)}</strong>
+                      <EmptyAction onClick={() => setLineItems((current) => current.filter((entry) => entry.id !== item.id))}>
+                        Hapus Item
+                      </EmptyAction>
+                    </div>
                   </div>
-                  <div className="field-grid">
-                    <label className="field">
-                      <span>{item.kind === "sparepart" ? "Nama tampilan" : "Nama item"}</span>
-                      <input value={item.name} onChange={(event) => updateLineItem(item.id, { name: event.target.value })} />
-                    </label>
-                    <label className="field">
-                      <span>Qty</span>
-                      <input
-                        type="number"
-                        min="1"
-                        value={item.quantity}
-                        onChange={(event) => updateLineItem(item.id, { quantity: Number(event.target.value) || 1 })}
-                      />
-                    </label>
-                  </div>
-                  <div className="field-grid">
-                    <label className="field">
-                      <span>Harga satuan</span>
-                      <input
-                        type="number"
-                        min="0"
-                        value={item.unitPrice}
-                        onChange={(event) => updateLineItem(item.id, { unitPrice: Number(event.target.value) || 0 })}
-                      />
-                    </label>
-                    <label className="field">
-                      <span>Catatan</span>
-                      <input value={item.note ?? ""} onChange={(event) => updateLineItem(item.id, { note: event.target.value })} />
-                    </label>
-                  </div>
-                  <div className="job-item-card__footer">
-                    <strong>{formatCurrency(item.quantity * item.unitPrice)}</strong>
-                    <EmptyAction onClick={() => setLineItems((current) => current.filter((entry) => entry.id !== item.id))}>
-                      Hapus Item
-                    </EmptyAction>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div className="button-row button-row--left">
-              <EmptyAction onClick={() => setLineItems((current) => [...current, createBlankItem()])}>
-                + Tambah Item
-              </EmptyAction>
-              <div className="field-like field-like--summary">Nilai service: {formatCurrency(totalItemsValue || 0)}</div>
-            </div>
-          </SectionCard>
+                ))}
+              </div>
+              <div className="button-row button-row--left">
+                <EmptyAction onClick={() => setLineItems((current) => [...current, createBlankItem()])}>
+                  + Tambah Item
+                </EmptyAction>
+                <div className="field-like field-like--summary">Nilai service: {formatRupiah(totalItemsValue || 0)}</div>
+              </div>
+            </SectionCard>
 
-          <SectionCard title="WhatsApp Manual" description="Kirim update kerja, invoice, dan reminder tugas lewat WhatsApp secara manual tanpa bot.">
+            {!isTechnician ? (
+            <SectionCard title="WhatsApp Manual" description="Kirim update kerja, invoice, dan reminder tugas lewat WhatsApp secara manual tanpa bot.">
             <div className="action-stack">
               <div className="callout callout--success">
                 <div>
@@ -550,8 +583,10 @@ export default function JobDetailPage() {
               </div>
             </div>
           </SectionCard>
+            ) : null}
 
-          <SectionCard title="WhatsApp Otomatis WAHA" description="Jika WAHA sudah terhubung, kirim pesan otomatis ke client dan teknisi langsung dari detail job.">
+            {!isTechnician ? (
+            <SectionCard title="WhatsApp Otomatis WAHA" description="Jika WAHA sudah terhubung, kirim pesan otomatis ke client dan teknisi langsung dari detail job.">
             <div className="action-stack">
               {!canUseWahaAutomation ? (
                 <div className="callout callout--warning">
@@ -603,11 +638,19 @@ export default function JobDetailPage() {
 
               {sendBusinessWhatsappMutation.error ? <p className="form-error">{getErrorMessage(sendBusinessWhatsappMutation.error)}</p> : null}
             </div>
-          </SectionCard>
-        </div>
+            </SectionCard>
+            ) : null}
+          </div>
 
-        <div className="detail-grid__side">
-          <SectionCard title="Action Panel" description="Ubah status job, assign teknisi, dan simpan detail lapangan.">
+          <div className="detail-grid__side">
+            <SectionCard
+              title={isTechnician ? "Panel Teknisi" : "Action Panel"}
+              description={
+                isTechnician
+                  ? "Update progres lapangan dan dokumentasi job tanpa membuka kontrol manajerial."
+                  : "Ubah status job, assign teknisi, dan simpan detail lapangan."
+              }
+            >
             <div className="action-stack">
               <label className="field">
                 <span>Status job</span>
@@ -621,6 +664,7 @@ export default function JobDetailPage() {
                   ))}
                 </select>
               </label>
+              {!isTechnician ? (
               <div className="field">
                 <span>Tim teknisi</span>
                 <div className="technician-checklist">
@@ -645,19 +689,23 @@ export default function JobDetailPage() {
                   })}
                 </div>
               </div>
+              ) : null}
               {status === "cancelled" ? (
                 <label className="field">
                   <span>Alasan pembatalan</span>
                   <textarea value={cancelReason} onChange={(event) => setCancelReason(event.target.value)} />
                 </label>
               ) : null}
+              {!isTechnician ? (
               <label className="field">
                 <span>Deadline tugas</span>
                 <input type="datetime-local" value={deadlineAt} onChange={(event) => setDeadlineAt(event.target.value)} />
               </label>
+              ) : null}
               <button className="btn btn--secondary" onClick={() => void handleUpdateStatus()} disabled={updateJobMutation.isPending}>
                 {updateJobMutation.isPending ? "Menyimpan..." : "Simpan Perubahan"}
               </button>
+              {!isTechnician ? (
               <button
                 className="btn btn--secondary"
                 onClick={() => void handleCreateInvoice()}
@@ -669,18 +717,23 @@ export default function JobDetailPage() {
                     ? "Invoice Sudah Ada"
                     : "Buat Invoice"}
               </button>
+              ) : null}
+              {!isTechnician ? (
               <EmptyAction onClick={handlePrintInvoice} disabled={!job.invoice}>
                 Simpan PDF Invoice
               </EmptyAction>
-              {job.status === "cancelled" ? (
+              ) : null}
+              {!isTechnician ? job.status === "cancelled" ? (
                 <p className="form-helper">Invoice tidak bisa dibuat dari job yang dibatalkan.</p>
               ) : (
                 <p className="form-helper">Pembayaran invoice terpisah dari status job. Job selesai tidak otomatis membuat invoice lunas.</p>
+              ) : (
+                <p className="form-helper">Akun teknisi hanya bisa memperbarui progres lapangan, foto dokumentasi, dan item pekerjaan.</p>
               )}
             </div>
-          </SectionCard>
+            </SectionCard>
 
-          <SectionCard title="Map Preview" description="Preview lokasi pekerjaan untuk cek area servis dengan cepat.">
+            <SectionCard title="Map Preview" description="Preview lokasi pekerjaan untuk cek area servis dengan cepat.">
             <div className="map-preview map-preview--embed">
               <iframe
                 title={`Map ${job.location}`}
@@ -692,20 +745,19 @@ export default function JobDetailPage() {
             <a className="inline-link" href={`https://www.google.com/maps/search/?api=1&query=${mapQuery}`} target="_blank" rel="noreferrer">
               Buka di Google Maps
             </a>
-          </SectionCard>
+            </SectionCard>
 
-          <SectionCard title="Ringkasan">
-            <div className="summary-list">
-              <div><span>Dibuat</span><strong>{job.createdAt ?? "-"}</strong></div>
-              <div><span>Dijadwalkan</span><strong>{job.schedule}</strong></div>
-              <div><span>Deadline</span><strong>{job.deadlineAt ? new Date(job.deadlineAt).toLocaleString("id-ID") : "Belum diatur"}</strong></div>
-              <div><span>Update terakhir</span><strong>{job.updatedAt ?? "-"}</strong></div>
-              <div><span>Nilai job</span><strong>{formatCurrency(totalItemsValue || 0)}</strong></div>
-              <div><span>Invoice</span><strong>{job.invoice?.number ?? "Belum ada"}</strong></div>
-            </div>
-            {updateJobMutation.error ? <p className="form-error">{getErrorMessage(updateJobMutation.error)}</p> : null}
-            {createInvoiceMutation.error ? <p className="form-error">{getErrorMessage(createInvoiceMutation.error)}</p> : null}
-          </SectionCard>
+            <SectionCard title="Ringkasan Operasional">
+              <div className="summary-list">
+                <div><span>Dibuat</span><strong>{job.createdAt ?? "-"}</strong></div>
+                <div><span>Dijadwalkan</span><strong>{job.schedule}</strong></div>
+                <div><span>Deadline</span><strong>{job.deadlineAt ? new Date(job.deadlineAt).toLocaleString("id-ID") : "Belum diatur"}</strong></div>
+                <div><span>Update terakhir</span><strong>{job.updatedAt ?? "-"}</strong></div>
+              </div>
+              {updateJobMutation.error ? <p className="form-error">{getErrorMessage(updateJobMutation.error)}</p> : null}
+              {createInvoiceMutation.error ? <p className="form-error">{getErrorMessage(createInvoiceMutation.error)}</p> : null}
+            </SectionCard>
+          </div>
         </div>
       </div>
     </div>

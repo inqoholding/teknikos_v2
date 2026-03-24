@@ -1,7 +1,7 @@
 import { FormEvent, startTransition, useDeferredValue, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { getErrorMessage } from "../api/client";
-import { useBusinessQuery, useCreateJobMutation, useCustomersQuery, useJobsQuery, useTechniciansQuery } from "../api/hooks";
+import { useBusinessQuery, useCreateJobMutation, useCustomersQuery, useJobsQuery, useSessionQuery, useTechniciansQuery } from "../api/hooks";
 import { PageError, PageLoader } from "../components/PageState";
 import { Badge, EmptyAction, SectionCard } from "../components/UI";
 
@@ -31,6 +31,8 @@ export default function JobsPage() {
   const deferredSearch = useDeferredValue(search);
   const statusFilter = searchParams.get("status") ?? "";
   const technicianFilter = searchParams.get("technicianId") ?? "";
+  const sessionQuery = useSessionQuery();
+  const isTechnician = sessionQuery.data?.user.role === "technician";
   const queryParams = useMemo(() => {
     const params: Record<string, string> = {};
     if (deferredSearch.trim()) params.q = deferredSearch.trim();
@@ -41,8 +43,8 @@ export default function JobsPage() {
 
   const jobsQuery = useJobsQuery(queryParams);
   const businessQuery = useBusinessQuery();
-  const customersQuery = useCustomersQuery();
-  const techniciansQuery = useTechniciansQuery();
+  const customersQuery = useCustomersQuery(undefined, !isTechnician);
+  const techniciansQuery = useTechniciansQuery(!isTechnician);
   const createJobMutation = useCreateJobMutation();
 
   if (jobsQuery.isLoading) {
@@ -57,6 +59,10 @@ export default function JobsPage() {
   const customers = customersQuery.data ?? [];
   const technicians = techniciansQuery.data ?? [];
   const canUseMultiTechnician = businessQuery.data?.entitlements?.multiTechnicianEnabled ?? false;
+  const pendingCount = filteredJobs.filter((job) => job.status === "pending").length;
+  const activeCount = filteredJobs.filter((job) => ["assigned", "on_the_way", "in_progress"].includes(job.status)).length;
+  const doneCount = filteredJobs.filter((job) => job.status === "done").length;
+  const urgentCount = filteredJobs.filter((job) => job.priority === "Urgent").length;
 
   async function handleCreateJob(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -113,30 +119,57 @@ export default function JobsPage() {
 
   return (
     <div className="page-stack">
-      <div className="toolbar">
-        <div className="segmented">
-          <button className={view === "list" ? "segmented__active" : ""} onClick={() => startTransition(() => setView("list"))}>
-            List
-          </button>
-          <button className={view === "kanban" ? "segmented__active" : ""} onClick={() => startTransition(() => setView("kanban"))}>
-            Kanban
-          </button>
-        </div>
-        <input
-          className="toolbar__search"
-          placeholder="Cari nama pelanggan atau nomor job"
-          value={search}
-          onChange={(event) => setSearch(event.target.value)}
-        />
-        <div className="toolbar__actions">
-          <EmptyAction onClick={handleExportCsv}>Export CSV</EmptyAction>
-          <EmptyAction primary onClick={() => setShowCreate((current) => !current)}>
-            {showCreate ? "Tutup Form" : "+ Buat Job"}
-          </EmptyAction>
-        </div>
+      <div className="cards-grid cards-grid--job-overview">
+        <article className="sub-card">
+          <span>Job tampil</span>
+          <strong>{filteredJobs.length}</strong>
+          <small>{statusFilter || "Semua status"}</small>
+        </article>
+        <article className="sub-card">
+          <span>Menunggu</span>
+          <strong>{pendingCount}</strong>
+          <small>Butuh assignment</small>
+        </article>
+        <article className="sub-card">
+          <span>Aktif</span>
+          <strong>{activeCount}</strong>
+          <small>Masih berjalan</small>
+        </article>
+        <article className="sub-card">
+          <span>Selesai / urgent</span>
+          <strong>{doneCount} · {urgentCount}</strong>
+          <small>Done dan prioritas tinggi</small>
+        </article>
       </div>
 
-      {showCreate ? (
+      <SectionCard title="Kontrol Job Order" description="Pindah tampilan, cari job, lalu ekspor atau buat order baru dari panel yang sama.">
+        <div className="toolbar">
+          <div className="segmented">
+            <button className={view === "list" ? "segmented__active" : ""} onClick={() => startTransition(() => setView("list"))}>
+              List
+            </button>
+            <button className={view === "kanban" ? "segmented__active" : ""} onClick={() => startTransition(() => setView("kanban"))}>
+              Kanban
+            </button>
+          </div>
+          <input
+            className="toolbar__search"
+            placeholder="Cari nama pelanggan atau nomor job"
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+          />
+          <div className="toolbar__actions">
+            <EmptyAction onClick={handleExportCsv}>Export CSV</EmptyAction>
+            {!isTechnician ? (
+              <EmptyAction primary onClick={() => setShowCreate((current) => !current)}>
+                {showCreate ? "Tutup Form" : "+ Buat Job"}
+              </EmptyAction>
+            ) : null}
+          </div>
+        </div>
+      </SectionCard>
+
+      {showCreate && !isTechnician ? (
         <SectionCard title="Job Baru">
           <form className="action-stack" onSubmit={handleCreateJob}>
             <div className="field-grid">
@@ -240,9 +273,17 @@ export default function JobsPage() {
       <SectionCard title="Filter">
         <div className="filter-grid">
           <div className="field-like">{statusFilter || "Semua status"}</div>
-          <div className="field-like">{technicianFilter ? technicians.find((item) => item.id === technicianFilter)?.name ?? "Teknisi" : "Semua teknisi"}</div>
+          <div className="field-like">
+            {isTechnician
+              ? "Job teknisi aktif"
+              : technicianFilter
+                ? technicians.find((item) => item.id === technicianFilter)?.name ?? "Teknisi"
+                : "Semua teknisi"}
+          </div>
           <div className="field-like">{filteredJobs.length} job tampil</div>
-          <div className="field-like field-like--muted">Gunakan search untuk filter cepat</div>
+          <div className="field-like field-like--muted">
+            {isTechnician ? "Akun teknisi hanya menampilkan job yang ditugaskan." : "Gunakan search untuk filter cepat"}
+          </div>
         </div>
       </SectionCard>
 

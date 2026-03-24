@@ -300,7 +300,7 @@ function InvoiceRow({
           onClick={() => void handleSendAutomaticInvoice()}
           disabled={!canUseWahaAutomation || sendBusinessWhatsappMutation.isPending || !customer?.phone}
         >
-          {sendBusinessWhatsappMutation.isPending ? "..." : "Kirim WAHA"}
+          {sendBusinessWhatsappMutation.isPending ? "..." : "Kirim Pesan Otomatis"}
         </button>
       </span>
     </div>

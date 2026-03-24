@@ -35,7 +35,7 @@ export function buildInvoiceMessage(input: {
     `Pekerjaan: ${input.jobLabel ?? "-"}`,
     `Total tagihan: ${input.total}`,
     `Status: ${input.status}`,
-    `Jatuh tempo: ${input.dueDate}`,
+    `Jatuh tempo: ${input.dueDate || "-"}`,
     "",
     "Silakan dibantu cek. Jika sudah transfer atau ada pertanyaan, boleh balas pesan ini ya.",
   ];
@@ -101,7 +101,7 @@ export function buildCustomerFollowUpMessage(input: {
     `Salam dari ${input.businessName ?? "TeknikOS"}.`,
     "",
     `Kami ingin follow up kebutuhan servis Anda${input.address ? ` di ${input.address}` : ""}.`,
-    `Servis terakhir: ${input.lastService ?? "-"}`,
+    `Servis terakhir: ${input.lastService ?? "Belum ada riwayat terbaru"}`,
     `Tindak lanjut yang kami siapkan: ${input.nextAction ?? "Silakan balas pesan ini jika ingin dijadwalkan."}`,
     "",
     "Jika ingin kami jadwalkan kunjungan atau pengecekan unit, cukup balas pesan ini ya.",

@@ -1,13 +1,16 @@
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import { getErrorMessage } from "../api/client";
 import {
   useBusinessQuery,
   useCreateTechnicianAccountMutation,
   useCreateTechnicianMutation,
+  useDisableTechnicianAccountMutation,
+  useForceLogoutTechnicianMutation,
   useJobsQuery,
   useResetTechnicianPasswordMutation,
   useTechniciansLiveQuery,
   useTechniciansQuery,
+  useUpdateTechnicianAccountMutation,
   useUpdateTechnicianMutation,
 } from "../api/hooks";
 import type { TechnicianAccountResult } from "../api/types";
@@ -23,7 +26,10 @@ export default function TechniciansPage() {
   const jobsQuery = useJobsQuery();
   const createTechnicianMutation = useCreateTechnicianMutation();
   const createTechnicianAccountMutation = useCreateTechnicianAccountMutation();
+  const disableTechnicianAccountMutation = useDisableTechnicianAccountMutation();
+  const forceLogoutTechnicianMutation = useForceLogoutTechnicianMutation();
   const resetTechnicianPasswordMutation = useResetTechnicianPasswordMutation();
+  const updateTechnicianAccountMutation = useUpdateTechnicianAccountMutation();
   const [editingId, setEditingId] = useState("");
   const [selectedTechnicianId, setSelectedTechnicianId] = useState("");
   const updateTechnicianMutation = useUpdateTechnicianMutation(editingId || undefined);
@@ -32,6 +38,9 @@ export default function TechniciansPage() {
   const [passwordDrafts, setPasswordDrafts] = useState<Record<string, string>>({});
   const [lastAccountResult, setLastAccountResult] = useState<TechnicianAccountResult | null>(null);
   const [accountActionTargetId, setAccountActionTargetId] = useState("");
+  const formRef = useRef<HTMLDivElement | null>(null);
+  const accountFeedbackRef = useRef<HTMLDivElement | null>(null);
+  const calendarRef = useRef<HTMLDivElement | null>(null);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [specialties, setSpecialties] = useState("");
@@ -102,6 +111,12 @@ export default function TechniciansPage() {
     priority: job.priority,
   }));
 
+  function scrollToRef(ref: { current: HTMLDivElement | null }) {
+    window.setTimeout(() => {
+      ref.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 140);
+  }
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const payload = {
@@ -128,7 +143,6 @@ export default function TechniciansPage() {
 
   async function handleCreateAccount(technicianId: string) {
     const email = accountDrafts[technicianId]?.trim();
-    const password = passwordDrafts[technicianId]?.trim();
     if (!email) {
       return;
     }
@@ -139,9 +153,24 @@ export default function TechniciansPage() {
       const result = await createTechnicianAccountMutation.mutateAsync({
         technicianId,
         email,
-        password: password || undefined,
       });
       setLastAccountResult(result);
+      scrollToRef(accountFeedbackRef);
+    } finally {
+      setAccountActionTargetId("");
+    }
+  }
+
+  async function handleResetPassword(technicianId: string) {
+    setAccountActionTargetId(technicianId);
+    setLastAccountResult(null);
+    try {
+      const result = await resetTechnicianPasswordMutation.mutateAsync({
+        technicianId,
+        newPassword: passwordDrafts[technicianId]?.trim() || undefined,
+      });
+      setLastAccountResult(result);
+      scrollToRef(accountFeedbackRef);
       setPasswordDrafts((current) => ({
         ...current,
         [technicianId]: "",
@@ -151,16 +180,51 @@ export default function TechniciansPage() {
     }
   }
 
-  async function handleResetPassword(technicianId: string) {
-    const password = passwordDrafts[technicianId]?.trim();
+  async function handleUpdateAccount(technicianId: string) {
+    const email = accountDrafts[technicianId]?.trim();
+    const newPassword = passwordDrafts[technicianId]?.trim();
+    if (!email && !newPassword) {
+      return;
+    }
+
     setAccountActionTargetId(technicianId);
     setLastAccountResult(null);
     try {
-      const result = await resetTechnicianPasswordMutation.mutateAsync({
+      const result = await updateTechnicianAccountMutation.mutateAsync({
         technicianId,
-        newPassword: password || undefined,
+        email: email || undefined,
+        newPassword: newPassword || undefined,
       });
       setLastAccountResult(result);
+      scrollToRef(accountFeedbackRef);
+      setPasswordDrafts((current) => ({
+        ...current,
+        [technicianId]: "",
+      }));
+    } finally {
+      setAccountActionTargetId("");
+    }
+  }
+
+  async function handleForceLogout(technicianId: string) {
+    setAccountActionTargetId(technicianId);
+    setLastAccountResult(null);
+    try {
+      const result = await forceLogoutTechnicianMutation.mutateAsync({ technicianId });
+      setLastAccountResult(result);
+      scrollToRef(accountFeedbackRef);
+    } finally {
+      setAccountActionTargetId("");
+    }
+  }
+
+  async function handleDisableAccount(technicianId: string) {
+    setAccountActionTargetId(technicianId);
+    setLastAccountResult(null);
+    try {
+      const result = await disableTechnicianAccountMutation.mutateAsync({ technicianId });
+      setLastAccountResult(result);
+      scrollToRef(accountFeedbackRef);
       setPasswordDrafts((current) => ({
         ...current,
         [technicianId]: "",
@@ -171,11 +235,15 @@ export default function TechniciansPage() {
   }
 
   function getAccountStatusLabel(accountStatus?: string | null) {
-    return accountStatus === "active" ? "Akun Aktif" : "Belum Ada Akun";
+    if (accountStatus === "active") return "Akun Aktif";
+    if (accountStatus === "disabled") return "Akun Dinonaktifkan";
+    return "Belum Ada Akun";
   }
 
   function getAccountStatusTone(accountStatus?: string | null) {
-    return accountStatus === "active" ? "success" : "warning";
+    if (accountStatus === "active") return "success";
+    if (accountStatus === "disabled") return "danger";
+    return "warning";
   }
 
   return (
@@ -219,7 +287,7 @@ export default function TechniciansPage() {
             <div>
               <strong>Belum ada data kehadiran aktif</strong>
               <p>
-                Data absensi akan tampil di sini setelah teknisi melakukan check-in atau check-out dari akun teknisinya.
+                Backend masih menyimpan field `lastSeenAt`, `latitude`, dan `longitude`, tetapi belum ada alur frontend yang mengirim check-in/check-out terbaru dari akun teknisi.
               </p>
             </div>
           </div>
@@ -227,7 +295,7 @@ export default function TechniciansPage() {
       </SectionCard>
 
       {lastAccountResult ? (
-        <div className="callout callout--success">
+        <div ref={accountFeedbackRef} className="callout callout--success">
           <div>
             <strong>{lastAccountResult.technicianName}</strong>
             <p>{lastAccountResult.message}</p>
@@ -260,7 +328,8 @@ export default function TechniciansPage() {
       </div>
 
       {showForm ? (
-        <SectionCard title={editingId ? "Edit Teknisi" : "Teknisi Baru"}>
+        <div ref={formRef}>
+          <SectionCard title={editingId ? "Edit Teknisi" : "Teknisi Baru"}>
           <form className="action-stack" onSubmit={handleSubmit}>
             <div className="field-grid">
               <label className="field">
@@ -301,7 +370,8 @@ export default function TechniciansPage() {
               </EmptyAction>
             </div>
           </form>
-        </SectionCard>
+          </SectionCard>
+        </div>
       ) : null}
 
       <div className="cards-grid">
@@ -347,7 +417,7 @@ export default function TechniciansPage() {
                     />
                   </label>
                   <label className="field">
-                    <span>Password login teknisi</span>
+                    <span>Password baru teknisi</span>
                     <input
                       type="text"
                       value={passwordDrafts[technician.id] ?? ""}
@@ -357,7 +427,7 @@ export default function TechniciansPage() {
                           [technician.id]: event.target.value,
                         }))
                       }
-                      placeholder="Kosongkan untuk password otomatis"
+                      placeholder="Kosongkan untuk password acak saat reset"
                     />
                   </label>
                   {createTechnicianAccountMutation.error && accountActionTargetId === technician.id ? (
@@ -366,15 +436,30 @@ export default function TechniciansPage() {
                   {resetTechnicianPasswordMutation.error && accountActionTargetId === technician.id ? (
                     <p className="form-error">{getErrorMessage(resetTechnicianPasswordMutation.error)}</p>
                   ) : null}
+                  {updateTechnicianAccountMutation.error && accountActionTargetId === technician.id ? (
+                    <p className="form-error">{getErrorMessage(updateTechnicianAccountMutation.error)}</p>
+                  ) : null}
+                  {forceLogoutTechnicianMutation.error && accountActionTargetId === technician.id ? (
+                    <p className="form-error">{getErrorMessage(forceLogoutTechnicianMutation.error)}</p>
+                  ) : null}
+                  {disableTechnicianAccountMutation.error && accountActionTargetId === technician.id ? (
+                    <p className="form-error">{getErrorMessage(disableTechnicianAccountMutation.error)}</p>
+                  ) : null}
                 </div>
                 <div className="button-row button-row--left">
-                  <EmptyAction onClick={() => setSelectedTechnicianId(technician.id)}>
+                  <EmptyAction
+                    onClick={() => {
+                      setSelectedTechnicianId(technician.id);
+                      scrollToRef(calendarRef);
+                    }}
+                  >
                     Buka Kalender
                   </EmptyAction>
                   <EmptyAction
                     onClick={() => {
                       setEditingId(technician.id);
                       setShowForm(true);
+                      scrollToRef(formRef);
                     }}
                   >
                     Edit
@@ -387,17 +472,59 @@ export default function TechniciansPage() {
                   >
                     Lihat Job
                   </EmptyAction>
-                  {technician.accountStatus === "active" ? (
-                    <EmptyAction
-                      onClick={() => {
-                        void handleResetPassword(technician.id);
-                      }}
-                      disabled={resetTechnicianPasswordMutation.isPending && accountActionTargetId === technician.id}
-                    >
-                      {resetTechnicianPasswordMutation.isPending && accountActionTargetId === technician.id
-                        ? "Mereset..."
-                        : "Reset Password"}
-                    </EmptyAction>
+                  {technician.accountStatus !== "not_created" ? (
+                    <>
+                      <EmptyAction
+                        onClick={() => {
+                          void handleUpdateAccount(technician.id);
+                        }}
+                        disabled={
+                          (!accountDrafts[technician.id]?.trim() && !passwordDrafts[technician.id]?.trim()) ||
+                          (updateTechnicianAccountMutation.isPending && accountActionTargetId === technician.id)
+                        }
+                      >
+                        {updateTechnicianAccountMutation.isPending && accountActionTargetId === technician.id
+                          ? "Menyimpan Akun..."
+                          : "Simpan Email / Password"}
+                      </EmptyAction>
+                      <EmptyAction
+                        onClick={() => {
+                          void handleResetPassword(technician.id);
+                        }}
+                        disabled={
+                          (resetTechnicianPasswordMutation.isPending && accountActionTargetId === technician.id) ||
+                          Boolean(passwordDrafts[technician.id]?.trim() && passwordDrafts[technician.id]!.trim().length < 8)
+                        }
+                      >
+                        {resetTechnicianPasswordMutation.isPending && accountActionTargetId === technician.id
+                          ? "Mereset..."
+                          : "Reset Password Acak"}
+                      </EmptyAction>
+                      {technician.accountStatus === "active" ? (
+                        <>
+                          <EmptyAction
+                            onClick={() => {
+                              void handleForceLogout(technician.id);
+                            }}
+                            disabled={forceLogoutTechnicianMutation.isPending && accountActionTargetId === technician.id}
+                          >
+                            {forceLogoutTechnicianMutation.isPending && accountActionTargetId === technician.id
+                              ? "Memutus Sesi..."
+                              : "Paksa Logout"}
+                          </EmptyAction>
+                          <EmptyAction
+                            onClick={() => {
+                              void handleDisableAccount(technician.id);
+                            }}
+                            disabled={disableTechnicianAccountMutation.isPending && accountActionTargetId === technician.id}
+                          >
+                            {disableTechnicianAccountMutation.isPending && accountActionTargetId === technician.id
+                              ? "Menonaktifkan..."
+                              : "Nonaktifkan Akun"}
+                          </EmptyAction>
+                        </>
+                      ) : null}
+                    </>
                   ) : (
                     <EmptyAction
                       onClick={() => {
@@ -426,7 +553,7 @@ export default function TechniciansPage() {
       </div>
 
       {focusedTechnician ? (
-        <div className="dashboard-grid">
+        <div ref={calendarRef} className="dashboard-grid">
           <SectionCard
             title={`Kalender Tugas ${focusedTechnician.name}`}
             description="Teknisi bisa melihat semua jadwal kerja yang menjadi tanggung jawabnya."

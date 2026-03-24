@@ -15,7 +15,7 @@ import {
   normalizeSubscriptionStatus,
   serializeSubscriptionState,
 } from "../lib/plans.js";
-import { requireSession, requireStaffRole } from "../lib/session.js";
+import { requireAdminRole, requireSession, requireStaffRole } from "../lib/session.js";
 import { formatDateShort } from "../utils/serializers.js";
 import { hashPassword } from "better-auth/crypto";
 
@@ -219,6 +219,7 @@ adminRouter.get("/calendar", async (_req, res) => {
 });
 
 adminRouter.patch("/subscriptions/:businessId", async (req, res) => {
+  requireAdminRole(res);
   const payload = updateSubscriptionSchema.parse(req.body);
   const businessId = req.params.businessId;
   const [existing] = await db.select().from(businesses).where(eq(businesses.id, businessId));
@@ -264,6 +265,7 @@ adminRouter.patch("/subscriptions/:businessId", async (req, res) => {
 });
 
 adminRouter.post("/clients/reset-password", async (req, res) => {
+  requireAdminRole(res);
   const payload = resetClientPasswordSchema.parse(req.body);
   const [business] = await db.select().from(businesses).where(eq(businesses.id, payload.businessId));
 

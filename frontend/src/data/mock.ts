@@ -90,17 +90,17 @@ export const dashboardStats = [
   { label: "Job Hari Ini", value: "14", hint: "+3 dari kemarin", tone: "success" as const },
   { label: "Job Aktif", value: "6", hint: "2 prioritas urgent", tone: "warning" as const },
   { label: "Teknisi Aktif", value: "4", hint: "1 teknisi standby", tone: "default" as const },
-  { label: "Revenue Bulan Ini", value: "Rp18,5 jt", hint: "Naik 18% MoM", tone: "success" as const },
+  { label: "Revenue Bulan Ini", value: "Rp18.500.000", hint: "Naik 18% MoM", tone: "success" as const },
 ];
 
 export const revenueBars = [
-  { label: "Sen", value: 42 },
-  { label: "Sel", value: 58 },
-  { label: "Rab", value: 46 },
-  { label: "Kam", value: 78 },
-  { label: "Jum", value: 64 },
-  { label: "Sab", value: 52 },
-  { label: "Min", value: 36 },
+  { label: "Sen", value: 420_000 },
+  { label: "Sel", value: 580_000 },
+  { label: "Rab", value: 460_000 },
+  { label: "Kam", value: 780_000 },
+  { label: "Jum", value: 640_000 },
+  { label: "Sab", value: 520_000 },
+  { label: "Min", value: 360_000 },
 ];
 
 export const statusBreakdown = [
@@ -187,7 +187,7 @@ export const jobs: Job[] = [
     technician: "Ardiansyah",
     type: "AC",
     schedule: "19 Mar 2026 · 09:30 WIB",
-    price: "Rp450rb",
+    price: "Rp450.000",
     status: "on_the_way",
     priority: "Urgent",
     description:
@@ -204,7 +204,7 @@ export const jobs: Job[] = [
     technician: "Fadli",
     type: "AC",
     schedule: "19 Mar 2026 · 11:00 WIB",
-    price: "Rp900rb",
+    price: "Rp900.000",
     status: "pending",
     priority: "Normal",
     description: "Isi freon dan cek tekanan untuk unit split wall lantai dua.",
@@ -220,7 +220,7 @@ export const jobs: Job[] = [
     technician: "Rian",
     type: "Maintenance",
     schedule: "19 Mar 2026 · 13:00 WIB",
-    price: "Rp1,2jt",
+    price: "Rp1.200.000",
     status: "done",
     priority: "Normal",
     description: "Preventive maintenance untuk enam unit split wall klinik.",
@@ -236,7 +236,7 @@ export const jobs: Job[] = [
     technician: "Ardiansyah",
     type: "AC",
     schedule: "20 Mar 2026 · 10:00 WIB",
-    price: "Rp2,4jt",
+    price: "Rp2.400.000",
     status: "assigned",
     priority: "Urgent",
     description: "Overhaul outdoor unit rooftop dan cek compressor.",
@@ -245,21 +245,21 @@ export const jobs: Job[] = [
 ];
 
 export const invoices: Invoice[] = [
-  { id: "invoice-1", number: "INV-2026-014", customer: "PT Sinar Jaya", job: "JOB-014", total: "Rp450rb", status: "Sent", dueDate: "22 Mar 2026" },
-  { id: "invoice-2", number: "INV-2026-013", customer: "Ibu Lina", job: "JOB-013", total: "Rp900rb", status: "Paid", dueDate: "19 Mar 2026" },
-  { id: "invoice-3", number: "INV-2026-011", customer: "Hotel Marannu", job: "JOB-011", total: "Rp2,4jt", status: "Overdue", dueDate: "15 Mar 2026" },
+  { id: "invoice-1", number: "INV-2026-014", customer: "PT Sinar Jaya", job: "JOB-014", total: "Rp450.000", status: "Sent", dueDate: "22 Mar 2026" },
+  { id: "invoice-2", number: "INV-2026-013", customer: "Ibu Lina", job: "JOB-013", total: "Rp900.000", status: "Paid", dueDate: "19 Mar 2026" },
+  { id: "invoice-3", number: "INV-2026-011", customer: "Hotel Marannu", job: "JOB-011", total: "Rp2.400.000", status: "Overdue", dueDate: "15 Mar 2026" },
 ];
 
 export const inventory: InventoryItem[] = [
-  { id: "item-1", name: "Freon R32 3kg", sku: "FR-R32-3", category: "Freon", stock: 2, minStock: 4, buyPrice: "Rp340rb", sellPrice: "Rp450rb", status: "Rendah" },
-  { id: "item-2", name: "Kapasitor 35uF", sku: "KP-35UF", category: "Sparepart", stock: 0, minStock: 3, buyPrice: "Rp28rb", sellPrice: "Rp60rb", status: "Habis" },
-  { id: "item-3", name: "Copper tube 1/4", sku: "CP-14", category: "Consumable", stock: 18, minStock: 6, buyPrice: "Rp70rb", sellPrice: "Rp120rb", status: "Aman" },
+  { id: "item-1", name: "Freon R32 3kg", sku: "FR-R32-3", category: "Freon", stock: 2, minStock: 4, buyPrice: "Rp340.000", sellPrice: "Rp450.000", status: "Rendah" },
+  { id: "item-2", name: "Kapasitor 35uF", sku: "KP-35UF", category: "Sparepart", stock: 0, minStock: 3, buyPrice: "Rp28.000", sellPrice: "Rp60.000", status: "Habis" },
+  { id: "item-3", name: "Copper tube 1/4", sku: "CP-14", category: "Consumable", stock: 18, minStock: 6, buyPrice: "Rp70.000", sellPrice: "Rp120.000", status: "Aman" },
 ];
 
 export const contracts: Contract[] = [
-  { id: "contract-1", customer: "PT Sinar Jaya", plan: "Bulanan · 10 unit", value: "Rp4,8jt", nextService: "04 Apr 2026", status: "Aktif" },
-  { id: "contract-2", customer: "Klinik Arafah", plan: "Kuartalan · 6 unit", value: "Rp2,7jt", nextService: "26 Mar 2026", status: "Hampir Jatuh Tempo" },
-  { id: "contract-3", customer: "Hotel Marannu", plan: "Tahunan · 18 unit", value: "Rp32jt", nextService: "Expired", status: "Expired" },
+  { id: "contract-1", customer: "PT Sinar Jaya", plan: "Bulanan · 10 unit", value: "Rp4.800.000", nextService: "04 Apr 2026", status: "Aktif" },
+  { id: "contract-2", customer: "Klinik Arafah", plan: "Kuartalan · 6 unit", value: "Rp2.700.000", nextService: "26 Mar 2026", status: "Hampir Jatuh Tempo" },
+  { id: "contract-3", customer: "Hotel Marannu", plan: "Tahunan · 18 unit", value: "Rp32.000.000", nextService: "Expired", status: "Expired" },
 ];
 
 export const settings = {

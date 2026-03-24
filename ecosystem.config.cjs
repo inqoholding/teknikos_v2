@@ -3,7 +3,7 @@ module.exports = {
     {
       name: "teknikos-backend",
       cwd: "/var/www/teknikos/backend",
-      script: "dist/server.js",
+      script: "dist/src/server.js",
       interpreter: "node",
       instances: 1,
       exec_mode: "fork",

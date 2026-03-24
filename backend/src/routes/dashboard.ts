@@ -3,7 +3,7 @@ import { eq } from "drizzle-orm";
 import { businesses, contracts, customers, inventory, invoices, jobs, technicians } from "../db/app-schema.js";
 import { db } from "../db/index.js";
 import { serializeSubscriptionState } from "../lib/plans.js";
-import { requireBusiness, requireSession } from "../lib/session.js";
+import { requireBusiness, requireOwnerAccess, requireSession } from "../lib/session.js";
 import {
   contractStatus,
   formatDateShort,
@@ -16,6 +16,14 @@ import {
 export const dashboardRouter = Router();
 
 dashboardRouter.use(requireSession);
+dashboardRouter.use((_req, res, next) => {
+  try {
+    requireOwnerAccess(res);
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
 
 function getAssignedTechnicianIds(job: typeof jobs.$inferSelect) {
   const rawIds =

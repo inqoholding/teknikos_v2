@@ -10,7 +10,7 @@ import {
   requireInvoiceForBusiness,
   requireJobForBusiness,
 } from "../lib/ownership.js";
-import { getCurrentBusiness, requireBusiness, requireSession } from "../lib/session.js";
+import { getCurrentBusiness, requireBusiness, requireOwnerAccess, requireSession } from "../lib/session.js";
 import { formatDateShort, formatRupiahCompact, invoiceStatus } from "../utils/serializers.js";
 
 const invoiceSchema = z.object({
@@ -49,6 +49,14 @@ async function validateInvoiceRelations(input: {
 export const invoicesRouter = Router();
 
 invoicesRouter.use(requireSession);
+invoicesRouter.use((_req, res, next) => {
+  try {
+    requireOwnerAccess(res);
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
 
 invoicesRouter.get("/", async (req, res) => {
   const businessId = requireBusiness(res);
