@@ -6,6 +6,7 @@ import {
   useCustomersQuery,
   useInvoicesQuery,
   useJobsQuery,
+  useSendBusinessWhatsappMutation,
   useUpdateInvoiceMutation,
 } from "../api/hooks";
 import type { Business, Customer, Invoice, JobListItem } from "../api/types";
@@ -34,6 +35,7 @@ export default function InvoicesPage() {
   const jobsQuery = useJobsQuery();
   const businessQuery = useBusinessQuery();
   const createInvoiceMutation = useCreateInvoiceMutation();
+  const sendBusinessWhatsappMutation = useSendBusinessWhatsappMutation();
 
   if (invoicesQuery.isLoading) {
     return <PageLoader title="Memuat invoice..." />;
@@ -169,12 +171,15 @@ export default function InvoicesPage() {
               key={invoice.id}
               invoice={invoice}
               business={businessQuery.data}
+              canUseWahaAutomation={businessQuery.data?.whatsapp?.canUseAutomation ?? false}
               customer={customers.find((item) => item.name === invoice.customer) ?? null}
               job={jobs.find((item) => item.number === invoice.job) ?? null}
+              sendBusinessWhatsappMutation={sendBusinessWhatsappMutation}
             />
           ))}
         </div>
       </SectionCard>
+      {sendBusinessWhatsappMutation.error ? <p className="form-error">{getErrorMessage(sendBusinessWhatsappMutation.error)}</p> : null}
     </div>
   );
 }
@@ -182,13 +187,17 @@ export default function InvoicesPage() {
 function InvoiceRow({
   invoice,
   business,
+  canUseWahaAutomation,
   customer,
   job,
+  sendBusinessWhatsappMutation,
 }: {
   invoice: Invoice;
   business?: Business | null;
+  canUseWahaAutomation: boolean;
   customer?: Customer | null;
   job?: JobListItem | null;
+  sendBusinessWhatsappMutation: ReturnType<typeof useSendBusinessWhatsappMutation>;
 }) {
   const updateInvoiceMutation = useUpdateInvoiceMutation(invoice.id);
   const invoiceWhatsappLink = buildWhatsAppLink(
@@ -225,6 +234,25 @@ function InvoiceRow({
             items: [],
           }
         : null,
+    });
+  }
+
+  async function handleSendAutomaticInvoice() {
+    if (!customer?.phone) {
+      return;
+    }
+
+    await sendBusinessWhatsappMutation.mutateAsync({
+      phone: customer.phone,
+      message: buildInvoiceMessage({
+        businessName: business?.name,
+        customerName: invoice.customer,
+        invoiceNumber: invoice.number,
+        total: invoice.total,
+        dueDate: invoice.dueDate,
+        status: invoice.status,
+        jobLabel: job?.title ?? invoice.job,
+      }).join("\n"),
     });
   }
 
@@ -266,6 +294,14 @@ function InvoiceRow({
             Kirim WA
           </a>
         ) : null}
+        <button
+          className="ghost-button"
+          type="button"
+          onClick={() => void handleSendAutomaticInvoice()}
+          disabled={!canUseWahaAutomation || sendBusinessWhatsappMutation.isPending || !customer?.phone}
+        >
+          {sendBusinessWhatsappMutation.isPending ? "..." : "Kirim WAHA"}
+        </button>
       </span>
     </div>
   );

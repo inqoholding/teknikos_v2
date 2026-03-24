@@ -1,6 +1,16 @@
 import { FormEvent, useEffect, useState } from "react";
 import { getErrorMessage } from "../api/client";
-import { useBusinessQuery, useCreateTechnicianMutation, useJobsQuery, useTechniciansQuery, useUpdateTechnicianMutation } from "../api/hooks";
+import {
+  useBusinessQuery,
+  useCreateTechnicianAccountMutation,
+  useCreateTechnicianMutation,
+  useJobsQuery,
+  useResetTechnicianPasswordMutation,
+  useTechniciansLiveQuery,
+  useTechniciansQuery,
+  useUpdateTechnicianMutation,
+} from "../api/hooks";
+import type { TechnicianAccountResult } from "../api/types";
 import { PageError, PageLoader } from "../components/PageState";
 import { DeadlineList, ScheduleCalendar } from "../components/ScheduleCalendar";
 import { Badge, EmptyAction, SectionCard, StatCard } from "../components/UI";
@@ -8,13 +18,20 @@ import { buildTechnicianTaskMessage, buildWhatsAppLink } from "../utils/whatsapp
 
 export default function TechniciansPage() {
   const techniciansQuery = useTechniciansQuery();
+  const techniciansLiveQuery = useTechniciansLiveQuery();
   const businessQuery = useBusinessQuery();
   const jobsQuery = useJobsQuery();
   const createTechnicianMutation = useCreateTechnicianMutation();
+  const createTechnicianAccountMutation = useCreateTechnicianAccountMutation();
+  const resetTechnicianPasswordMutation = useResetTechnicianPasswordMutation();
   const [editingId, setEditingId] = useState("");
   const [selectedTechnicianId, setSelectedTechnicianId] = useState("");
   const updateTechnicianMutation = useUpdateTechnicianMutation(editingId || undefined);
   const [showForm, setShowForm] = useState(false);
+  const [accountDrafts, setAccountDrafts] = useState<Record<string, string>>({});
+  const [passwordDrafts, setPasswordDrafts] = useState<Record<string, string>>({});
+  const [lastAccountResult, setLastAccountResult] = useState<TechnicianAccountResult | null>(null);
+  const [accountActionTargetId, setAccountActionTargetId] = useState("");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [specialties, setSpecialties] = useState("");
@@ -41,6 +58,22 @@ export default function TechniciansPage() {
     setStatus(editingTechnician.status);
   }, [editingTechnician]);
 
+  useEffect(() => {
+    setAccountDrafts((current) => {
+      let changed = false;
+      const next = { ...current };
+
+      for (const technician of technicians) {
+        if (!next[technician.id] && technician.accountEmail) {
+          next[technician.id] = technician.accountEmail;
+          changed = true;
+        }
+      }
+
+      return changed ? next : current;
+    });
+  }, [technicians]);
+
   if (techniciansQuery.isLoading) {
     return <PageLoader title="Memuat teknisi..." />;
   }
@@ -54,6 +87,7 @@ export default function TechniciansPage() {
   const inactiveCount = technicians.filter((item) => item.status === "Tidak Aktif").length;
   const maxTechnicians = businessQuery.data?.entitlements?.maxTechnicians ?? 1;
   const technicianSlotsLeft = Math.max(0, maxTechnicians - technicians.length);
+  const liveTechnicians = techniciansLiveQuery.data ?? [];
   const focusedAssignments = focusedTechnician
     ? jobs.filter((job) => job.technicianIds.includes(focusedTechnician.id))
     : [];
@@ -92,6 +126,58 @@ export default function TechniciansPage() {
     setStatus("Aktif");
   }
 
+  async function handleCreateAccount(technicianId: string) {
+    const email = accountDrafts[technicianId]?.trim();
+    const password = passwordDrafts[technicianId]?.trim();
+    if (!email) {
+      return;
+    }
+
+    setAccountActionTargetId(technicianId);
+    setLastAccountResult(null);
+    try {
+      const result = await createTechnicianAccountMutation.mutateAsync({
+        technicianId,
+        email,
+        password: password || undefined,
+      });
+      setLastAccountResult(result);
+      setPasswordDrafts((current) => ({
+        ...current,
+        [technicianId]: "",
+      }));
+    } finally {
+      setAccountActionTargetId("");
+    }
+  }
+
+  async function handleResetPassword(technicianId: string) {
+    const password = passwordDrafts[technicianId]?.trim();
+    setAccountActionTargetId(technicianId);
+    setLastAccountResult(null);
+    try {
+      const result = await resetTechnicianPasswordMutation.mutateAsync({
+        technicianId,
+        newPassword: password || undefined,
+      });
+      setLastAccountResult(result);
+      setPasswordDrafts((current) => ({
+        ...current,
+        [technicianId]: "",
+      }));
+    } finally {
+      setAccountActionTargetId("");
+    }
+  }
+
+  function getAccountStatusLabel(accountStatus?: string | null) {
+    return accountStatus === "active" ? "Akun Aktif" : "Belum Ada Akun";
+  }
+
+  function getAccountStatusTone(accountStatus?: string | null) {
+    return accountStatus === "active" ? "success" : "warning";
+  }
+
   return (
     <div className="page-stack">
       <div className="stats-grid">
@@ -108,6 +194,51 @@ export default function TechniciansPage() {
           Maksimal {maxTechnicians} teknisi. Kalau timmu tumbuh lebih besar, upgrade plan dari admin subscription console.
         </p>
       </div>
+
+      <SectionCard
+        title="Absen & Kehadiran Teknisi"
+        description="Panel ini mengambil data lokasi dan waktu aktif terakhir teknisi dari backend live."
+      >
+        {techniciansLiveQuery.isLoading ? (
+          <p className="form-helper">Memuat data kehadiran teknisi...</p>
+        ) : liveTechnicians.length > 0 ? (
+          <div className="cards-grid cards-grid--two">
+            {liveTechnicians.map((technician) => (
+              <article key={technician.id} className="sub-card">
+                <span>{technician.name}</span>
+                <strong>{technician.status}</strong>
+                <small>Update terakhir: {technician.lastSeenAt ?? "Belum ada"}</small>
+                <small>
+                  Lokasi: {technician.latitude.toFixed(5)}, {technician.longitude.toFixed(5)}
+                </small>
+              </article>
+            ))}
+          </div>
+        ) : (
+          <div className="callout">
+            <div>
+              <strong>Belum ada data kehadiran aktif</strong>
+              <p>
+                Data absensi akan tampil di sini setelah teknisi melakukan check-in atau check-out dari akun teknisinya.
+              </p>
+            </div>
+          </div>
+        )}
+      </SectionCard>
+
+      {lastAccountResult ? (
+        <div className="callout callout--success">
+          <div>
+            <strong>{lastAccountResult.technicianName}</strong>
+            <p>{lastAccountResult.message}</p>
+            <p>Email login: {lastAccountResult.accountEmail ?? "-"}</p>
+            <p>
+              Password sementara:{" "}
+              {lastAccountResult.temporaryPassword ?? "Tidak diubah karena akun lama hanya ditautkan ulang."}
+            </p>
+          </div>
+        </div>
+      ) : null}
 
       <div className="toolbar toolbar--simple">
         <div />
@@ -197,6 +328,44 @@ export default function TechniciansPage() {
                   <div><span>Rating</span><strong>{technician.rating} · {technician.jobsCompleted} job</strong></div>
                   <div><span>Status</span><Badge tone={technician.status === "Aktif" ? "success" : "info"}>{technician.status}</Badge></div>
                   <div><span>Phone</span><strong>{technician.phone}</strong></div>
+                  <div><span>Login</span><Badge tone={getAccountStatusTone(technician.accountStatus)}>{getAccountStatusLabel(technician.accountStatus)}</Badge></div>
+                  <div><span>Email</span><strong>{technician.accountEmail ?? "Belum diatur"}</strong></div>
+                </div>
+                <div className="action-stack">
+                  <label className="field">
+                    <span>Email login teknisi</span>
+                    <input
+                      type="email"
+                      value={accountDrafts[technician.id] ?? ""}
+                      onChange={(event) =>
+                        setAccountDrafts((current) => ({
+                          ...current,
+                          [technician.id]: event.target.value,
+                        }))
+                      }
+                      placeholder="teknisi@bisnisanda.id"
+                    />
+                  </label>
+                  <label className="field">
+                    <span>Password login teknisi</span>
+                    <input
+                      type="text"
+                      value={passwordDrafts[technician.id] ?? ""}
+                      onChange={(event) =>
+                        setPasswordDrafts((current) => ({
+                          ...current,
+                          [technician.id]: event.target.value,
+                        }))
+                      }
+                      placeholder="Kosongkan untuk password otomatis"
+                    />
+                  </label>
+                  {createTechnicianAccountMutation.error && accountActionTargetId === technician.id ? (
+                    <p className="form-error">{getErrorMessage(createTechnicianAccountMutation.error)}</p>
+                  ) : null}
+                  {resetTechnicianPasswordMutation.error && accountActionTargetId === technician.id ? (
+                    <p className="form-error">{getErrorMessage(resetTechnicianPasswordMutation.error)}</p>
+                  ) : null}
                 </div>
                 <div className="button-row button-row--left">
                   <EmptyAction onClick={() => setSelectedTechnicianId(technician.id)}>
@@ -218,6 +387,32 @@ export default function TechniciansPage() {
                   >
                     Lihat Job
                   </EmptyAction>
+                  {technician.accountStatus === "active" ? (
+                    <EmptyAction
+                      onClick={() => {
+                        void handleResetPassword(technician.id);
+                      }}
+                      disabled={resetTechnicianPasswordMutation.isPending && accountActionTargetId === technician.id}
+                    >
+                      {resetTechnicianPasswordMutation.isPending && accountActionTargetId === technician.id
+                        ? "Mereset..."
+                        : "Reset Password"}
+                    </EmptyAction>
+                  ) : (
+                    <EmptyAction
+                      onClick={() => {
+                        void handleCreateAccount(technician.id);
+                      }}
+                      disabled={
+                        !accountDrafts[technician.id]?.trim() ||
+                        (createTechnicianAccountMutation.isPending && accountActionTargetId === technician.id)
+                      }
+                    >
+                      {createTechnicianAccountMutation.isPending && accountActionTargetId === technician.id
+                        ? "Membuat Akun..."
+                        : "Buat Akun Login"}
+                    </EmptyAction>
+                  )}
                   {reminderWhatsappLink ? (
                     <a className="btn btn--secondary" href={reminderWhatsappLink} target="_blank" rel="noreferrer">
                       Reminder WA

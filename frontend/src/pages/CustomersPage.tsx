@@ -1,9 +1,10 @@
 import { FormEvent, useDeferredValue, useState } from "react";
 import { Link } from "react-router-dom";
 import { getErrorMessage } from "../api/client";
-import { useCreateCustomerMutation, useCustomersQuery } from "../api/hooks";
+import { useBusinessQuery, useCreateCustomerMutation, useCustomersQuery, useSendBusinessWhatsappMutation } from "../api/hooks";
 import { PageError, PageLoader } from "../components/PageState";
 import { Badge, EmptyAction, SectionCard } from "../components/UI";
+import { buildCustomerFollowUpMessage } from "../utils/whatsapp";
 
 export default function CustomersPage() {
   const [search, setSearch] = useState("");
@@ -15,6 +16,8 @@ export default function CustomersPage() {
   const [units, setUnits] = useState("");
   const deferredSearch = useDeferredValue(search);
   const createCustomerMutation = useCreateCustomerMutation();
+  const businessQuery = useBusinessQuery();
+  const sendBusinessWhatsappMutation = useSendBusinessWhatsappMutation();
   const customersQuery = useCustomersQuery(
     deferredSearch.trim() ? { q: deferredSearch.trim() } : undefined,
   );
@@ -31,6 +34,7 @@ export default function CustomersPage() {
   const contractsCount = filteredCustomers.filter((item) => item.contract !== "Tidak ada").length;
   const billingCount = filteredCustomers.filter((item) => item.health === "Butuh Billing").length;
   const followUpCount = filteredCustomers.filter((item) => item.health === "Perlu Follow Up").length;
+  const canUseWahaAutomation = businessQuery.data?.whatsapp?.canUseAutomation ?? false;
 
   function buildMapsLink(address: string) {
     return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
@@ -54,6 +58,19 @@ export default function CustomersPage() {
     setAddress("");
     setUnits("");
     setShowCreate(false);
+  }
+
+  async function handleSendAutomaticFollowUp(customer: (typeof filteredCustomers)[number]) {
+    await sendBusinessWhatsappMutation.mutateAsync({
+      phone: customer.phone,
+      message: buildCustomerFollowUpMessage({
+        businessName: businessQuery.data?.name,
+        customerName: customer.name,
+        address: customer.address,
+        lastService: customer.lastService,
+        nextAction: customer.nextAction,
+      }).join("\n"),
+    });
   }
 
   return (
@@ -114,7 +131,7 @@ export default function CustomersPage() {
         </SectionCard>
       ) : null}
 
-      <div className="dashboard-grid">
+      <div className="dashboard-grid dashboard-grid--balanced">
         <SectionCard title="Database Pelanggan">
           <div className="customer-list">
             {filteredCustomers.map((customer) => (
@@ -167,6 +184,12 @@ export default function CustomersPage() {
                   <a className="btn btn--secondary" href={`https://wa.me/${customer.phone.replace(/[^\d]/g, "")}`} target="_blank" rel="noreferrer">
                     Chat WA
                   </a>
+                  <EmptyAction
+                    onClick={() => void handleSendAutomaticFollowUp(customer)}
+                    disabled={!canUseWahaAutomation || sendBusinessWhatsappMutation.isPending || !customer.phone}
+                  >
+                    {sendBusinessWhatsappMutation.isPending ? "Mengirim..." : "Kirim WAHA"}
+                  </EmptyAction>
                 </div>
               </article>
             ))}
@@ -205,6 +228,10 @@ export default function CustomersPage() {
               <p>CRM sekarang tidak cuma daftar pelanggan, tapi juga health, piutang, dan saran follow-up seperti aplikasi field service yang lebih matang.</p>
             </div>
           </div>
+          {!canUseWahaAutomation ? (
+            <p className="form-helper">Tombol WAHA otomatis di daftar pelanggan aktif jika mode Otomasi WAHA sudah terhubung.</p>
+          ) : null}
+          {sendBusinessWhatsappMutation.error ? <p className="form-error">{getErrorMessage(sendBusinessWhatsappMutation.error)}</p> : null}
         </SectionCard>
       </div>
     </div>

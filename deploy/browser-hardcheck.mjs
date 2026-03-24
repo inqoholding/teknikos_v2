@@ -155,7 +155,10 @@ async function checkAdminFlow(baseUrl, browser, result) {
 }
 
 async function main() {
-  const browser = await chromium.launch({ headless: true });
+  const browser = await chromium.launch({
+    headless: true,
+    args: ["--no-sandbox"],
+  });
   const result = [];
 
   try {

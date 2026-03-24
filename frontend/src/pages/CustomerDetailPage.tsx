@@ -1,12 +1,15 @@
 import { Link, useParams } from "react-router-dom";
 import { getErrorMessage } from "../api/client";
-import { useCustomerQuery } from "../api/hooks";
+import { useBusinessQuery, useCustomerQuery, useSendBusinessWhatsappMutation } from "../api/hooks";
 import { PageError, PageLoader } from "../components/PageState";
-import { SectionCard } from "../components/UI";
+import { EmptyAction, SectionCard } from "../components/UI";
+import { buildCustomerFollowUpMessage } from "../utils/whatsapp";
 
 export default function CustomerDetailPage() {
   const { id } = useParams();
   const customerQuery = useCustomerQuery(id);
+  const businessQuery = useBusinessQuery();
+  const sendBusinessWhatsappMutation = useSendBusinessWhatsappMutation();
 
   if (customerQuery.isLoading) {
     return <PageLoader title="Memuat detail pelanggan..." />;
@@ -18,6 +21,20 @@ export default function CustomerDetailPage() {
 
   const customer = customerQuery.data;
   const mapQuery = encodeURIComponent(customer.address);
+  const canUseWahaAutomation = businessQuery.data?.whatsapp?.canUseAutomation ?? false;
+
+  async function handleSendAutomaticFollowUp() {
+    await sendBusinessWhatsappMutation.mutateAsync({
+      phone: customer.phone,
+      message: buildCustomerFollowUpMessage({
+        businessName: businessQuery.data?.name,
+        customerName: customer.name,
+        address: customer.address,
+        lastService: customer.lastService,
+        nextAction: customer.nextAction,
+      }).join("\n"),
+    });
+  }
 
   return (
     <div className="page-stack">
@@ -94,11 +111,22 @@ export default function CustomerDetailPage() {
               <a className="btn btn--secondary" href={`https://wa.me/${customer.phone.replace(/[^\d]/g, "")}`} target="_blank" rel="noreferrer">
                 Kirim Reminder WA
               </a>
+              <EmptyAction
+                primary
+                onClick={() => void handleSendAutomaticFollowUp()}
+                disabled={!canUseWahaAutomation || sendBusinessWhatsappMutation.isPending || !customer.phone}
+              >
+                {sendBusinessWhatsappMutation.isPending ? "Mengirim..." : "Kirim WAHA Otomatis"}
+              </EmptyAction>
               <a className="btn btn--secondary" href={`https://www.google.com/maps/search/?api=1&query=${mapQuery}`} target="_blank" rel="noreferrer">
                 Buka Maps
               </a>
               <Link className="btn btn--secondary" to="/invoices">Lihat Invoice</Link>
             </div>
+            {!canUseWahaAutomation ? (
+              <p className="form-helper">Aktifkan mode Otomasi WAHA dan hubungkan nomor bisnis agar follow-up otomatis bisa dipakai.</p>
+            ) : null}
+            {sendBusinessWhatsappMutation.error ? <p className="form-error">{getErrorMessage(sendBusinessWhatsappMutation.error)}</p> : null}
           </SectionCard>
         </div>
       </div>

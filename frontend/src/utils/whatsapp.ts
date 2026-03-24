@@ -88,3 +88,22 @@ export function buildTechnicianTaskMessage(input: {
     "Mohon cek detail job di dashboard dan konfirmasi jika ada kendala di lapangan.",
   ];
 }
+
+export function buildCustomerFollowUpMessage(input: {
+  businessName?: MaybeText;
+  customerName: string;
+  address?: MaybeText;
+  lastService?: MaybeText;
+  nextAction?: MaybeText;
+}) {
+  return [
+    `Halo ${input.customerName},`,
+    `Salam dari ${input.businessName ?? "TeknikOS"}.`,
+    "",
+    `Kami ingin follow up kebutuhan servis Anda${input.address ? ` di ${input.address}` : ""}.`,
+    `Servis terakhir: ${input.lastService ?? "-"}`,
+    `Tindak lanjut yang kami siapkan: ${input.nextAction ?? "Silakan balas pesan ini jika ingin dijadwalkan."}`,
+    "",
+    "Jika ingin kami jadwalkan kunjungan atau pengecekan unit, cukup balas pesan ini ya.",
+  ];
+}

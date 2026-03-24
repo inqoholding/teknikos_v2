@@ -14,7 +14,7 @@ import {
 import { PageError, PageLoader } from "../components/PageState";
 import { DeadlineList, ScheduleCalendar } from "../components/ScheduleCalendar";
 import { Badge, DonutSummary, EmptyAction, MiniBarChart, SectionCard, StatCard } from "../components/UI";
-import { WAHA_TEST_MESSAGE } from "../utils/whatsapp";
+import { buildJobProgressMessage, buildTechnicianTaskMessage } from "../utils/whatsapp";
 
 function defaultDueDate() {
   const date = new Date();
@@ -22,6 +22,16 @@ function defaultDueDate() {
   date.setHours(17, 0, 0, 0);
   return date.toISOString().slice(0, 16);
 }
+
+const jobStatusLabels: Record<string, string> = {
+  pending: "Menunggu",
+  assigned: "Ditugaskan",
+  on_the_way: "Menuju Lokasi",
+  in_progress: "Dikerjakan",
+  done: "Selesai",
+  cancelled: "Dibatalkan",
+  paid: "Lunas (Legacy)",
+};
 
 export default function DashboardPage() {
   const dashboardQuery = useDashboardStatsQuery();
@@ -119,7 +129,16 @@ export default function DashboardPage() {
 
     await sendBusinessWhatsappMutation.mutateAsync({
       phone: selectedWahaCustomer.phone,
-      message: WAHA_TEST_MESSAGE,
+      message: buildJobProgressMessage({
+        businessName: business?.name,
+        customerName: selectedWahaCustomer.name ?? selectedWahaJob.customer,
+        jobNumber: selectedWahaJob.number,
+        jobTitle: selectedWahaJob.title,
+        status: jobStatusLabels[selectedWahaJob.status] ?? selectedWahaJob.status,
+        schedule: selectedWahaJob.schedule,
+        location: selectedWahaJob.location,
+        technicians: selectedWahaTechnicians.map((item) => item.name),
+      }).join("\n"),
     });
   }
 
@@ -135,7 +154,16 @@ export default function DashboardPage() {
 
     await sendBusinessWhatsappMutation.mutateAsync({
       phone: technician.phone,
-      message: WAHA_TEST_MESSAGE,
+      message: buildTechnicianTaskMessage({
+        businessName: business?.name,
+        technicianName: technician.name,
+        jobNumber: selectedWahaJob.number,
+        jobTitle: selectedWahaJob.title,
+        status: jobStatusLabels[selectedWahaJob.status] ?? selectedWahaJob.status,
+        schedule: selectedWahaJob.schedule,
+        location: selectedWahaJob.location,
+        customerName: selectedWahaCustomer?.name ?? selectedWahaJob.customer,
+      }).join("\n"),
     });
   }
 
@@ -264,7 +292,7 @@ export default function DashboardPage() {
       <div className="dashboard-grid">
         <SectionCard
           title="Kirim Otomatis via WAHA"
-          description='Pilih job lalu uji alur kirim otomatis ke pelanggan atau teknisi. Untuk hard test saat ini payload yang dikirim sengaja hanya ".".'
+          description="Pilih job lalu kirim notifikasi otomatis ke pelanggan atau teknisi memakai template pesan WAHA."
         >
           <div className="action-stack">
             <label className="field">

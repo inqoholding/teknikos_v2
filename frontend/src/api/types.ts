@@ -169,6 +169,7 @@ export interface JobDetail extends JobListItem {
 
 export interface Technician {
   id: string;
+  userId?: string | null;
   name: string;
   phone: string;
   specialties: string[];
@@ -178,6 +179,42 @@ export interface Technician {
   latitude?: number | null;
   longitude?: number | null;
   lastSeenAt?: string | null;
+  accountEmail?: string | null;
+  accountStatus?: "not_created" | "active" | string;
+}
+
+export interface TechnicianLivePresence {
+  id: string;
+  name: string;
+  status: string;
+  latitude: number;
+  longitude: number;
+  lastSeenAt: string | null;
+}
+
+export interface TechnicianSelfProfile {
+  id: string;
+  userId: string | null;
+  name: string;
+  phone: string;
+  specialties: string[];
+  status: "Aktif" | "Bertugas" | "Standby" | "Tidak Aktif";
+  attendanceStatus: string;
+  rating: number;
+  latitude: number | null;
+  longitude: number | null;
+  lastSeenAt: string | null;
+  attendanceLatitude: number | null;
+  attendanceLongitude: number | null;
+  attendanceUpdatedAt: string | null;
+}
+
+export interface TechnicianAccountResult {
+  technicianId: string;
+  technicianName: string;
+  accountEmail: string | null;
+  temporaryPassword: string | null;
+  message: string;
 }
 
 export interface Customer {

@@ -94,14 +94,14 @@ export default function SettingsWhatsappConnectPage() {
       phone: testPhone,
       message: WAHA_TEST_MESSAGE,
     });
-    setSetupNotice('Pesan tes berhasil dikirim. Untuk hard test saat ini isi pesan sengaja hanya "." agar fungsi kirim bisa dicek tanpa mengganggu user.');
+    setSetupNotice("Pesan tes berhasil dikirim ke nomor bisnis untuk verifikasi koneksi WAHA.");
   }
 
   return (
     <div className="page-stack">
       <SectionCard
         title="Menghubungkan ke WAHA"
-        description='Ikuti 3 langkah di bawah ini secara berurutan. Untuk hard test saat ini tombol tes koneksi hanya mengirim "." supaya aman dipakai cek alur.'
+        description="Ikuti 3 langkah di bawah ini secara berurutan untuk mengaktifkan pengiriman otomatis via WAHA."
       >
         <div className="page-stack">
           <div className="callout callout--success">

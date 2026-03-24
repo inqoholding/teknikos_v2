@@ -1,164 +1,181 @@
-import { ArrowRight, CheckCircle2, MessageCircleMore } from "lucide-react";
-import { FormEvent, useState } from "react";
+import {
+  ArrowRight,
+  Boxes,
+  CalendarClock,
+  CheckCircle2,
+  ClipboardList,
+  MessageSquareQuote,
+  ReceiptText,
+  ShieldCheck,
+  Users,
+  Wrench,
+} from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { Link } from "react-router-dom";
-import { FeatureIcon, MarketingFooter } from "../components/Layout";
+import { LandingHeroTemplate } from "../components/marketing/LandingHeroTemplate";
+import { MarketingFooter } from "../components/Layout";
 
-const featureCards = [
-  "Dispatch dan kalender kerja",
-  "Invoice dan billing lebih rapi",
-  "CRM pelanggan yang hidup",
-  "Inventori, kontrak, dan WAHA",
-];
+type FeatureCard = {
+  icon: LucideIcon;
+  title: string;
+  body: string;
+};
 
-const narrativeCards = [
-  {
-    label: "Dispatch Room",
-    title: "Owner tahu siapa berangkat ke mana, tanpa bongkar chat satu-satu.",
-    body: "Board operasional dibuat seperti ruang kontrol kecil: urgen terlihat, teknisi aktif terlihat, dan job yang belum ada owner-nya langsung kelihatan.",
-  },
-  {
-    label: "Billing Rhythm",
-    title: "Tagihan tidak lagi datang belakangan setelah kerja lapangan selesai.",
-    body: "Biaya jasa, sparepart, invoice overdue, dan queue siap ditagih ditata agar cashflow ikut terbaca, bukan cuma job count.",
-  },
-  {
-    label: "Customer Memory",
-    title: "Pelanggan terasa punya konteks, bukan sekadar nama dan nomor telepon.",
-    body: "Riwayat job, unit, kontrak, kesehatan akun, dan next action disusun supaya follow-up lebih terasa seperti CRM sungguhan.",
-  },
-];
+type PricingPlan = {
+  name: string;
+  price: string;
+  summary: string;
+  highlight?: string;
+  featured?: boolean;
+  items: string[];
+};
 
-const communicationCards = [
+const outcomes = [
   {
-    title: "Kirim progres kerja ke client",
-    body: "Owner tinggal buka detail job lalu kirim update status, jadwal, lokasi, dan teknisi lewat WhatsApp manual.",
+    label: "Jadwal lebih jelas",
+    title: "Owner cepat tahu job yang padat, telat, dan masih menggantung.",
+    body: "Semua pekerjaan dibaca dari board dan kalender, jadi tim tidak lagi bergantung pada chat yang tercecer.",
   },
   {
-    title: "Kirim invoice tanpa copy-paste panjang",
-    body: "Nomor invoice, total tagihan, status, dan jatuh tempo sudah disusun otomatis agar lebih enak dibagikan ke client.",
+    label: "Billing lebih cepat",
+    title: "Invoice tidak lagi menunggu mood admin atau catatan lapangan.",
+    body: "Job, sparepart, nilai tagihan, dan status pembayaran tersambung dalam satu alur yang lebih rapi.",
   },
   {
-    title: "Setup WAHA dibuat step-by-step",
-    body: "Admin tinggal ikuti urutan pilih mode, hubungkan session, scan QR, lalu tes koneksi. Tidak perlu menebak langkah berikutnya.",
+    label: "Client lebih tenang",
+    title: "Update kerja terasa profesional, bukan improvisasi setiap kali ada pertanyaan.",
+    body: "Riwayat pelanggan, unit, dan progres teknisi tersimpan supaya follow-up tidak mengulang dari nol.",
   },
 ];
 
-const latestFeatureCards = [
+const painPoints = [
+  "Jadwal kerja tercecer di WhatsApp group dan catatan admin.",
+  "Owner telat tahu job mana yang urgent, tertunda, atau belum ditagih.",
+  "Client harus bertanya dulu baru dapat update progres dan invoice.",
+];
+
+const featureCards: FeatureCard[] = [
   {
-    title: "Kalender jadwal dan deadline",
-    body: "Dashboard owner dan admin sekarang bisa melihat seluruh jadwal kerja dan deadline job tanpa buka satu per satu.",
+    icon: ClipboardList,
+    title: "Dispatch yang langsung terbaca",
+    body: "Buat job, assign teknisi, lihat status kerja, lalu cek deadline tanpa pindah-pindah alat.",
   },
   {
-    title: "Panel WAHA yang lebih jelas",
-    body: "Halaman pengaturan sudah dipisah jadi rules dan setup WAHA, lengkap dengan langkah hubungkan session, QR, dan tes koneksi.",
+    icon: CalendarClock,
+    title: "Kalender operasional harian",
+    body: "Jadwal visit dan tenggat job tampil berdampingan supaya bentrok cepat kelihatan.",
   },
   {
-    title: "Detail job lebih operasional",
-    body: "Di detail job sekarang ada deadline, before-after photo, item sparepart, invoice, dan panel tindakan yang lebih lengkap.",
+    icon: ReceiptText,
+    title: "Billing yang ikut alur kerja",
+    body: "Invoice manual atau dari job selesai bisa dipantau per status agar penagihan tidak tertunda.",
+  },
+  {
+    icon: Users,
+    title: "CRM yang punya konteks",
+    body: "Pelanggan, histori servis, unit, kontrak, dan next action tersimpan dalam satu tempat.",
+  },
+  {
+    icon: Boxes,
+    title: "Stok dan sparepart lebih aman",
+    body: "Item yang dipakai di lapangan tercatat supaya owner tahu stok menipis sebelum kehabisan.",
+  },
+  {
+    icon: ShieldCheck,
+    title: "Setup WhatsApp lebih jelas",
+    body: "Rules dan koneksi WAHA dipisah supaya tim paham langkah setup tanpa nebak-nebak menu.",
   },
 ];
 
-const livePanelPreview = [
+const workflowSteps = [
   {
-    title: "Operations Cockpit",
-    body: "Queue dispatch, billing, dan CRM follow up dibaca dari satu panel yang langsung bisa ditindak.",
+    step: "01",
+    title: "Job masuk dan langsung diassign",
+    body: "Admin buat pekerjaan, pilih pelanggan, lalu assign teknisi dari satu alur yang singkat.",
   },
   {
-    title: "Kalender & Deadline",
-    body: "Jadwal kerja dan tenggat job terlihat berdampingan, jadi owner tidak cuma melihat list job.",
+    step: "02",
+    title: "Owner pantau progres tanpa bongkar chat",
+    body: "Status kerja, jadwal, deadline, dan catatan lapangan terlihat dari dashboard yang sama.",
   },
   {
-    title: "WAHA Setup",
-    body: "Rules WhatsApp dan langkah connect WAHA dipisah supaya setup lebih mudah dipahami client.",
-  },
-];
-
-const chatbotFaq = [
-  {
-    question: "TeknikOS bisa dipakai untuk apa?",
-    answer:
-      "Untuk mengatur job, teknisi, pelanggan, invoice, inventori, dan kontrak servis dalam satu dashboard owner.",
-  },
-  {
-    question: "Apakah bisa untuk tim kecil dulu?",
-    answer:
-      "Bisa. Paket Starter cocok untuk mulai rapi dulu, lalu upgrade saat teknisi dan job makin banyak.",
-  },
-  {
-    question: "Bagaimana alur invoice-nya?",
-    answer:
-      "Kamu bisa buat invoice manual, tarik dari job, lalu pantau status pembayaran tanpa catatan terpisah.",
-  },
-  {
-    question: "Apa bedanya Pro dan Bisnis?",
-    answer:
-      "Pro cocok untuk operasional tim aktif sehari-hari. Bisnis lebih pas untuk tim lebih besar dan monitoring lebih luas.",
+    step: "03",
+    title: "Invoice keluar saat pekerjaan selesai",
+    body: "Penagihan mengikuti job yang selesai supaya cashflow tidak tertinggal di belakang operasional.",
   },
 ];
 
-function resolveChatAnswer(question: string) {
-  const trimmedQuestion = question.trim();
-  const normalized = trimmedQuestion.toLowerCase();
+const roleCards = [
+  {
+    title: "Bengkel AC dan HVAC",
+    body: "Cocok untuk tim yang menangani service rutin, komplain mendadak, dan kontrak maintenance.",
+  },
+  {
+    title: "Plumbing dan electrical service",
+    body: "Dipakai saat owner perlu kontrol dispatch cepat, teknisi lapangan, dan tagihan per pekerjaan.",
+  },
+  {
+    title: "Kontraktor jasa multi-tim",
+    body: "Lebih aman untuk bisnis yang mulai punya banyak job aktif dan butuh visibilitas lintas tim.",
+  },
+];
 
-  const exactMatch = chatbotFaq.find((item) => item.question.toLowerCase() === normalized);
-  if (exactMatch) {
-    return exactMatch;
-  }
+const testimonialCards = [
+  {
+    title: "Tim lebih cepat paham",
+    body: "Bahasa dan alurnya dibuat sederhana agar owner dan admin langsung tahu apa yang harus ditindak hari ini.",
+  },
+  {
+    title: "Client lebih cepat dapat kabar",
+    body: "Status kerja, invoice, dan histori pelanggan tersusun lebih rapi sehingga follow-up tidak perlu improvisasi terus.",
+  },
+  {
+    title: "Owner tetap pegang kontrol",
+    body: "Saat job bertambah, owner tetap bisa membaca prioritas, teknisi aktif, dan pekerjaan yang belum ditagih dari satu dashboard.",
+  },
+];
 
-  if (normalized.includes("job") || normalized.includes("teknisi") || normalized.includes("dispatch")) {
-    return {
-      question: trimmedQuestion || "Bagaimana job dan teknisi diatur?",
-      answer:
-        "TeknikOS membantu bikin job, assign satu atau beberapa teknisi, lalu pantau status kerja dari berangkat sampai selesai dalam satu board.",
-    };
-  }
+const pricingPlans: PricingPlan[] = [
+  {
+    name: "Starter",
+    price: "Rp0",
+    summary: "Untuk teknisi solo atau bisnis kecil yang mau mulai rapi dulu.",
+    items: ["Job dasar", "Data pelanggan", "Invoice manual"],
+  },
+  {
+    name: "Pro",
+    price: "Rp249K",
+    summary: "Plan utama untuk tim aktif yang butuh kontrol harian tanpa ribet.",
+    highlight: "Paling cocok untuk operasional harian",
+    featured: true,
+    items: ["Dashboard owner", "Dispatch + kalender", "CRM, stok, kontrak"],
+  },
+  {
+    name: "Bisnis",
+    price: "Rp499K",
+    summary: "Untuk tim yang lebih besar dan perlu visibilitas lebih luas.",
+    items: ["Kontrol multi tim", "Monitoring lebih luas", "Skala operasional lebih aman"],
+  },
+];
 
-  if (normalized.includes("invoice") || normalized.includes("tagih") || normalized.includes("bayar")) {
-    return {
-      question: trimmedQuestion || "Bagaimana invoice dan pembayaran berjalan?",
-      answer:
-        "Invoice bisa dibuat manual atau dari job, lalu status pembayarannya dipantau terpisah supaya owner tahu mana yang sudah dibayar dan mana yang masih perlu follow up.",
-    };
-  }
-
-  if (normalized.includes("stok") || normalized.includes("inventory") || normalized.includes("sparepart")) {
-    return {
-      question: trimmedQuestion || "Apakah stok sparepart ikut tercatat?",
-      answer:
-        "Ya. Sparepart yang dipakai di pekerjaan bisa dicatat, stok inventori ikut berkurang, dan owner bisa lihat item mana yang mulai menipis.",
-    };
-  }
-
-  if (normalized.includes("pelanggan") || normalized.includes("crm") || normalized.includes("customer")) {
-    return {
-      question: trimmedQuestion || "Apa yang disimpan untuk pelanggan?",
-      answer:
-        "Data pelanggan, alamat, histori job, unit yang pernah ditangani, invoice, dan kontrak servis disimpan supaya follow up terasa lebih rapi.",
-    };
-  }
-
-  if (normalized.includes("kontrak") || normalized.includes("maintenance")) {
-    return {
-      question: trimmedQuestion || "Bisa untuk kontrak maintenance?",
-      answer:
-        "Bisa. Paket Pro dan Bisnis mendukung kontrak servis berkala supaya owner bisa pantau jadwal visit berikutnya dan renewal yang mendekat.",
-    };
-  }
-
-  if (normalized.includes("plan") || normalized.includes("pro") || normalized.includes("bisnis") || normalized.includes("starter")) {
-    return {
-      question: trimmedQuestion || "Plan mana yang cocok untuk saya?",
-      answer:
-        "Starter cocok untuk mulai gratis. Pro pas untuk operasional harian yang sudah aktif. Bisnis cocok jika tim dan kontrol owner sudah lebih besar.",
-    };
-  }
-
-  return {
-    question: trimmedQuestion || "Fitur apa yang paling sering dipakai?",
-    answer:
-      "Yang paling sering dipakai owner biasanya dashboard harian, job board, pelanggan, invoice, inventori, dan kontrak. Kalau mau, mulai dulu dari pertanyaan tentang job, invoice, atau plan.",
-  };
-}
+const faqItems = [
+  {
+    question: "Apakah TeknikOS cocok untuk tim kecil dulu?",
+    answer: "Cocok. Mulai dari Starter untuk membereskan job dan pelanggan dulu, lalu upgrade saat operasional makin padat.",
+  },
+  {
+    question: "Apakah invoice harus dibuat manual semua?",
+    answer: "Tidak. Invoice bisa dibuat manual atau mengikuti alur job yang sudah selesai agar proses tagih lebih cepat.",
+  },
+  {
+    question: "Kalau masih pakai WhatsApp, apa tetap relevan?",
+    answer: "Ya. TeknikOS justru membantu tim yang masih mengandalkan WhatsApp agar informasi operasionalnya tidak tercecer.",
+  },
+  {
+    question: "Berapa cepat tim bisa mulai pakai?",
+    answer: "Untuk use case awal, tim bisa mulai dari setup bisnis, input pelanggan, lalu membuat job pertama dalam waktu singkat.",
+  },
+];
 
 function buildPlanRegisterLink(plan: string) {
   return `/register?plan=${encodeURIComponent(plan)}`;
@@ -168,384 +185,302 @@ const SALES_WHATSAPP_LINK =
   "https://wa.me/6281354444967?text=Halo%20sales%20TeknikOS,%20saya%20ingin%20tanya%20demo%20dan%20langganan.";
 
 export default function HomePage() {
-  const [draftQuestion, setDraftQuestion] = useState("");
-  const [activeChat, setActiveChat] = useState(chatbotFaq[0]);
-
-  function handleChatSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setActiveChat(resolveChatAnswer(draftQuestion));
-  }
-
   return (
     <div className="landing-page">
-      <header className="landing-navbar">
-        <div className="brand-mark brand-mark--hero">
-          <div className="brand-mark__icon">T</div>
-          <div>
-            <strong>TeknikOS</strong>
-            <span>SaaS field service Indonesia</span>
-          </div>
+      <LandingHeroTemplate salesWhatsappLink={SALES_WHATSAPP_LINK} />
+
+      <section className="grid gap-4 lg:grid-cols-3">
+        {outcomes.map((item) => (
+          <article
+            key={item.title}
+            className="rounded-[28px] border border-[rgba(12,30,25,0.1)] bg-white/88 p-6 shadow-[0_18px_50px_rgba(14,52,43,0.08)] backdrop-blur-sm"
+          >
+            <span className="eyebrow">{item.label}</span>
+            <h2 className="mt-3 font-['Space_Grotesk'] text-[1.45rem] leading-[1.08] tracking-[-0.04em] text-[#171a17]">
+              {item.title}
+            </h2>
+            <p className="mt-3 text-sm leading-7 text-[#5b605c]">{item.body}</p>
+          </article>
+        ))}
+      </section>
+
+      <section
+        id="fitur"
+        className="grid gap-5 rounded-[32px] border border-[rgba(12,30,25,0.1)] bg-[linear-gradient(135deg,#09231d,#10352d_52%,#165444)] p-6 text-white shadow-[0_32px_90px_rgba(11,49,39,0.16)] lg:grid-cols-[0.9fr_1.1fr] lg:p-8"
+      >
+        <div>
+          <span className="inline-flex min-h-8 items-center rounded-full border border-white/12 bg-white/8 px-4 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#c9efdf]">
+            Masalah yang paling sering bikin chaos
+          </span>
+          <h2 className="mt-4 max-w-xl font-['Space_Grotesk'] text-3xl leading-[1.02] tracking-[-0.05em] md:text-5xl">
+            Bukan kekurangan kerjaan. Yang bikin berat biasanya informasi operasionalnya pecah ke banyak tempat.
+          </h2>
+          <p className="mt-4 max-w-lg text-sm leading-7 text-white/72 md:text-base">
+            TeknikOS merapikan alur kerja harian supaya owner, admin, dan teknisi membaca konteks yang sama
+            tanpa mengejar info dari chat, catatan manual, dan spreadsheet terpisah.
+          </p>
         </div>
-        <nav className="landing-navbar__links">
-          <a href="#fitur">Fitur</a>
-          <a href="#harga">Harga</a>
-          <Link to="/register">Daftar</Link>
-          <Link to="/login">Login</Link>
-          <Link to="/demo-owner-dashboard" className="btn btn--primary">
-            Coba Gratis
+        <div className="grid gap-3">
+          {painPoints.map((item) => (
+            <div key={item} className="rounded-3xl border border-white/10 bg-white/8 px-5 py-4 text-sm leading-7 text-white/88">
+              {item}
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="rounded-[32px] border border-[rgba(12,30,25,0.1)] bg-white/84 p-6 shadow-[0_18px_50px_rgba(14,52,43,0.08)] md:p-8">
+        <div className="max-w-3xl">
+          <span className="eyebrow">Fitur Inti</span>
+          <h2 className="mt-3 font-['Space_Grotesk'] text-3xl leading-[1.02] tracking-[-0.05em] text-[#171a17] md:text-5xl">
+            Modul inti yang paling sering dipakai owner untuk menjalankan operasional harian.
+          </h2>
+          <p className="mt-4 text-sm leading-7 text-[#5b605c] md:text-base">
+            Fokusnya bukan menambah menu. Fokusnya membuat job lebih cepat dijalankan, billing lebih cepat
+            keluar, dan komunikasi client lebih konsisten.
+          </p>
+        </div>
+
+        <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {featureCards.map((item) => {
+            const Icon = item.icon;
+
+            return (
+              <article
+                key={item.title}
+                className="rounded-[26px] border border-[rgba(12,30,25,0.08)] bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(244,249,246,0.88))] p-6 transition-transform duration-200 hover:-translate-y-1"
+              >
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#dff7ee] text-[#0b5f4e]">
+                  <Icon size={22} />
+                </div>
+                <h3 className="mt-4 font-['Space_Grotesk'] text-xl leading-tight tracking-[-0.03em] text-[#171a17]">
+                  {item.title}
+                </h3>
+                <p className="mt-3 text-sm leading-7 text-[#5b605c]">{item.body}</p>
+              </article>
+            );
+          })}
+        </div>
+      </section>
+
+      <section className="grid gap-5 lg:grid-cols-[0.86fr_1.14fr]">
+        <article className="rounded-[30px] border border-[rgba(12,30,25,0.1)] bg-[linear-gradient(180deg,rgba(255,255,255,0.92),rgba(249,252,250,0.86))] p-6 shadow-[0_18px_50px_rgba(14,52,43,0.08)] md:p-8">
+          <span className="eyebrow">Workflow</span>
+          <h2 className="mt-3 font-['Space_Grotesk'] text-3xl leading-[1.02] tracking-[-0.05em] text-[#171a17] md:text-5xl">
+            Dari job masuk sampai invoice lunas, alurnya tetap pendek.
+          </h2>
+          <p className="mt-4 text-sm leading-7 text-[#5b605c] md:text-base">
+            Ini bagian yang penting untuk calon client: mereka tidak perlu mempelajari semua modul dulu.
+            Cukup lihat alur kerja utamanya dan pahami bahwa sistem ini dibuat untuk operasional harian.
+          </p>
+        </article>
+
+        <div className="grid gap-4">
+          {workflowSteps.map((item) => (
+            <article
+              key={item.step}
+              className="rounded-[28px] border border-[rgba(12,30,25,0.08)] bg-white/88 p-6 shadow-[0_18px_50px_rgba(14,52,43,0.08)]"
+            >
+              <div className="flex items-start gap-4">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#dff7ee] font-['Space_Grotesk'] text-lg font-bold text-[#0b5f4e]">
+                  {item.step}
+                </div>
+                <div>
+                  <h3 className="font-['Space_Grotesk'] text-xl leading-tight tracking-[-0.03em] text-[#171a17]">
+                    {item.title}
+                  </h3>
+                  <p className="mt-3 text-sm leading-7 text-[#5b605c]">{item.body}</p>
+                </div>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="grid gap-4 lg:grid-cols-3">
+        {roleCards.map((item) => (
+          <article
+            key={item.title}
+            className="rounded-[28px] border border-[rgba(12,30,25,0.1)] bg-[linear-gradient(180deg,rgba(255,249,236,0.95),rgba(255,255,255,0.92))] p-6 shadow-[0_18px_50px_rgba(14,52,43,0.08)]"
+          >
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#fff0d8] text-[#8a5a10]">
+              <Wrench size={20} />
+            </div>
+            <h2 className="mt-4 font-['Space_Grotesk'] text-[1.35rem] leading-tight tracking-[-0.03em] text-[#171a17]">
+              {item.title}
+            </h2>
+            <p className="mt-3 text-sm leading-7 text-[#5b605c]">{item.body}</p>
+          </article>
+        ))}
+      </section>
+
+      <section className="rounded-[32px] border border-[rgba(12,30,25,0.1)] bg-white/86 p-6 shadow-[0_18px_50px_rgba(14,52,43,0.08)] md:p-8">
+        <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+          <div className="max-w-3xl">
+            <span className="eyebrow">Kenapa Tim Service Cepat Cocok</span>
+            <h2 className="mt-3 font-['Space_Grotesk'] text-3xl leading-[1.02] tracking-[-0.05em] text-[#171a17] md:text-5xl">
+              Dibuat untuk bisnis jasa teknik yang butuh kontrol cepat, bukan sistem yang terasa berat dipelajari.
+            </h2>
+          </div>
+          <Link
+            to="/demo-owner-dashboard"
+            className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-[#0b5f4e] px-6 text-sm font-semibold text-white transition hover:-translate-y-0.5"
+          >
+            Lihat Demo Dashboard
+            <ArrowRight size={16} />
           </Link>
-        </nav>
-      </header>
-
-      <section className="landing-hero">
-        <div className="landing-hero__copy">
-          <span className="eyebrow-pill">Untuk bengkel AC, plumber, listrik</span>
-          <h1>Operasional jasa teknik yang tadinya kacau, jadi rapi dalam 10 menit.</h1>
-          <p>
-            Ganti koordinasi job via WhatsApp group, invoice tulis tangan, dan stok yang suka
-            hilang dengan satu sistem owner dashboard yang terasa lokal, ringan, dan siap dipakai
-            tim Indonesia.
-          </p>
-          <p className="chart-helper">
-            Sekarang bukan cuma dispatch dan billing. TeknikOS juga sudah punya kalender jadwal,
-            deadline job, setup WAHA bertahap, dan halaman demo yang mengikuti alur aplikasi utama.
-          </p>
-          <div className="landing-hero__actions">
-            <Link to="/register" className="btn btn--secondary">
-              Buat Akun Gratis
-            </Link>
-            <Link to="/demo-owner-dashboard" className="btn btn--primary">
-              Coba Gratis
-            </Link>
-            <Link to="/demo-owner-dashboard" className="btn btn--secondary">
-              Lihat Demo Owner Dashboard
-            </Link>
-            <a href={SALES_WHATSAPP_LINK} target="_blank" rel="noreferrer" className="btn btn--secondary">
-              Tanya via WhatsApp
-            </a>
-          </div>
-          <div className="landing-pill-row">
-            <div className="mini-metric">
-              <span>Setup</span>
-              <strong>10 min</strong>
-              <small>setup siap pakai</small>
-            </div>
-            <div className="mini-metric">
-              <span>Harga</span>
-              <strong>Rp249K</strong>
-              <small>plan Pro populer</small>
-            </div>
-            <div className="mini-metric">
-              <span>Result</span>
-              <strong>Tanpa chaos</strong>
-              <small>jadwal lebih rapi</small>
-            </div>
-          </div>
         </div>
 
-        <div className="landing-hero__panel">
-          <div className="demo-shell">
-            <div className="demo-shell__header">
+        <div className="mt-8 grid gap-4 lg:grid-cols-3">
+          {testimonialCards.map((item) => (
+            <article
+              key={item.title}
+              className="rounded-[26px] border border-[rgba(12,30,25,0.08)] bg-[linear-gradient(180deg,rgba(239,247,243,0.96),rgba(255,255,255,0.92))] p-6"
+            >
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#dff7ee] text-[#0b5f4e]">
+                <MessageSquareQuote size={20} />
+              </div>
+              <h3 className="mt-4 font-['Space_Grotesk'] text-xl leading-tight tracking-[-0.03em] text-[#171a17]">
+                {item.title}
+              </h3>
+              <p className="mt-3 text-sm leading-7 text-[#5b605c]">{item.body}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section
+        id="harga"
+        className="rounded-[32px] border border-[rgba(12,30,25,0.1)] bg-[linear-gradient(180deg,rgba(255,255,255,0.94),rgba(250,252,249,0.84))] p-6 shadow-[0_18px_50px_rgba(14,52,43,0.08)] md:p-8"
+      >
+        <div className="grid gap-5 lg:grid-cols-[1.5fr_0.9fr] lg:items-end">
+          <div className="max-w-3xl">
+            <span className="eyebrow">Harga</span>
+            <h2 className="mt-3 font-['Space_Grotesk'] text-3xl leading-[1.02] tracking-[-0.05em] text-[#171a17] md:text-5xl">
+              Mulai gratis. Upgrade saat operasional memang sudah butuh kontrol lebih besar.
+            </h2>
+          </div>
+          <p className="text-sm leading-7 text-[#5b605c] md:text-base">
+            Naming dan copy plan dibuat lebih outcome-driven: mulai rapi, kontrol harian, lalu skala lebih luas.
+          </p>
+        </div>
+
+        <div className="mt-8 grid gap-4 xl:grid-cols-3">
+          {pricingPlans.map((plan) => (
+            <article
+              key={plan.name}
+              className={`relative flex flex-col gap-4 rounded-[28px] border p-6 ${
+                plan.featured
+                  ? "border-[#0b5f4e] bg-[#0b5f4e] text-white shadow-[0_32px_90px_rgba(11,49,39,0.16)]"
+                  : "border-[rgba(12,30,25,0.08)] bg-white/92 text-[#171a17]"
+              }`}
+            >
+              {plan.highlight ? (
+                <span className={`inline-flex w-fit rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] ${
+                  plan.featured ? "bg-white/12 text-white/88" : "bg-[#dff7ee] text-[#0b5f4e]"
+                }`}>
+                  {plan.highlight}
+                </span>
+              ) : null}
+
               <div>
-                <strong>Owner Dashboard</strong>
-                <span>Hari ini · 14 job · 4 teknisi aktif</span>
+                <h3 className="font-['Space_Grotesk'] text-2xl tracking-[-0.03em]">{plan.name}</h3>
+                <strong className="mt-2 block font-['Space_Grotesk'] text-5xl leading-none tracking-[-0.06em]">
+                  {plan.price}
+                </strong>
               </div>
-              <div className="avatar avatar--small">BS</div>
-            </div>
-            <div className="demo-shell__stats">
-              <div className="demo-stat">
-                <span>Revenue</span>
-                <strong>Rp18,5jt</strong>
-                <small>Naik 18% MoM</small>
-              </div>
-              <div className="demo-stat">
-                <span>Job Aktif</span>
-                <strong>6</strong>
-                <small>2 urgent</small>
-              </div>
-            </div>
-            <div className="demo-shell__grid">
-              <div className="demo-chart demo-chart--features">
-                {[
-                  "Dispatch board dengan status live",
-                  "Kalender jadwal dan deadline job",
-                  "CRM pelanggan dan histori unit",
-                  "Invoice, kontrak, inventori, dan setup WAHA",
-                ].map((item) => (
-                  <div key={item} className="demo-feature-item">
-                    <span className="demo-feature-item__dot" />
-                    <strong>{item}</strong>
+
+              <p className={`text-sm leading-7 ${plan.featured ? "text-white/78" : "text-[#5b605c]"}`}>{plan.summary}</p>
+
+              <div className="grid gap-3">
+                {plan.items.map((item) => (
+                  <div
+                    key={item}
+                    className={`flex items-center gap-3 rounded-2xl border px-4 py-3 text-sm ${
+                      plan.featured
+                        ? "border-white/10 bg-white/8 text-white/88"
+                        : "border-[rgba(12,30,25,0.08)] bg-[rgba(247,251,248,0.88)] text-[#171a17]"
+                    }`}
+                  >
+                    <CheckCircle2 size={16} className={plan.featured ? "text-[#c9efdf]" : "text-[#0b5f4e]"} />
+                    <span>{item}</span>
                   </div>
                 ))}
               </div>
-              <div className="demo-chart demo-chart--donut">
-                <div className="donut-summary__chart demo-donut">
-                  <div className="donut-summary__center">
-                    <strong>14</strong>
-                    <span>total job</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
 
-      <section className="landing-proof">
-        <span>Dirancang untuk operasi teknik sehari-hari</span>
-        <div>
-          <strong>Job dispatch</strong>
-          <strong>Invoice</strong>
-          <strong>CRM pelanggan</strong>
-          <strong>Inventori</strong>
-          <strong>Kontrak rutin</strong>
-        </div>
-      </section>
-
-      <section className="landing-rhythm-grid">
-        {narrativeCards.map((item) => (
-          <article key={item.label} className="rhythm-card">
-            <span className="eyebrow">{item.label}</span>
-            <h3>{item.title}</h3>
-            <p>{item.body}</p>
-          </article>
-        ))}
-      </section>
-
-      <section className="landing-rhythm-grid">
-        {latestFeatureCards.map((item) => (
-          <article key={item.title} className="rhythm-card">
-            <span className="eyebrow">Fitur Terbaru</span>
-            <h3>{item.title}</h3>
-            <p>{item.body}</p>
-          </article>
-        ))}
-      </section>
-
-      <section className="landing-ops-strip">
-        <div className="landing-ops-strip__copy">
-          <span className="eyebrow">Preview Dashboard Live</span>
-          <h2>Yang dilihat calon user di demo sekarang lebih dekat dengan yang benar-benar dipakai di app utama.</h2>
-          <p>
-            Bukan cuma halaman promosi. Struktur panel, istilah, dan prioritas di landing serta demo
-            sekarang mengikuti dashboard live TeknikOS sedekat mungkin.
-          </p>
-        </div>
-        <div className="landing-ops-strip__grid">
-          {livePanelPreview.map((item, index) => (
-            <article key={item.title} className={`ops-story-card ops-story-card--${index + 1}`}>
-              <span className="eyebrow-pill">Live 0{index + 1}</span>
-              <h3>{item.title}</h3>
-              <p>{item.body}</p>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section className="landing-ops-strip">
-        <div className="landing-ops-strip__copy">
-          <span className="eyebrow">Komunikasi Lapangan</span>
-          <h2>WhatsApp tetap dipakai, tapi sekarang pesannya lebih rapi dan tidak improvisasi terus.</h2>
-          <p>
-            Cocok untuk fase sekarang: masih manual, belum pakai bot, tapi owner sudah bisa kirim
-            progres kerja, invoice, dan reminder tugas dengan format yang konsisten.
-          </p>
-        </div>
-        <div className="landing-ops-strip__grid">
-          {communicationCards.map((item, index) => (
-            <article key={item.title} className={`ops-story-card ops-story-card--${index + 1}`}>
-              <span className="eyebrow-pill">0{index + 1}</span>
-              <h3>{item.title}</h3>
-              <p>{item.body}</p>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section className="landing-chatbot">
-        <div className="landing-chatbot__copy">
-          <span className="eyebrow">Tanya Fitur</span>
-          <h2>Masih bingung TeknikOS cocok untuk apa? Tanya cepat di sini.</h2>
-          <p>
-            Saya ringkas dengan bahasa yang mudah dipahami, jadi calon client tidak perlu menebak-nebak
-            fungsi setiap menu di aplikasi.
-          </p>
-        </div>
-        <div className="landing-chatbot__panel">
-          <div className="landing-chatbot__header">
-            <div className="feature-icon">
-              <MessageCircleMore size={18} />
-            </div>
-            <div>
-              <strong>Asisten Fitur TeknikOS</strong>
-              <p>Pilih pertanyaan yang paling sering ditanyakan owner.</p>
-            </div>
-          </div>
-          <div className="landing-chatbot__questions">
-            {chatbotFaq.map((item) => (
-              <button
-                key={item.question}
-                type="button"
-                className={`landing-chatbot__chip ${activeChat?.question === item.question ? "landing-chatbot__chip--active" : ""}`}
-                onClick={() => {
-                  setDraftQuestion(item.question);
-                  setActiveChat(item);
-                }}
+              <Link
+                className={`mt-2 inline-flex min-h-12 items-center justify-center rounded-2xl px-5 text-sm font-semibold transition hover:-translate-y-0.5 ${
+                  plan.featured
+                    ? "bg-white text-[#0b5f4e]"
+                    : "border border-[rgba(12,30,25,0.12)] bg-white text-[#171a17]"
+                }`}
+                to={buildPlanRegisterLink(plan.name)}
               >
-                {item.question}
-              </button>
-            ))}
-          </div>
-          <form className="landing-chatbot__composer" onSubmit={handleChatSubmit}>
-            <input
-              type="text"
-              value={draftQuestion}
-              onChange={(event) => setDraftQuestion(event.target.value)}
-              placeholder="Contoh: bisa atur stok sparepart?"
-            />
-            <button type="submit" className="btn btn--primary">
-              Tanya
-            </button>
-          </form>
-          <div className="landing-chatbot__answer">
-            <span>Pertanyaan</span>
-            <strong>{activeChat?.question}</strong>
-            <p>{activeChat?.answer}</p>
-          </div>
-        </div>
-      </section>
-
-      <section id="fitur" className="landing-grid">
-        <article className="problem-panel">
-          <span className="eyebrow">Masalah Lama</span>
-          <h2>WhatsApp group, catatan manual, dan spreadsheet bikin bisnis susah scale.</h2>
-          <ul>
-            <li>Double booking karena jadwal tersebar di chat.</li>
-            <li>Owner tidak tahu teknisi mana yang produktif.</li>
-            <li>Invoice dan kontrak servis sering telat ditagih.</li>
-          </ul>
-        </article>
-        <div className="feature-grid">
-          {featureCards.map((card) => (
-            <article key={card} className="feature-card">
-              <FeatureIcon />
-              <h3>{card}</h3>
-              <p>
-                {card === "Dispatch dan kalender kerja" &&
-                  "Job dibuat, di-assign, dipantau, lalu dibaca juga dari kalender dan daftar deadline."}
-                {card === "Invoice dan billing lebih rapi" &&
-                  "Invoice manual dan auto-generate dari job selesai, tanpa tulis ulang."}
-                {card === "CRM pelanggan yang hidup" &&
-                  "Alamat, unit AC, job history, dan kontrak aktif tersimpan rapi."}
-                {card === "Inventori, kontrak, dan WAHA" &&
-                  "Owner tahu item hampir habis, kontrak mana yang mendekat, dan nomor bisnis bisa disiapkan ke WAHA."}
-              </p>
+                Pilih {plan.name}
+              </Link>
             </article>
           ))}
         </div>
       </section>
 
-      <section className="workflow-panel">
-        <div>
-          <span className="eyebrow">Core Workflow</span>
-          <h2>Dari job masuk sampai invoice lunas, owner tetap pegang kontrol.</h2>
+      <section className="grid gap-4 lg:grid-cols-2">
+        {faqItems.map((item) => (
+          <article
+            key={item.question}
+            className="rounded-[28px] border border-[rgba(12,30,25,0.1)] bg-white/88 p-6 shadow-[0_18px_50px_rgba(14,52,43,0.08)]"
+          >
+            <h2 className="font-['Space_Grotesk'] text-[1.3rem] leading-tight tracking-[-0.03em] text-[#171a17]">
+              {item.question}
+            </h2>
+            <p className="mt-3 text-sm leading-7 text-[#5b605c]">{item.answer}</p>
+          </article>
+        ))}
+      </section>
+
+      <section className="rounded-[32px] border border-[#8bcfae] bg-[linear-gradient(135deg,#176347,#23906a_58%,#6fd0a2)] p-6 text-white shadow-[0_32px_90px_rgba(11,49,39,0.18)] md:p-8">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+          <div className="max-w-2xl">
+            <span className="text-[11px] uppercase tracking-[0.18em] text-white/70">Siap pindah</span>
+            <h2 className="mt-4 font-['Space_Grotesk'] text-3xl font-semibold tracking-[-0.05em] text-white md:text-4xl">
+              Kalau bisnis jasa teknik Anda sudah capek hidup di chat, waktunya pindah ke sistem.
+            </h2>
+            <p className="mt-4 text-sm leading-7 text-white/82">
+              Mulai dari job pertama, tambah teknisi, dan lihat operasional lebih tenang minggu ini juga.
+            </p>
+          </div>
+
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <Link
+              to="/register"
+              className="inline-flex min-h-12 items-center justify-center rounded-2xl border border-[#d8f6e8]/30 bg-[linear-gradient(135deg,#0f5f46,#15805d)] px-6 text-sm font-semibold text-white shadow-[0_18px_40px_rgba(8,57,42,0.28)] transition hover:-translate-y-0.5 hover:border-[#e6fff3]/40 hover:bg-[linear-gradient(135deg,#127353,#189468)]"
+            >
+              Coba Gratis Sekarang
+            </Link>
+            <Link
+              to="/demo-owner-dashboard"
+              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl border border-[#d8f6e8]/24 bg-[#0d4c39]/34 px-6 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-[#0d4c39]/46"
+            >
+              Lihat demo owner dashboard
+              <ArrowRight size={16} />
+            </Link>
+          </div>
         </div>
-        <div className="workflow-list">
+
+        <div className="mt-8 grid gap-3 md:grid-cols-3">
           {[
-            "Buat job dan assign teknisi dalam hitungan detik.",
-            "Pantau status pending, on the way, in progress, done, atau cancelled.",
-            "Baca jadwal dari kalender, cek deadline, lalu lanjutkan ke invoice atau follow up pembayaran.",
-          ].map((text, index) => (
-            <div key={text} className="workflow-list__item">
-              <span>{index + 1}</span>
-              <p>{text}</p>
+            "Setup bisnis kurang dari 10 menit",
+            "UI lokal yang mudah dipahami owner",
+            "Siap dikembangkan ke BetterAuth dan API backend",
+          ].map((item) => (
+            <div
+              key={item}
+              className="flex items-center gap-3 rounded-2xl border border-[#d8f6e8]/18 bg-[#0d4c39]/26 px-4 py-4 text-sm text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]"
+            >
+              <CheckCircle2 size={18} className="shrink-0 text-[#dff7ee]" />
+              <span>{item}</span>
             </div>
           ))}
         </div>
-      </section>
-
-      <section id="harga" className="pricing-panel">
-        <div className="pricing-panel__heading">
-          <div>
-            <span className="eyebrow">Harga Sederhana</span>
-            <h2>Mulai gratis, upgrade saat bisnis makin sibuk.</h2>
-          </div>
-          <p>
-            Sesuai PRD: dirancang untuk bengkel kecil sampai kontraktor multi-cabang dengan harga
-            yang tidak menakutkan.
-          </p>
-        </div>
-        <div className="pricing-grid">
-          <article className="price-card">
-            <h3>Starter</h3>
-            <strong>Rp0</strong>
-            <p>Solo teknisi yang baru mulai rapi.</p>
-            <ul>
-              <li>Job dasar</li>
-              <li>Pelanggan</li>
-              <li>Invoice manual</li>
-            </ul>
-            <Link className="btn btn--secondary" to={buildPlanRegisterLink("Starter")}>
-              Pilih Starter
-            </Link>
-          </article>
-          <article className="price-card price-card--featured">
-            <div className="price-card__tag">Primary</div>
-            <h3>Pro</h3>
-            <strong>Rp249K</strong>
-            <p>Untuk bengkel AC 4 teknisi seperti persona utama.</p>
-            <ul>
-              <li>Dashboard penuh</li>
-              <li>Job board</li>
-              <li>CRM, stok, kontrak</li>
-            </ul>
-            <Link className="btn btn--secondary btn--inverse" to={buildPlanRegisterLink("Pro")}>
-              Pilih Plan Pro
-            </Link>
-          </article>
-          <article className="price-card">
-            <h3>Bisnis</h3>
-            <strong>Rp499K</strong>
-            <p>Untuk multi-cabang yang butuh visibilitas lebih luas.</p>
-            <ul>
-              <li>Multi tim</li>
-              <li>Laporan konsolidasi</li>
-              <li>Visibility lintas kota</li>
-            </ul>
-            <Link className="btn btn--secondary" to={buildPlanRegisterLink("Bisnis")}>
-              Pilih Plan Bisnis
-            </Link>
-          </article>
-        </div>
-      </section>
-
-      <section className="cta-banner">
-        <div>
-          <span className="eyebrow">Ready To Switch</span>
-          <h2>Kalau bisnis jasa teknikmu sudah capek hidup di chat, waktunya pindah ke sistem.</h2>
-          <p>Mulai dari job pertama, tambah teknisi, dan lihat operasional lebih tenang minggu ini juga.</p>
-        </div>
-        <div className="cta-banner__actions">
-          <Link to="/demo-owner-dashboard" className="btn btn--secondary btn--inverse-soft">
-            Coba Gratis Sekarang
-          </Link>
-          <Link to="/demo-owner-dashboard" className="cta-inline-link">
-            Lihat demo owner dashboard <ArrowRight size={16} />
-          </Link>
-        </div>
-      </section>
-
-      <section className="landing-checks">
-        {[
-          "Setup bisnis kurang dari 10 menit",
-          "UI lokal yang mudah dipahami owner",
-          "Siap dikembangkan ke BetterAuth dan API backend",
-        ].map((item) => (
-          <div key={item} className="landing-checks__item">
-            <CheckCircle2 size={18} />
-            <span>{item}</span>
-          </div>
-        ))}
       </section>
 
       <MarketingFooter />

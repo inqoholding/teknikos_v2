@@ -1,11 +1,14 @@
 import { Router } from "express";
 import { and, desc, eq, like, sql } from "drizzle-orm";
 import { z } from "zod";
+import { hashPassword } from "better-auth/crypto";
+import { account, session, user } from "../db/auth-schema.js";
 import { db } from "../db/index.js";
 import { jobs, technicians } from "../db/app-schema.js";
-import { notFound } from "../lib/errors.js";
+import { auth } from "../lib/auth.js";
+import { conflict, notFound } from "../lib/errors.js";
 import { assertSubscriptionWritable, assertTechnicianLimit } from "../lib/plans.js";
-import { getCurrentBusiness, requireBusiness, requireSession } from "../lib/session.js";
+import { getCurrentBusiness, requireBusiness, requireOwnerAccess, requireSession } from "../lib/session.js";
 
 const technicianSchema = z.object({
   name: z.string().min(2),
@@ -18,9 +21,49 @@ const technicianSchema = z.object({
   lastSeenAt: z.coerce.date().optional().nullable(),
 });
 
+const provisionTechnicianAccountSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(8).optional(),
+});
+
+const resetTechnicianPasswordSchema = z.object({
+  newPassword: z.string().min(8).optional(),
+});
+
+function generateTemporaryPassword() {
+  const seed = Math.random().toString(36).slice(2, 8).toUpperCase();
+  return `TeknikOS!${seed}`;
+}
+
+function serializeTechnician(technician: typeof technicians.$inferSelect, jobsCompleted: number) {
+  return {
+    id: technician.id,
+    userId: technician.userId,
+    name: technician.name,
+    phone: technician.phone,
+    specialties: technician.specialties,
+    status: technician.status,
+    rating: technician.rating,
+    jobsCompleted,
+    latitude: technician.latitude,
+    longitude: technician.longitude,
+    lastSeenAt: technician.lastSeenAt,
+    accountEmail: technician.accountEmail,
+    accountStatus: technician.accountStatus,
+  };
+}
+
 export const techniciansRouter = Router();
 
 techniciansRouter.use(requireSession);
+techniciansRouter.use((_req, res, next) => {
+  try {
+    requireOwnerAccess(res);
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
 
 techniciansRouter.get("/", async (req, res) => {
   const businessId = requireBusiness(res);
@@ -43,18 +86,7 @@ techniciansRouter.get("/", async (req, res) => {
     .orderBy(desc(technicians.createdAt));
 
   res.json({
-    data: rows.map(({ technician, jobsCompleted }) => ({
-      id: technician.id,
-      name: technician.name,
-      phone: technician.phone,
-      specialties: technician.specialties,
-      status: technician.status,
-      rating: technician.rating,
-      jobsCompleted,
-      latitude: technician.latitude,
-      longitude: technician.longitude,
-      lastSeenAt: technician.lastSeenAt,
-    })),
+    data: rows.map(({ technician, jobsCompleted }) => serializeTechnician(technician, jobsCompleted)),
   });
 });
 
@@ -96,7 +128,189 @@ techniciansRouter.patch("/:id", async (req, res) => {
     throw notFound("Teknisi tidak ditemukan.");
   }
 
+  if (updated.userId) {
+    await db
+      .update(user)
+      .set({
+        name: updated.name,
+        phone: updated.phone,
+        updatedAt: new Date(),
+      })
+      .where(eq(user.id, updated.userId));
+  }
+
   res.json({ data: updated });
+});
+
+techniciansRouter.post("/:id/account", async (req, res) => {
+  const businessId = requireBusiness(res);
+  const business = await getCurrentBusiness(res);
+  const payload = provisionTechnicianAccountSchema.parse(req.body);
+  assertSubscriptionWritable(business.subscriptionStatus, business.currentPeriodEndsAt);
+
+  const [technician] = await db
+    .select()
+    .from(technicians)
+    .where(and(eq(technicians.id, req.params.id), eq(technicians.businessId, businessId)));
+
+  if (!technician) {
+    throw notFound("Teknisi tidak ditemukan.");
+  }
+
+  const normalizedEmail = payload.email.trim().toLowerCase();
+  const [emailUser] = await db.select().from(user).where(eq(user.email, normalizedEmail));
+
+  if (technician.userId && (!emailUser || emailUser.id !== technician.userId)) {
+    throw conflict("Teknisi ini sudah terhubung ke akun lain. Gunakan reset password untuk memberi akses ulang.");
+  }
+
+  let technicianUserId = technician.userId;
+  let temporaryPassword: string | null = null;
+
+  if (emailUser) {
+    if (emailUser.businessId && emailUser.businessId !== businessId) {
+      throw conflict("Email ini sudah dipakai oleh akun bisnis lain.");
+    }
+
+    if (emailUser.role && emailUser.role !== "technician") {
+      throw conflict("Email ini sudah dipakai oleh akun non-teknisi.");
+    }
+
+    const [linkedTechnician] = await db
+      .select()
+      .from(technicians)
+      .where(and(eq(technicians.businessId, businessId), eq(technicians.userId, emailUser.id)));
+
+    if (linkedTechnician && linkedTechnician.id !== technician.id) {
+      throw conflict("Email ini sudah terhubung ke teknisi lain.");
+    }
+
+    const [credentialAccount] = await db
+      .select()
+      .from(account)
+      .where(eq(account.userId, emailUser.id));
+
+    if (!credentialAccount) {
+      throw conflict("Email ini ada di sistem, tetapi belum memiliki login email/password yang bisa dipakai.");
+    }
+
+    technicianUserId = emailUser.id;
+
+    await db
+      .update(user)
+      .set({
+        name: technician.name,
+        role: "technician",
+        businessId,
+        phone: technician.phone,
+        updatedAt: new Date(),
+      })
+      .where(eq(user.id, emailUser.id));
+  } else {
+    temporaryPassword = payload.password || generateTemporaryPassword();
+    const signUpResult = await auth.api.signUpEmail({
+      body: {
+        name: technician.name,
+        email: normalizedEmail,
+        password: temporaryPassword,
+      },
+      headers: new Headers(),
+    });
+
+    technicianUserId = signUpResult.user.id;
+
+    await db
+      .update(user)
+      .set({
+        name: technician.name,
+        role: "technician",
+        businessId,
+        phone: technician.phone,
+        updatedAt: new Date(),
+      })
+      .where(eq(user.id, technicianUserId));
+  }
+
+  await db
+    .update(technicians)
+    .set({
+      userId: technicianUserId,
+      accountEmail: normalizedEmail,
+      accountStatus: "active",
+      updatedAt: new Date(),
+    })
+    .where(eq(technicians.id, technician.id));
+
+  res.json({
+    data: {
+      technicianId: technician.id,
+      technicianName: technician.name,
+      accountEmail: normalizedEmail,
+      temporaryPassword,
+      message: temporaryPassword
+        ? "Akun login teknisi berhasil dibuat."
+        : "Akun teknisi berhasil ditautkan ke login yang sudah ada.",
+    },
+  });
+});
+
+techniciansRouter.post("/:id/account/reset-password", async (req, res) => {
+  const businessId = requireBusiness(res);
+  const business = await getCurrentBusiness(res);
+  const payload = resetTechnicianPasswordSchema.parse(req.body);
+  assertSubscriptionWritable(business.subscriptionStatus, business.currentPeriodEndsAt);
+
+  const [technician] = await db
+    .select()
+    .from(technicians)
+    .where(and(eq(technicians.id, req.params.id), eq(technicians.businessId, businessId)));
+
+  if (!technician) {
+    throw notFound("Teknisi tidak ditemukan.");
+  }
+
+  if (!technician.userId) {
+    throw conflict("Teknisi ini belum memiliki akun login.");
+  }
+
+  const [credentialAccount] = await db
+    .select()
+    .from(account)
+    .where(eq(account.userId, technician.userId));
+
+  if (!credentialAccount) {
+    throw conflict("Akun teknisi belum memiliki login email/password yang bisa direset.");
+  }
+
+  const temporaryPassword = payload.newPassword || generateTemporaryPassword();
+  const hashedPassword = await hashPassword(temporaryPassword);
+
+  await db
+    .update(account)
+    .set({
+      password: hashedPassword,
+      updatedAt: new Date(),
+    })
+    .where(eq(account.id, credentialAccount.id));
+
+  await db.delete(session).where(eq(session.userId, technician.userId));
+  await db
+    .update(technicians)
+    .set({
+      accountStatus: "active",
+      updatedAt: new Date(),
+    })
+    .where(eq(technicians.id, technician.id));
+
+  res.json({
+    data: {
+      technicianId: technician.id,
+      technicianName: technician.name,
+      accountEmail: technician.accountEmail,
+      temporaryPassword,
+      message: "Password akun teknisi berhasil direset.",
+    },
+  });
 });
 
 techniciansRouter.delete("/:id", async (req, res) => {

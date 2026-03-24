@@ -17,7 +17,10 @@ import type {
   JobListItem,
   SessionPayload,
   SupportRequestResult,
+  TechnicianAccountResult,
   Technician,
+  TechnicianLivePresence,
+  TechnicianSelfProfile,
 } from "./types";
 
 async function getSession() {
@@ -54,6 +57,16 @@ async function getJob(id: string) {
 
 async function getTechnicians() {
   const { data } = await api.get<{ data: Technician[] }>("/api/technicians");
+  return data.data;
+}
+
+async function getTechniciansLive() {
+  const { data } = await api.get<{ data: TechnicianLivePresence[] }>("/api/dashboard/technicians-live");
+  return data.data;
+}
+
+async function getTechnicianSelf() {
+  const { data } = await api.get<{ data: TechnicianSelfProfile }>("/api/technician/me");
   return data.data;
 }
 
@@ -156,6 +169,24 @@ export function useTechniciansQuery(enabled = true) {
     queryKey: ["technicians"],
     queryFn: getTechnicians,
     enabled,
+  });
+}
+
+export function useTechniciansLiveQuery(enabled = true) {
+  return useQuery({
+    queryKey: ["technicians", "live"],
+    queryFn: getTechniciansLive,
+    enabled,
+    refetchInterval: 30_000,
+  });
+}
+
+export function useTechnicianSelfQuery(enabled = true) {
+  return useQuery({
+    queryKey: ["technician", "self"],
+    queryFn: getTechnicianSelf,
+    enabled,
+    retry: false,
   });
 }
 
@@ -380,6 +411,45 @@ export function useUpdateTechnicianMutation(id?: string) {
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["technicians"] });
       await queryClient.invalidateQueries({ queryKey: ["dashboard", "stats"] });
+    },
+  });
+}
+
+export function useCreateTechnicianAccountMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (payload: { technicianId: string; email: string; password?: string }) => {
+      const { data } = await api.post<{ data: TechnicianAccountResult }>(
+        `/api/technicians/${payload.technicianId}/account`,
+        {
+          email: payload.email,
+          password: payload.password,
+        },
+      );
+      return data.data;
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["technicians"] });
+    },
+  });
+}
+
+export function useResetTechnicianPasswordMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (payload: { technicianId: string; newPassword?: string }) => {
+      const { data } = await api.post<{ data: TechnicianAccountResult }>(
+        `/api/technicians/${payload.technicianId}/account/reset-password`,
+        {
+          newPassword: payload.newPassword,
+        },
+      );
+      return data.data;
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["technicians"] });
     },
   });
 }
@@ -642,6 +712,54 @@ export function useDisconnectBusinessWhatsappMutation() {
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["business"] });
       await queryClient.invalidateQueries({ queryKey: ["business", "whatsapp"] });
+    },
+  });
+}
+
+export function useTechnicianCheckInMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (payload: { latitude: number; longitude: number }) => {
+      const { data } = await api.post<{ data: TechnicianSelfProfile }>("/api/technician/check-in", payload);
+      return data.data;
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["technician", "self"] });
+      await queryClient.invalidateQueries({ queryKey: ["technicians"] });
+      await queryClient.invalidateQueries({ queryKey: ["technicians", "live"] });
+    },
+  });
+}
+
+export function useTechnicianCheckOutMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (payload?: { latitude?: number; longitude?: number }) => {
+      const { data } = await api.post<{ data: TechnicianSelfProfile }>("/api/technician/check-out", payload ?? {});
+      return data.data;
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["technician", "self"] });
+      await queryClient.invalidateQueries({ queryKey: ["technicians"] });
+      await queryClient.invalidateQueries({ queryKey: ["technicians", "live"] });
+    },
+  });
+}
+
+export function useTechnicianLocationMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (payload: { latitude: number; longitude: number }) => {
+      const { data } = await api.patch<{ data: TechnicianSelfProfile }>("/api/technician/location", payload);
+      return data.data;
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["technician", "self"] });
+      await queryClient.invalidateQueries({ queryKey: ["technicians"] });
+      await queryClient.invalidateQueries({ queryKey: ["technicians", "live"] });
     },
   });
 }

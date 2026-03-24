@@ -236,7 +236,7 @@ export function DemoDashboardPage() {
         ))}
       </div>
 
-      <div className="dashboard-grid">
+      <div className="dashboard-grid dashboard-grid--balanced">
         <SectionCard title="Operations Cockpit" description="Panel pertama di dashboard live: dispatch, billing, dan CRM follow up dibaca dari satu layar.">
           <div className="ops-grid">
             {queueCards.map((card) => (
@@ -279,7 +279,7 @@ export function DemoDashboardPage() {
         </SectionCard>
       </div>
 
-      <div className="dashboard-grid">
+      <div className="dashboard-grid dashboard-grid--balanced">
         <SectionCard title="Kalender Jadwal & Deadline" description="Preview tampilan kalender kerja yang sekarang ada di app utama.">
           <div className="demo-feature-list">
             {calendarCards.map((item) => (
@@ -305,7 +305,7 @@ export function DemoDashboardPage() {
         </SectionCard>
       </div>
 
-      <div className="dashboard-grid">
+      <div className="dashboard-grid dashboard-grid--balanced">
         <SectionCard title="Revenue 7 Hari" description="Preview ritme pendapatan mingguan.">
           <MiniBarChart items={revenueBars.map((item) => ({ ...item, valueLabel: `Rp${item.value}00rb` }))} />
         </SectionCard>
@@ -333,7 +333,7 @@ export function DemoDashboardPage() {
         </SectionCard>
       </div>
 
-      <div className="dashboard-grid">
+      <div className="dashboard-grid dashboard-grid--balanced">
         <SectionCard title="Setup WAHA" description="Di aplikasi utama, pengaturan WAHA sekarang dibikin bertahap dan lebih mudah diikuti client.">
           <div className="demo-feature-list">
             {wahaSteps.map((item) => (
@@ -361,8 +361,8 @@ export function DemoDashboardPage() {
         </SectionCard>
       </div>
 
-      <div className="dashboard-grid">
-        <SectionCard title="Kirim Otomatis via WAHA" description="Di dashboard live ada panel pilih job, pelanggan, dan teknisi untuk notifikasi otomatis.">
+      <div className="dashboard-grid dashboard-grid--balanced">
+        <SectionCard title="Kirim Otomatis via WAHA" description="Panel ini dipakai untuk testing kirim notifikasi otomatis ke pelanggan atau teknisi setelah nomor bisnis terhubung.">
           <div className="summary-list">
             {autoSendPreview.map((item) => (
               <div key={item.label}>
@@ -554,6 +554,32 @@ export function DemoJobDetailPage() {
               ))}
             </div>
           </SectionCard>
+
+          <SectionCard title="WhatsApp Manual" description="Preview pengiriman progress, invoice, dan reminder teknisi dari detail job.">
+            <div className="summary-list">
+              <div><span>Client</span><strong>{relatedCustomer?.name ?? job.customer}</strong></div>
+              <div><span>Nomor</span><strong>{relatedCustomer?.phone ?? "-"}</strong></div>
+              <div><span>Teknisi</span><strong>{job.technician}</strong></div>
+            </div>
+            <div className="button-row button-row--left">
+              <button className="btn btn--secondary" disabled>Kirim Progress ke Client</button>
+              <button className="btn btn--secondary" disabled>Kirim Invoice ke Client</button>
+              <button className="btn btn--secondary" disabled>Kirim Tugas via WA</button>
+            </div>
+          </SectionCard>
+
+          <SectionCard title="WhatsApp Otomatis WAHA" description="Di app utama, panel ini dipakai untuk testing kirim pesan otomatis setelah koneksi WAHA aktif.">
+            <div className="summary-list">
+              <div><span>Status WAHA</span><strong>Terhubung</strong></div>
+              <div><span>Pelanggan</span><strong>{relatedCustomer?.name ?? job.customer}</strong></div>
+              <div><span>Invoice</span><strong>{relatedInvoice?.number ?? "Belum ada"}</strong></div>
+            </div>
+            <div className="button-row button-row--left">
+              <button className="btn btn--secondary" disabled>Kirim Progress Otomatis</button>
+              <button className="btn btn--secondary" disabled>Kirim Invoice Otomatis</button>
+              <button className="btn btn--secondary" disabled>Kirim Tugas Otomatis</button>
+            </div>
+          </SectionCard>
         </div>
 
         <div className="detail-grid__side">
@@ -610,7 +636,7 @@ export function DemoCustomersPage() {
       <div className="toolbar">
         <input className="toolbar__search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Cari nama, WA, atau alamat" />
       </div>
-      <SectionCard title="Database Pelanggan Demo">
+      <SectionCard title="Database Pelanggan Demo" description="Versi demo ini sekarang juga menunjukkan area tempat aksi WAHA otomatis muncul di app utama.">
         <div className="customer-list">
           {filteredCustomers.map((customer) => (
             <article key={customer.id} className="customer-card">
@@ -629,6 +655,10 @@ export function DemoCustomersPage() {
               </div>
               <div className="customer-card__units">
                 {customer.units.map((unit) => <span key={unit}>{unit}</span>)}
+              </div>
+              <div className="customer-card__actions">
+                <button className="btn btn--secondary" disabled>Chat WA</button>
+                <button className="btn btn--secondary" disabled>Kirim WAHA</button>
               </div>
             </article>
           ))}
@@ -684,7 +714,7 @@ export function DemoInvoicesPage() {
           <option value="Overdue">Overdue</option>
         </select>
       </div>
-      <SectionCard title="Daftar Invoice Demo">
+      <SectionCard title="Daftar Invoice Demo" description="Aksi WA manual dan WAHA otomatis ikut dipreview di tabel ini seperti di aplikasi utama.">
         <div className="table-card">
           <div className="data-table data-table--head">
             <span>Invoice#</span>
@@ -709,6 +739,8 @@ export function DemoInvoicesPage() {
               <span>{invoice.dueDate}</span>
               <span className="row-actions">
                 <button className="ghost-button" disabled>Lihat PDF</button>
+                <button className="ghost-button" disabled>Kirim WA</button>
+                <button className="ghost-button" disabled>Kirim WAHA</button>
               </span>
             </div>
           ))}
@@ -835,7 +867,7 @@ export function DemoWhatsappRulesPage() {
 export function DemoWhatsappConnectPage() {
   return (
     <div className="page-stack">
-      <SectionCard title="Menghubungkan ke WAHA" description="Versi demo dari halaman connect WAHA. Alurnya aktif untuk dipreview, tetapi tidak mengubah data sungguhan.">
+      <SectionCard title="Menghubungkan ke WAHA" description="Versi demo dari halaman connect WAHA untuk preview alur setup dan testing koneksi.">
         <div className="page-stack">
           <div className="callout callout--success">
             <strong>Mode aktif sekarang: Otomasi WAHA</strong>

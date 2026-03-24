@@ -16,7 +16,7 @@ import { Badge, EmptyAction, SectionCard } from "../components/UI";
 import { PageError, PageLoader } from "../components/PageState";
 import { printInvoice } from "../utils/invoicePrint";
 import { createClientId } from "../utils/ids";
-import { buildInvoiceMessage, buildJobProgressMessage, buildTechnicianTaskMessage, buildWhatsAppLink, WAHA_TEST_MESSAGE } from "../utils/whatsapp";
+import { buildInvoiceMessage, buildJobProgressMessage, buildTechnicianTaskMessage, buildWhatsAppLink } from "../utils/whatsapp";
 
 type EditableItem = {
   id: string;
@@ -276,9 +276,31 @@ export default function JobDetailPage() {
       return;
     }
 
+    const messageLines =
+      kind === "invoice"
+        ? buildInvoiceMessage({
+            businessName: businessQuery.data?.name,
+            customerName: customer.name ?? job.customer,
+            invoiceNumber: job.invoice?.number ?? `${job.number}-INV`,
+            total: job.invoice?.totalLabel ?? formatCurrency(totalItemsValue || 0),
+            dueDate: job.invoice?.dueDateLabel ?? "Segera",
+            status: job.invoice?.status ?? "Belum dibuat",
+            jobLabel: `${job.number} · ${job.title}`,
+          })
+        : buildJobProgressMessage({
+            businessName: businessQuery.data?.name,
+            customerName: customer.name ?? job.customer,
+            jobNumber: job.number,
+            jobTitle: job.title,
+            status: statusLabels[status] ?? status,
+            schedule: job.schedule,
+            location: job.location,
+            technicians: assignedTechnicians.map((item) => item.name),
+          });
+
     await sendBusinessWhatsappMutation.mutateAsync({
       phone: customer.phone,
-      message: WAHA_TEST_MESSAGE,
+      message: messageLines.join("\n"),
     });
   }
 
@@ -290,7 +312,16 @@ export default function JobDetailPage() {
 
     await sendBusinessWhatsappMutation.mutateAsync({
       phone: technician.phone,
-      message: WAHA_TEST_MESSAGE,
+      message: buildTechnicianTaskMessage({
+        businessName: businessQuery.data?.name,
+        technicianName: technician.name,
+        jobNumber: job.number,
+        jobTitle: job.title,
+        status: statusLabels[status] ?? status,
+        schedule: job.schedule,
+        location: job.location,
+        customerName: customer?.name ?? job.customer,
+      }).join("\n"),
     });
   }
 
@@ -452,108 +483,6 @@ export default function JobDetailPage() {
               <div className="field-like field-like--summary">Nilai service: {formatCurrency(totalItemsValue || 0)}</div>
             </div>
           </SectionCard>
-        </div>
-
-        <div className="detail-grid__side">
-          <SectionCard title="Action Panel" description="Ubah status job, assign teknisi, dan simpan detail lapangan.">
-            <div className="action-stack">
-              <label className="field">
-                <span>Status job</span>
-                <select className="field-like align-left" value={status} onChange={(event) => setStatus(event.target.value)}>
-                  {Object.entries(statusLabels)
-                    .filter(([value]) => value !== "paid" || status === "paid")
-                    .map(([value, label]) => (
-                    <option key={value} value={value} disabled={!allowedStatusOptions.has(value)}>
-                      {label}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <div className="field">
-                <span>Tim teknisi</span>
-                <div className="technician-checklist">
-                  {technicians.map((technician) => {
-                    const checked = technicianIds.includes(technician.id);
-                    return (
-                      <label key={technician.id} className={`technician-chip ${checked ? "technician-chip--active" : ""}`}>
-                        <input
-                          type="checkbox"
-                          checked={checked}
-                          onChange={(event) =>
-                            setTechnicianIds((current) =>
-                              event.target.checked
-                                ? [...current, technician.id]
-                                : current.filter((item) => item !== technician.id),
-                            )
-                          }
-                        />
-                        <span>{technician.name}</span>
-                      </label>
-                    );
-                  })}
-                </div>
-              </div>
-              {status === "cancelled" ? (
-                <label className="field">
-                  <span>Alasan pembatalan</span>
-                  <textarea value={cancelReason} onChange={(event) => setCancelReason(event.target.value)} />
-                </label>
-              ) : null}
-              <label className="field">
-                <span>Deadline tugas</span>
-                <input type="datetime-local" value={deadlineAt} onChange={(event) => setDeadlineAt(event.target.value)} />
-              </label>
-              <button className="btn btn--secondary" onClick={() => void handleUpdateStatus()} disabled={updateJobMutation.isPending}>
-                {updateJobMutation.isPending ? "Menyimpan..." : "Simpan Perubahan"}
-              </button>
-              <button
-                className="btn btn--secondary"
-                onClick={() => void handleCreateInvoice()}
-                disabled={createInvoiceMutation.isPending || Boolean(job.invoice) || job.status === "cancelled"}
-              >
-                {createInvoiceMutation.isPending
-                  ? "Membuat..."
-                  : job.invoice
-                    ? "Invoice Sudah Ada"
-                    : "Buat Invoice"}
-              </button>
-              <EmptyAction onClick={handlePrintInvoice} disabled={!job.invoice}>
-                Simpan PDF Invoice
-              </EmptyAction>
-              {job.status === "cancelled" ? (
-                <p className="form-helper">Invoice tidak bisa dibuat dari job yang dibatalkan.</p>
-              ) : (
-                <p className="form-helper">Pembayaran invoice terpisah dari status job. Job selesai tidak otomatis membuat invoice lunas.</p>
-              )}
-            </div>
-          </SectionCard>
-
-          <SectionCard title="Map Preview" description="Preview lokasi pekerjaan untuk cek area servis dengan cepat.">
-            <div className="map-preview map-preview--embed">
-              <iframe
-                title={`Map ${job.location}`}
-                src={`https://www.google.com/maps?q=${mapQuery}&output=embed`}
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-              />
-            </div>
-            <a className="inline-link" href={`https://www.google.com/maps/search/?api=1&query=${mapQuery}`} target="_blank" rel="noreferrer">
-              Buka di Google Maps
-            </a>
-          </SectionCard>
-
-          <SectionCard title="Ringkasan">
-            <div className="summary-list">
-              <div><span>Dibuat</span><strong>{job.createdAt ?? "-"}</strong></div>
-              <div><span>Dijadwalkan</span><strong>{job.schedule}</strong></div>
-              <div><span>Deadline</span><strong>{job.deadlineAt ? new Date(job.deadlineAt).toLocaleString("id-ID") : "Belum diatur"}</strong></div>
-              <div><span>Update terakhir</span><strong>{job.updatedAt ?? "-"}</strong></div>
-              <div><span>Nilai job</span><strong>{formatCurrency(totalItemsValue || 0)}</strong></div>
-              <div><span>Invoice</span><strong>{job.invoice?.number ?? "Belum ada"}</strong></div>
-            </div>
-            {updateJobMutation.error ? <p className="form-error">{getErrorMessage(updateJobMutation.error)}</p> : null}
-            {createInvoiceMutation.error ? <p className="form-error">{getErrorMessage(createInvoiceMutation.error)}</p> : null}
-          </SectionCard>
 
           <SectionCard title="WhatsApp Manual" description="Kirim update kerja, invoice, dan reminder tugas lewat WhatsApp secara manual tanpa bot.">
             <div className="action-stack">
@@ -674,6 +603,108 @@ export default function JobDetailPage() {
 
               {sendBusinessWhatsappMutation.error ? <p className="form-error">{getErrorMessage(sendBusinessWhatsappMutation.error)}</p> : null}
             </div>
+          </SectionCard>
+        </div>
+
+        <div className="detail-grid__side">
+          <SectionCard title="Action Panel" description="Ubah status job, assign teknisi, dan simpan detail lapangan.">
+            <div className="action-stack">
+              <label className="field">
+                <span>Status job</span>
+                <select className="field-like align-left" value={status} onChange={(event) => setStatus(event.target.value)}>
+                  {Object.entries(statusLabels)
+                    .filter(([value]) => value !== "paid" || status === "paid")
+                    .map(([value, label]) => (
+                    <option key={value} value={value} disabled={!allowedStatusOptions.has(value)}>
+                      {label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <div className="field">
+                <span>Tim teknisi</span>
+                <div className="technician-checklist">
+                  {technicians.map((technician) => {
+                    const checked = technicianIds.includes(technician.id);
+                    return (
+                      <label key={technician.id} className={`technician-chip ${checked ? "technician-chip--active" : ""}`}>
+                        <input
+                          type="checkbox"
+                          checked={checked}
+                          onChange={(event) =>
+                            setTechnicianIds((current) =>
+                              event.target.checked
+                                ? [...current, technician.id]
+                                : current.filter((item) => item !== technician.id),
+                            )
+                          }
+                        />
+                        <span>{technician.name}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+              {status === "cancelled" ? (
+                <label className="field">
+                  <span>Alasan pembatalan</span>
+                  <textarea value={cancelReason} onChange={(event) => setCancelReason(event.target.value)} />
+                </label>
+              ) : null}
+              <label className="field">
+                <span>Deadline tugas</span>
+                <input type="datetime-local" value={deadlineAt} onChange={(event) => setDeadlineAt(event.target.value)} />
+              </label>
+              <button className="btn btn--secondary" onClick={() => void handleUpdateStatus()} disabled={updateJobMutation.isPending}>
+                {updateJobMutation.isPending ? "Menyimpan..." : "Simpan Perubahan"}
+              </button>
+              <button
+                className="btn btn--secondary"
+                onClick={() => void handleCreateInvoice()}
+                disabled={createInvoiceMutation.isPending || Boolean(job.invoice) || job.status === "cancelled"}
+              >
+                {createInvoiceMutation.isPending
+                  ? "Membuat..."
+                  : job.invoice
+                    ? "Invoice Sudah Ada"
+                    : "Buat Invoice"}
+              </button>
+              <EmptyAction onClick={handlePrintInvoice} disabled={!job.invoice}>
+                Simpan PDF Invoice
+              </EmptyAction>
+              {job.status === "cancelled" ? (
+                <p className="form-helper">Invoice tidak bisa dibuat dari job yang dibatalkan.</p>
+              ) : (
+                <p className="form-helper">Pembayaran invoice terpisah dari status job. Job selesai tidak otomatis membuat invoice lunas.</p>
+              )}
+            </div>
+          </SectionCard>
+
+          <SectionCard title="Map Preview" description="Preview lokasi pekerjaan untuk cek area servis dengan cepat.">
+            <div className="map-preview map-preview--embed">
+              <iframe
+                title={`Map ${job.location}`}
+                src={`https://www.google.com/maps?q=${mapQuery}&output=embed`}
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+              />
+            </div>
+            <a className="inline-link" href={`https://www.google.com/maps/search/?api=1&query=${mapQuery}`} target="_blank" rel="noreferrer">
+              Buka di Google Maps
+            </a>
+          </SectionCard>
+
+          <SectionCard title="Ringkasan">
+            <div className="summary-list">
+              <div><span>Dibuat</span><strong>{job.createdAt ?? "-"}</strong></div>
+              <div><span>Dijadwalkan</span><strong>{job.schedule}</strong></div>
+              <div><span>Deadline</span><strong>{job.deadlineAt ? new Date(job.deadlineAt).toLocaleString("id-ID") : "Belum diatur"}</strong></div>
+              <div><span>Update terakhir</span><strong>{job.updatedAt ?? "-"}</strong></div>
+              <div><span>Nilai job</span><strong>{formatCurrency(totalItemsValue || 0)}</strong></div>
+              <div><span>Invoice</span><strong>{job.invoice?.number ?? "Belum ada"}</strong></div>
+            </div>
+            {updateJobMutation.error ? <p className="form-error">{getErrorMessage(updateJobMutation.error)}</p> : null}
+            {createInvoiceMutation.error ? <p className="form-error">{getErrorMessage(createInvoiceMutation.error)}</p> : null}
           </SectionCard>
         </div>
       </div>
