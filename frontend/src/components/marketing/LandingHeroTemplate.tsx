@@ -21,6 +21,7 @@ export function LandingHeroTemplate({ salesWhatsappLink }: { salesWhatsappLink: 
         <div className="hidden md:flex items-center gap-8 text-sm font-medium text-zinc-300">
           <a href="#fitur" className="hover:text-white transition">Fitur</a>
           <a href="#harga" className="hover:text-white transition">Harga</a>
+          <Link to="/demo-owner-dashboard" className="hover:text-white transition">Demo App</Link>
         </div>
         <div className="hidden md:flex items-center gap-4">
           <Link to="/login" className="text-sm font-medium text-zinc-300 hover:text-white transition">Masuk</Link>
@@ -37,6 +38,7 @@ export function LandingHeroTemplate({ salesWhatsappLink }: { salesWhatsappLink: 
         <div className="fixed inset-0 z-40 bg-[#0A0A0B]/95 backdrop-blur-md pt-24 px-6 flex flex-col gap-6 md:hidden">
            <a href="#fitur" onClick={() => setMobileMenuOpen(false)} className="text-xl font-bold">Fitur</a>
            <a href="#harga" onClick={() => setMobileMenuOpen(false)} className="text-xl font-bold">Harga</a>
+           <Link to="/demo-owner-dashboard" onClick={() => setMobileMenuOpen(false)} className="text-xl font-bold">Demo App</Link>
            <Link to="/login" className="text-xl font-bold text-zinc-400">Masuk</Link>
            <button onClick={() => navigate('/register')} className="mt-4 bg-gradient-to-r from-rose-500 to-red-600 text-white py-4 rounded-xl font-bold text-lg">Daftar Sekarang</button>
         </div>
@@ -74,9 +76,9 @@ export function LandingHeroTemplate({ salesWhatsappLink }: { salesWhatsappLink: 
              <img 
                src="/teknikos-dashboard-mockup.png" 
                alt="TeknikOS Dashboard Live" 
-               className="w-full h-auto flex rounded-[1.5rem] border border-white/5 shadow-inner"
+               className="w-full max-h-[400px] md:max-h-[550px] object-cover object-top flex rounded-[1.5rem] border border-white/5 shadow-inner"
              />
-             <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0B] via-transparent to-transparent rounded-[2rem] pointer-events-none"></div>
+             <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0B] via-transparent to-[#0A0A0B]/10 rounded-[2rem] pointer-events-none"></div>
           </div>
         </div>
       </section>
