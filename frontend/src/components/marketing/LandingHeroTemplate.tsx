@@ -1,4 +1,4 @@
-import { ArrowRight, LayoutGrid, CircleDollarSign, Route, Menu, X, CheckCircle2 } from "lucide-react";
+import { ArrowRight, LayoutGrid, CircleDollarSign, Route, Menu, X, CheckCircle2, Kanban, Users, Package, FileSignature } from "lucide-react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ShimmerButton } from "@/components/ui/shimmer-button";
@@ -7,7 +7,16 @@ import { motion } from "framer-motion";
 
 export function LandingHeroTemplate({ salesWhatsappLink }: { salesWhatsappLink: string }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [activeFeature, setActiveFeature] = useState("dashboard");
   const navigate = useNavigate();
+
+  const features = [
+    { id: "dashboard", label: "Dashboard", icon: LayoutGrid, img: "/mockups/dashboard.png" },
+    { id: "kanban", label: "Job Kanban", icon: Kanban, img: "/mockups/kanban.png" },
+    { id: "teknisi", label: "Teknisi", icon: Users, img: "/mockups/teknisi.png" },
+    { id: "inventori", label: "Inventori", icon: Package, img: "/mockups/inventori.png" },
+    { id: "kontrak", label: "Kontrak B2B", icon: FileSignature, img: "/mockups/kontrak.png" },
+  ];
 
   return (
     <div className="relative text-white font-sans selection:bg-emerald-500/30">
@@ -92,20 +101,58 @@ export function LandingHeroTemplate({ salesWhatsappLink }: { salesWhatsappLink: 
           </a>
         </div>
 
-        <div className="mt-20 relative w-full max-w-5xl mx-auto perspective-[2000px]">
-          <div className="absolute inset-0 bg-gradient-to-b from-emerald-500/20 to-transparent blur-3xl rounded-[3rem] -z-10 transform scale-105"></div>
-          <div className="rounded-[2rem] p-2 bg-white/5 border border-white/10 backdrop-blur-sm shadow-2xl relative">
-             <div className="absolute top-4 left-4 flex gap-2 z-20">
-               <div className="w-3 h-3 rounded-full bg-emerald-500/50"></div>
-               <div className="w-3 h-3 rounded-full bg-yellow-500/50"></div>
-               <div className="w-3 h-3 rounded-full bg-green-500/50"></div>
-             </div>
-             <img 
-               src="/teknikos-dashboard-mockup.png" 
-               alt="TeknikOS Dashboard Live" 
-               className="w-full max-h-[400px] md:max-h-[550px] object-cover object-top flex rounded-[1.5rem] border border-white/5 shadow-inner"
-             />
-             <div className="absolute inset-0 bg-gradient-to-t from-[#01140E] via-transparent to-[#01140E]/10 rounded-[2rem] pointer-events-none"></div>
+        <div className="w-full flex justify-center mb-8 overflow-x-auto no-scrollbar scroll-smooth">
+          <div className="flex bg-white/5 border border-white/10 p-1.5 rounded-2xl backdrop-blur-md">
+            {features.map((feature) => (
+              <button
+                key={feature.id}
+                onClick={() => setActiveFeature(feature.id)}
+                className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 whitespace-nowrap ${
+                  activeFeature === feature.id
+                    ? "bg-emerald-500 text-white shadow-[0_0_20px_rgba(16,185,129,0.3)]"
+                    : "text-zinc-400 hover:text-white hover:bg-white/5"
+                }`}
+              >
+                <feature.icon size={16} />
+                {feature.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="w-full max-w-5xl group relative">
+          <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500 to-green-600 rounded-[2.5rem] blur opacity-20 group-hover:opacity-40 transition duration-1000"></div>
+          <div className="relative rounded-[2rem] border border-white/10 bg-zinc-950 overflow-hidden shadow-2xl">
+            <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-emerald-500/50 to-transparent"></div>
+            <div className="p-2 md:p-4 bg-zinc-900/50 backdrop-blur-sm border-b border-white/5 flex items-center gap-2">
+              <div className="flex gap-1.5">
+                <div className="w-3 h-3 rounded-full bg-red-500/20 border border-red-500/40"></div>
+                <div className="w-3 h-3 rounded-full bg-yellow-500/20 border border-yellow-500/40"></div>
+                <div className="w-3 h-3 rounded-full bg-green-500/20 border border-green-500/40"></div>
+              </div>
+              <div className="mx-auto bg-white/5 rounded-lg px-4 py-1 text-[10px] text-zinc-500 border border-white/5 font-mono">
+                app.teknikos.id/{activeFeature}
+              </div>
+            </div>
+            <div className="relative aspect-[16/10] overflow-hidden bg-black">
+              {features.map((f) => (
+                <div
+                  key={f.id}
+                  className={`absolute inset-0 transition-all duration-700 ease-in-out ${
+                    activeFeature === f.id 
+                      ? "opacity-100 scale-100 translate-y-0" 
+                      : "opacity-0 scale-105 translate-y-4 pointer-events-none"
+                  }`}
+                >
+                  <img 
+                    src={f.img} 
+                    alt={f.label} 
+                    className="w-full h-full object-cover object-top"
+                  />
+                  <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-zinc-950 via-zinc-950/50 to-transparent"></div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </motion.section>
