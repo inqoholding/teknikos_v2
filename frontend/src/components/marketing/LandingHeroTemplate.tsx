@@ -63,12 +63,12 @@ export function LandingHeroTemplate({ salesWhatsappLink }: { salesWhatsappLink: 
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
-        transition={{ duration: 0.8 }}
+        transition={{ type: "spring", stiffness: 100, damping: 30, mass: 1 }}
         className="relative z-10 pt-40 pb-20 px-6 max-w-7xl mx-auto flex flex-col items-center text-center"
       >
         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-300 text-sm font-medium mb-8">
           <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-          Platform B2B SaaS Jasa Teknik Indonesia
+          Buktikan kecanggihan operasional Anda dengan Demo Interaktif
         </div>
         <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-6 max-w-4xl leading-[1.1]">
           Operasional lapangan yang <span className="bg-gradient-to-r from-emerald-400 to-green-500 bg-clip-text text-transparent">tadinya ribet</span>, kini terkendali penuh.
@@ -115,7 +115,7 @@ export function LandingHeroTemplate({ salesWhatsappLink }: { salesWhatsappLink: 
         initial={{ opacity: 0, y: 40 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
-        transition={{ duration: 0.8, delay: 0.2 }}
+        transition={{ type: "spring", stiffness: 100, damping: 30, mass: 1, delay: 0.2 }}
         className="py-24 px-6 max-w-7xl mx-auto relative z-10"
       >
         <div className="text-center mb-16">
@@ -178,7 +178,7 @@ export function LandingHeroTemplate({ salesWhatsappLink }: { salesWhatsappLink: 
         initial={{ opacity: 0, scale: 0.95 }}
         whileInView={{ opacity: 1, scale: 1 }}
         viewport={{ once: true }}
-        transition={{ duration: 0.8 }}
+        transition={{ type: "spring", stiffness: 100, damping: 30, mass: 1, delay: 0.2 }}
         className="py-24 px-6 max-w-7xl mx-auto relative z-10"
       >
         <div className="text-center mb-16">
@@ -196,9 +196,9 @@ export function LandingHeroTemplate({ salesWhatsappLink }: { salesWhatsappLink: 
             </div>
             <p className="mt-3 text-sm text-zinc-400 pb-6 border-b border-white/10 mb-6 flex-1">Solois baru mulai.</p>
             <ul className="space-y-4 text-sm text-zinc-300 mb-8 font-medium">
-              <li className="flex gap-3"><CheckCircle2 size={18} className="text-emerald-500 shrink-0" /> Job list dasar</li>
-              <li className="flex gap-3"><CheckCircle2 size={18} className="text-emerald-500 shrink-0" /> List Pelanggan</li>
-              <li className="flex gap-3"><CheckCircle2 size={18} className="text-emerald-500 shrink-0" /> Invoice statis</li>
+              <li className="flex gap-3"><CheckCircle2 size={18} className="text-emerald-500 shrink-0" /> Job list Dasar (List & Kanban)</li>
+              <li className="flex gap-3"><CheckCircle2 size={18} className="text-emerald-500 shrink-0" /> Manajemen Teknisi & Skill Tags</li>
+              <li className="flex gap-3"><CheckCircle2 size={18} className="text-emerald-500 shrink-0" /> CRM Pelanggan & Unit Aset</li>
             </ul>
             <button onClick={() => navigate('/register')} className="w-full rounded-full border border-white/20 bg-white/5 py-3 text-sm font-bold hover:bg-white/10 transition-colors">
               Ambil Starter
@@ -218,10 +218,11 @@ export function LandingHeroTemplate({ salesWhatsappLink }: { salesWhatsappLink: 
             </div>
             <p className="mt-3 text-sm text-emerald-200/70 pb-6 border-b border-emerald-900/50 mb-6 flex-1">Untuk max 4 teknisi dan admin.</p>
             <ul className="space-y-4 text-sm text-white mb-8 font-medium">
-              <li className="flex gap-3"><CheckCircle2 size={18} className="text-emerald-400 shrink-0" /> Semua Starter +</li>
-              <li className="flex gap-3 opacity-90"><CheckCircle2 size={18} className="text-emerald-400 shrink-0" /> Live Dashboard</li>
-              <li className="flex gap-3 opacity-90"><CheckCircle2 size={18} className="text-emerald-400 shrink-0" /> CRM & Histori</li>
-              <li className="flex gap-3 opacity-90"><CheckCircle2 size={18} className="text-emerald-400 shrink-0" /> Otomasi WAHA</li>
+              <li className="flex gap-3"><CheckCircle2 size={18} className="text-emerald-400 shrink-0" /> Semua fitur Starter +</li>
+              <li className="flex gap-3 opacity-90"><CheckCircle2 size={18} className="text-emerald-400 shrink-0" /> Otomasi WhatsApp (WAHA)</li>
+              <li className="flex gap-3 opacity-90"><CheckCircle2 size={18} className="text-emerald-400 shrink-0" /> Foto Sebelum & Sesudah Kerja</li>
+              <li className="flex gap-3 opacity-90"><CheckCircle2 size={18} className="text-emerald-400 shrink-0" /> Inventori & Stok Sparepart</li>
+              <li className="flex gap-3 opacity-90"><CheckCircle2 size={18} className="text-emerald-400 shrink-0" /> Invoice PDF via WhatsApp</li>
             </ul>
             <button onClick={() => navigate('/register')} className="w-full rounded-full bg-gradient-to-r from-emerald-500 to-green-600 py-3 text-sm font-bold text-white hover:scale-[1.02] transition-transform">
               Mulai Berlangganan
@@ -237,10 +238,11 @@ export function LandingHeroTemplate({ salesWhatsappLink }: { salesWhatsappLink: 
             </div>
             <p className="mt-3 text-sm text-zinc-400 pb-6 border-b border-white/10 mb-6 flex-1">Ekspansi lebih luas.</p>
             <ul className="space-y-4 text-sm text-zinc-300 mb-8 font-medium">
-              <li className="flex gap-3"><CheckCircle2 size={18} className="text-zinc-500 shrink-0" /> Semua fitur Pro</li>
-              <li className="flex gap-3"><CheckCircle2 size={18} className="text-zinc-500 shrink-0" /> Multi tim lapangan</li>
-              <li className="flex gap-3"><CheckCircle2 size={18} className="text-zinc-500 shrink-0" /> Konsolidasi laporan</li>
-              <li className="flex gap-3"><CheckCircle2 size={18} className="text-zinc-500 shrink-0" /> Limit API extra</li>
+              <li className="flex gap-3"><CheckCircle2 size={18} className="text-zinc-500 shrink-0" /> Semua fitur Pro +</li>
+              <li className="flex gap-3"><CheckCircle2 size={18} className="text-zinc-500 shrink-0" /> Manajemen Kontrak B2B (Recurring)</li>
+              <li className="flex gap-3"><CheckCircle2 size={18} className="text-zinc-500 shrink-0" /> Asset Health & Service Frequency</li>
+              <li className="flex gap-3"><CheckCircle2 size={18} className="text-zinc-500 shrink-0" /> Laporan Profitabilitas Berbasis Data</li>
+              <li className="flex gap-3"><CheckCircle2 size={18} className="text-zinc-500 shrink-0" /> Dukungan Prioritas 24/7</li>
             </ul>
             <button onClick={() => navigate('/register')} className="w-full rounded-full border border-white/20 bg-white/5 py-3 text-sm font-bold hover:bg-white/10 transition-colors">
               Ambil Bisnis
