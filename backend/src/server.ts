@@ -2,6 +2,7 @@ import cors from "cors";
 import express from "express";
 import helmet from "helmet";
 import morgan from "morgan";
+import compression from "compression";
 import { toNodeHandler } from "better-auth/node";
 import { ZodError } from "zod";
 import type { AppError } from "./lib/errors.js";
@@ -57,6 +58,7 @@ app.use(
 );
 app.use(helmet());
 app.use(morgan("dev"));
+app.use(compression());
 app.use(express.json({ limit: "1mb" }));
 
 app.get("/api/health", (_req, res) => {

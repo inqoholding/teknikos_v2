@@ -230,3 +230,28 @@ export function EmptyAction({
     </button>
   );
 }
+
+export function EmptyState({
+  title,
+  description,
+  action,
+}: {
+  title: string;
+  description: string;
+  action?: ReactNode;
+}) {
+  return (
+    <div className="flex flex-col items-center justify-center p-12 text-center rounded-3xl border border-slate-200 bg-slate-50/50 border-dashed w-full my-4">
+      <div className="flex h-16 w-16 mb-4 items-center justify-center rounded-2xl bg-white shadow-sm border border-slate-100 text-slate-400">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <rect width="18" height="18" x="3" y="3" rx="4" ry="4" />
+          <line x1="9" x2="15" y1="9" y2="9" />
+          <line x1="9" x2="15" y1="15" y2="15" />
+        </svg>
+      </div>
+      <h3 className="text-lg font-bold text-slate-800">{title}</h3>
+      <p className="mt-2 text-sm text-slate-500 max-w-sm">{description}</p>
+      {action && <div className="mt-6">{action}</div>}
+    </div>
+  );
+}

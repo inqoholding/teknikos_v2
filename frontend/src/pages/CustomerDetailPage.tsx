@@ -38,6 +38,9 @@ export default function CustomerDetailPage() {
 
   return (
     <div className="page-stack">
+      <div className="button-row button-row--left" style={{ marginBottom: "-8px" }}>
+        <Link to="/customers" className="ghost-button">&larr; Kembali ke Pelanggan</Link>
+      </div>
       <SectionCard
         title={customer.name}
         action={<Link className="btn btn--primary" to={`/jobs?create=1&customerId=${customer.id}`}>Buat Job Baru</Link>}

@@ -1,12 +1,10 @@
 import { relations } from "drizzle-orm";
-import { integer, real, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { pgTable, text, timestamp, integer, real, jsonb } from "drizzle-orm/pg-core";
 import { user } from "./auth-schema.js";
 
-export const businesses = sqliteTable("businesses", {
+export const businesses = pgTable("businesses", {
   id: text("id").primaryKey(),
-  ownerUserId: text("owner_user_id")
-    .notNull()
-    .references(() => user.id, { onDelete: "cascade" }),
+  ownerUserId: text("owner_user_id").notNull().references(() => user.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
   slug: text("slug").notNull().unique(),
   serviceType: text("service_type").notNull().default("AC"),
@@ -16,22 +14,18 @@ export const businesses = sqliteTable("businesses", {
   city: text("city"),
   plan: text("plan").notNull().default("Pro"),
   subscriptionStatus: text("subscription_status").notNull().default("trialing"),
-  trialEndsAt: integer("trial_ends_at", { mode: "timestamp" }),
-  currentPeriodEndsAt: integer("current_period_ends_at", { mode: "timestamp" }),
+  trialEndsAt: timestamp("trial_ends_at"),
+  currentPeriodEndsAt: timestamp("current_period_ends_at"),
   subscriptionNotes: text("subscription_notes"),
   whatsappMode: text("whatsapp_mode").notNull().default("basic"),
   whatsappAutomationStatus: text("whatsapp_automation_status").notNull().default("not_connected"),
-  whatsappAutomationConnectedAt: integer("whatsapp_automation_connected_at", { mode: "timestamp" }),
+  whatsappAutomationConnectedAt: timestamp("whatsapp_automation_connected_at"),
   whatsappAutomationLastError: text("whatsapp_automation_last_error"),
-  createdAt: integer("created_at", { mode: "timestamp" })
-    .$defaultFn(() => new Date())
-    .notNull(),
-  updatedAt: integer("updated_at", { mode: "timestamp" })
-    .$defaultFn(() => new Date())
-    .notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-export const adminInboxRequests = sqliteTable("admin_inbox_requests", {
+export const adminInboxRequests = pgTable("admin_inbox_requests", {
   id: text("id").primaryKey(),
   businessId: text("business_id").references(() => businesses.id, { onDelete: "set null" }),
   type: text("type").notNull(),
@@ -44,28 +38,22 @@ export const adminInboxRequests = sqliteTable("admin_inbox_requests", {
   currentPlan: text("current_plan"),
   targetPlan: text("target_plan"),
   message: text("message"),
-  createdAt: integer("created_at", { mode: "timestamp" })
-    .$defaultFn(() => new Date())
-    .notNull(),
-  updatedAt: integer("updated_at", { mode: "timestamp" })
-    .$defaultFn(() => new Date())
-    .notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-export const technicians = sqliteTable("technicians", {
+export const technicians = pgTable("technicians", {
   id: text("id").primaryKey(),
-  businessId: text("business_id")
-    .notNull()
-    .references(() => businesses.id, { onDelete: "cascade" }),
+  businessId: text("business_id").notNull().references(() => businesses.id, { onDelete: "cascade" }),
   userId: text("user_id").references(() => user.id, { onDelete: "set null" }).unique(),
   name: text("name").notNull(),
   phone: text("phone").notNull(),
-  specialties: text("specialties", { mode: "json" }).$type<string[]>().notNull(),
+  specialties: jsonb("specialties").$type<string[]>().notNull(),
   status: text("status").notNull().default("Aktif"),
   rating: real("rating").notNull().default(0),
   latitude: real("latitude"),
   longitude: real("longitude"),
-  lastSeenAt: integer("last_seen_at", { mode: "timestamp" }),
+  lastSeenAt: timestamp("last_seen_at"),
   accountEmail: text("account_email"),
   accountStatus: text("account_status").notNull().default("not_created"),
   attendanceStatus: text("attendance_status").notNull().default("Belum Check-in"),
@@ -75,50 +63,34 @@ export const technicians = sqliteTable("technicians", {
   attendanceLocationLabel: text("attendance_location_label"),
   attendanceLatitude: real("attendance_latitude"),
   attendanceLongitude: real("attendance_longitude"),
-  attendanceUpdatedAt: integer("attendance_updated_at", { mode: "timestamp" }),
-  createdAt: integer("created_at", { mode: "timestamp" })
-    .$defaultFn(() => new Date())
-    .notNull(),
-  updatedAt: integer("updated_at", { mode: "timestamp" })
-    .$defaultFn(() => new Date())
-    .notNull(),
+  attendanceUpdatedAt: timestamp("attendance_updated_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-export const customers = sqliteTable("customers", {
+export const customers = pgTable("customers", {
   id: text("id").primaryKey(),
-  businessId: text("business_id")
-    .notNull()
-    .references(() => businesses.id, { onDelete: "cascade" }),
+  businessId: text("business_id").notNull().references(() => businesses.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
   phone: text("phone").notNull(),
   email: text("email"),
   address: text("address").notNull(),
-  units: text("units", { mode: "json" }).$type<string[]>().notNull(),
-  createdAt: integer("created_at", { mode: "timestamp" })
-    .$defaultFn(() => new Date())
-    .notNull(),
-  updatedAt: integer("updated_at", { mode: "timestamp" })
-    .$defaultFn(() => new Date())
-    .notNull(),
+  units: jsonb("units").$type<string[]>().notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-export const jobs = sqliteTable("jobs", {
+export const jobs = pgTable("jobs", {
   id: text("id").primaryKey(),
-  businessId: text("business_id")
-    .notNull()
-    .references(() => businesses.id, { onDelete: "cascade" }),
+  businessId: text("business_id").notNull().references(() => businesses.id, { onDelete: "cascade" }),
   number: text("number").notNull().unique(),
   title: text("title").notNull(),
-  customerId: text("customer_id")
-    .notNull()
-    .references(() => customers.id, { onDelete: "cascade" }),
-  technicianId: text("technician_id").references(() => technicians.id, {
-    onDelete: "set null",
-  }),
-  assignedTechnicianIds: text("assigned_technician_ids", { mode: "json" }).$type<string[]>(),
+  customerId: text("customer_id").notNull().references(() => customers.id, { onDelete: "cascade" }),
+  technicianId: text("technician_id").references(() => technicians.id, { onDelete: "set null" }),
+  assignedTechnicianIds: jsonb("assigned_technician_ids").$type<string[]>(),
   type: text("type").notNull(),
-  scheduleAt: integer("schedule_at", { mode: "timestamp" }).notNull(),
-  deadlineAt: integer("deadline_at", { mode: "timestamp" }),
+  scheduleAt: timestamp("schedule_at").notNull(),
+  deadlineAt: timestamp("deadline_at"),
   price: integer("price").notNull(),
   status: text("status").notNull().default("pending"),
   priority: text("priority").notNull().default("Normal"),
@@ -127,20 +99,28 @@ export const jobs = sqliteTable("jobs", {
   beforePhotoUrl: text("before_photo_url"),
   afterPhotoUrl: text("after_photo_url"),
   cancelReason: text("cancel_reason"),
-  completedAt: integer("completed_at", { mode: "timestamp" }),
-  createdAt: integer("created_at", { mode: "timestamp" })
-    .$defaultFn(() => new Date())
-    .notNull(),
-  updatedAt: integer("updated_at", { mode: "timestamp" })
-    .$defaultFn(() => new Date())
-    .notNull(),
+  completedAt: timestamp("completed_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-export const jobItems = sqliteTable("job_items", {
+export const inventory = pgTable("inventory", {
   id: text("id").primaryKey(),
-  jobId: text("job_id")
-    .notNull()
-    .references(() => jobs.id, { onDelete: "cascade" }),
+  businessId: text("business_id").notNull().references(() => businesses.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  sku: text("sku").notNull().unique(),
+  category: text("category").notNull(),
+  stock: integer("stock").notNull().default(0),
+  minStock: integer("min_stock").notNull().default(0),
+  buyPrice: integer("buy_price").notNull().default(0),
+  sellPrice: integer("sell_price").notNull().default(0),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const jobItems = pgTable("job_items", {
+  id: text("id").primaryKey(),
+  jobId: text("job_id").notNull().references(() => jobs.id, { onDelete: "cascade" }),
   inventoryId: text("inventory_id").references(() => inventory.id, { onDelete: "set null" }),
   kind: text("kind").notNull().default("service"),
   name: text("name").notNull(),
@@ -150,70 +130,34 @@ export const jobItems = sqliteTable("job_items", {
   note: text("note"),
 });
 
-export const invoices = sqliteTable("invoices", {
+export const invoices = pgTable("invoices", {
   id: text("id").primaryKey(),
-  businessId: text("business_id")
-    .notNull()
-    .references(() => businesses.id, { onDelete: "cascade" }),
-  customerId: text("customer_id")
-    .notNull()
-    .references(() => customers.id, { onDelete: "cascade" }),
+  businessId: text("business_id").notNull().references(() => businesses.id, { onDelete: "cascade" }),
+  customerId: text("customer_id").notNull().references(() => customers.id, { onDelete: "cascade" }),
   jobId: text("job_id").references(() => jobs.id, { onDelete: "set null" }),
   number: text("number").notNull().unique(),
   total: integer("total").notNull(),
   status: text("status").notNull().default("Draft"),
-  dueDate: integer("due_date", { mode: "timestamp" }).notNull(),
+  dueDate: timestamp("due_date").notNull(),
   paidAmount: integer("paid_amount").notNull().default(0),
   paymentMethod: text("payment_method"),
-  paidAt: integer("paid_at", { mode: "timestamp" }),
-  createdAt: integer("created_at", { mode: "timestamp" })
-    .$defaultFn(() => new Date())
-    .notNull(),
-  updatedAt: integer("updated_at", { mode: "timestamp" })
-    .$defaultFn(() => new Date())
-    .notNull(),
+  paidAt: timestamp("paid_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-export const contracts = sqliteTable("contracts", {
+export const contracts = pgTable("contracts", {
   id: text("id").primaryKey(),
-  businessId: text("business_id")
-    .notNull()
-    .references(() => businesses.id, { onDelete: "cascade" }),
-  customerId: text("customer_id")
-    .notNull()
-    .references(() => customers.id, { onDelete: "cascade" }),
+  businessId: text("business_id").notNull().references(() => businesses.id, { onDelete: "cascade" }),
+  customerId: text("customer_id").notNull().references(() => customers.id, { onDelete: "cascade" }),
   plan: text("plan").notNull(),
   serviceInterval: text("service_interval").notNull().default("Bulanan"),
   unitCount: integer("unit_count").notNull().default(1),
   value: integer("value").notNull(),
-  nextServiceAt: integer("next_service_at", { mode: "timestamp" }).notNull(),
+  nextServiceAt: timestamp("next_service_at").notNull(),
   status: text("status").notNull().default("Aktif"),
-  createdAt: integer("created_at", { mode: "timestamp" })
-    .$defaultFn(() => new Date())
-    .notNull(),
-  updatedAt: integer("updated_at", { mode: "timestamp" })
-    .$defaultFn(() => new Date())
-    .notNull(),
-});
-
-export const inventory = sqliteTable("inventory", {
-  id: text("id").primaryKey(),
-  businessId: text("business_id")
-    .notNull()
-    .references(() => businesses.id, { onDelete: "cascade" }),
-  name: text("name").notNull(),
-  sku: text("sku").notNull().unique(),
-  category: text("category").notNull(),
-  stock: integer("stock").notNull().default(0),
-  minStock: integer("min_stock").notNull().default(0),
-  buyPrice: integer("buy_price").notNull().default(0),
-  sellPrice: integer("sell_price").notNull().default(0),
-  createdAt: integer("created_at", { mode: "timestamp" })
-    .$defaultFn(() => new Date())
-    .notNull(),
-  updatedAt: integer("updated_at", { mode: "timestamp" })
-    .$defaultFn(() => new Date())
-    .notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
 export const businessesRelations = relations(businesses, ({ many, one }) => ({

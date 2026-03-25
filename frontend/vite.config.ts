@@ -9,6 +9,18 @@ export default defineConfig({
       "@": new URL("./src", import.meta.url).pathname,
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ["react", "react-dom", "react-router-dom", "better-auth"],
+          ui: ["framer-motion", "lucide-react", "clsx", "tailwind-merge"],
+          query: ["@tanstack/react-query", "axios"],
+          pdf: ["jspdf", "jspdf-autotable"],
+        },
+      },
+    },
+  },
   server: {
     host: "0.0.0.0",
     port: 5173,

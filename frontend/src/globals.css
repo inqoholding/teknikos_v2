@@ -51,24 +51,33 @@
 
 :root {
   --radius: 1rem;
-  --background: #f7f5ef;
-  --foreground: #171a17;
-  --card: rgba(255, 255, 255, 0.92);
-  --card-foreground: #171a17;
-  --popover: #ffffff;
-  --popover-foreground: #171a17;
-  --primary: #0b5f4e;
+  --background: #F8FAFC;
+  --foreground: #020617;
+  --card: rgba(255, 255, 255, 0.72);
+  --card-foreground: #020617;
+  --popover: rgba(255, 255, 255, 0.9);
+  --popover-foreground: #020617;
+  --primary: #0F172A;
   --primary-foreground: #ffffff;
-  --secondary: #dff7ee;
-  --secondary-foreground: #08382d;
-  --muted: #edf3ef;
-  --muted-foreground: #5b605c;
-  --accent: #fff0d8;
-  --accent-foreground: #3a2a08;
-  --destructive: #b42318;
-  --border: rgba(12, 30, 25, 0.12);
-  --input: rgba(12, 30, 25, 0.12);
-  --ring: rgba(12, 95, 78, 0.25);
+  --secondary: #334155;
+  --secondary-foreground: #ffffff;
+  --muted: #f1f5f9;
+  --muted-foreground: #64748b;
+  --accent: #e2e8f0;
+  --accent-foreground: #0f172a;
+  --destructive: #ef4444;
+  --border: rgba(15, 23, 42, 0.12);
+  --input: rgba(15, 23, 42, 0.12);
+  --ring: rgba(3, 105, 161, 0.25);
+}
+
+@layer utilities {
+  .glass {
+    background-color: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  }
 }
 
 @layer base {

@@ -1,5 +1,5 @@
 import { ChangeEvent, useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { getErrorMessage } from "../api/client";
 import {
   useBusinessQuery,
@@ -333,6 +333,9 @@ export default function JobDetailPage() {
 
   return (
     <div className="page-stack">
+      <div className="button-row button-row--left" style={{ marginBottom: "-8px" }}>
+        <Link to="/jobs" className="ghost-button">&larr; Kembali ke Jobs</Link>
+      </div>
       <SectionCard
         title={`${job.number} · ${job.title}`}
         action={

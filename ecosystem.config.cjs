@@ -2,11 +2,11 @@ module.exports = {
   apps: [
     {
       name: "teknikos-backend",
-      cwd: "/var/www/teknikos/backend",
+      cwd: "./backend",
       script: "dist/src/server.js",
       interpreter: "node",
-      instances: 1,
-      exec_mode: "fork",
+      instances: "max",
+      exec_mode: "cluster",
       autorestart: true,
       watch: false,
       max_memory_restart: "512M",

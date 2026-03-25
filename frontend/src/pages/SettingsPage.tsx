@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { getErrorMessage } from "../api/client";
 import {
@@ -8,6 +9,7 @@ import {
   useTechnicianCheckOutMutation,
   useTechnicianLocationMutation,
   useTechnicianSelfQuery,
+  useUpdateBusinessMutation,
 } from "../api/hooks";
 import { PageError, PageLoader } from "../components/PageState";
 import { SectionCard } from "../components/UI";
@@ -97,15 +99,88 @@ export default function SettingsPage() {
     await technicianLocationMutation.mutateAsync(location);
   }
 
+  const [isEditing, setIsEditing] = useState(false);
+  const updateBusinessMutation = useUpdateBusinessMutation();
+
+  const handleUpdateProfile = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const payload = {
+      name: formData.get("name") as string,
+      phone: formData.get("phone") as string,
+      address: formData.get("address") as string,
+      email: formData.get("email") as string,
+    };
+    try {
+      await updateBusinessMutation.mutateAsync(payload);
+      setIsEditing(false);
+    } catch {
+      // Error is handled by the mutation and client implicitly or we can ignore
+    }
+  };
+
   return (
     <div className="page-stack">
       <SectionCard title="Profil Bisnis" description="Kelola informasi dasar bisnis dan akses halaman pengaturan yang lebih spesifik.">
-        <div className="summary-list">
-          <div><span>Nama bisnis</span><strong>{business.name}</strong></div>
-          <div><span>WhatsApp</span><strong>{business.phone ?? "-"}</strong></div>
-          <div><span>Alamat</span><strong>{business.address ?? "-"}</strong></div>
-          <div><span>Paket aktif</span><strong>{business.plan}</strong></div>
-        </div>
+        {isEditing ? (
+          <form onSubmit={handleUpdateProfile} className="form-stack">
+            <div className="form-grid">
+              <div className="field">
+                <label htmlFor="name">Nama Bisnis</label>
+                <input id="name" name="name" type="text" defaultValue={business.name} required />
+              </div>
+              <div className="field">
+                <label htmlFor="phone">WhatsApp</label>
+                <input id="phone" name="phone" type="tel" defaultValue={business.phone ?? ""} required />
+              </div>
+              <div className="field">
+                <label htmlFor="email">Email</label>
+                <input id="email" name="email" type="email" defaultValue={business.email ?? ""} />
+              </div>
+              <div className="field">
+                <label htmlFor="address">Alamat</label>
+                <textarea id="address" name="address" defaultValue={business.address ?? ""} rows={2} required />
+              </div>
+            </div>
+            {updateBusinessMutation.error && (
+              <p className="form-error">{getErrorMessage(updateBusinessMutation.error)}</p>
+            )}
+            <div className="button-row">
+              <button 
+                className="btn btn--secondary" 
+                type="button" 
+                onClick={() => setIsEditing(false)}
+                disabled={updateBusinessMutation.isPending}
+              >
+                Batal
+              </button>
+              <button 
+                className="btn btn--primary" 
+                type="submit"
+                disabled={updateBusinessMutation.isPending}
+              >
+                {updateBusinessMutation.isPending ? "Menyimpan..." : "Simpan Perubahan"}
+              </button>
+            </div>
+          </form>
+        ) : (
+          <>
+            <div className="summary-list">
+              <div><span>Nama bisnis</span><strong>{business.name}</strong></div>
+              <div><span>WhatsApp</span><strong>{business.phone ?? "-"}</strong></div>
+              <div><span>Email</span><strong>{business.email ?? "-"}</strong></div>
+              <div><span>Alamat</span><strong>{business.address ?? "-"}</strong></div>
+              <div><span>Paket aktif</span><strong>{business.plan}</strong></div>
+            </div>
+            {!isTechnician && (
+              <div className="button-row button-row--left" style={{ marginTop: "16px" }}>
+                <button className="btn btn--secondary" type="button" onClick={() => setIsEditing(true)}>
+                  Edit Profil
+                </button>
+              </div>
+            )}
+          </>
+        )}
       </SectionCard>
 
       {isTechnician ? (

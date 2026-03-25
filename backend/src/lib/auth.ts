@@ -12,7 +12,7 @@ if (!globalThis.crypto) {
 
 export const auth: ReturnType<typeof betterAuth> = betterAuth({
   database: drizzleAdapter(db, {
-    provider: "sqlite",
+    provider: "pg",
     schema,
   }),
   secret: env.BETTER_AUTH_SECRET,

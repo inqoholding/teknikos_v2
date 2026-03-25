@@ -3,7 +3,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import { getErrorMessage } from "../api/client";
 import { useBusinessQuery, useCreateJobMutation, useCustomersQuery, useJobsQuery, useSessionQuery, useTechniciansQuery } from "../api/hooks";
 import { PageError, PageLoader } from "../components/PageState";
-import { Badge, EmptyAction, SectionCard } from "../components/UI";
+import { Badge, EmptyAction, SectionCard, EmptyState } from "../components/UI";
 
 const statusBuckets = [
   { key: "pending", title: "Menunggu" },
@@ -300,28 +300,36 @@ export default function JobsPage() {
               <span>Status</span>
               <span className="align-right">Harga</span>
             </div>
-            {filteredJobs.map((job) => (
-              <div key={job.id} className="data-table data-table--jobs">
-                <span className="mono">{job.number.replace("JOB-", "")}</span>
-                <span>
-                  <Link to={`/jobs/${job.id}`}><strong>{job.title}</strong></Link>
-                  <small>{job.location}</small>
-                </span>
-                <span>{job.customer}</span>
-                <span>{job.technician}</span>
-                <span>{job.type}</span>
-                <span>
-                  {job.schedule.split("·")[1]?.trim() ?? job.schedule}
-                  <small>{job.deadlineAt ? `Deadline ${new Date(job.deadlineAt).toLocaleString("id-ID")}` : "Tanpa deadline"}</small>
-                </span>
-                <span>
-                  <Badge tone={job.status === "pending" ? "warning" : job.status === "done" ? "success" : "info"}>
-                    {job.status.replaceAll("_", " ")}
-                  </Badge>
-                </span>
-                <span className="align-right">{job.price}</span>
-              </div>
-            ))}
+            {filteredJobs.length === 0 ? (
+              <EmptyState
+                title="Belum ada job order"
+                description="Buat job operasional pertama Anda dan assign teknisi untuk melihat antrian tugas di sini."
+                action={!isTechnician ? <EmptyAction primary onClick={() => setShowCreate(true)}>+ Buat Job Baru</EmptyAction> : undefined}
+              />
+            ) : (
+              filteredJobs.map((job) => (
+                <div key={job.id} className="data-table data-table--jobs">
+                  <span className="mono">{job.number.replace("JOB-", "")}</span>
+                  <span>
+                    <Link to={`/jobs/${job.id}`}><strong>{job.title}</strong></Link>
+                    <small>{job.location}</small>
+                  </span>
+                  <span>{job.customer}</span>
+                  <span>{job.technician}</span>
+                  <span>{job.type}</span>
+                  <span>
+                    {job.schedule.split("·")[1]?.trim() ?? job.schedule}
+                    <small>{job.deadlineAt ? `Deadline ${new Date(job.deadlineAt).toLocaleString("id-ID")}` : "Tanpa deadline"}</small>
+                  </span>
+                  <span>
+                    <Badge tone={job.status === "pending" ? "warning" : job.status === "done" ? "success" : "info"}>
+                      {job.status.replaceAll("_", " ")}
+                    </Badge>
+                  </span>
+                  <span className="align-right">{job.price}</span>
+                </div>
+              ))
+            )}
           </div>
         </SectionCard>
       ) : (
@@ -336,7 +344,11 @@ export default function JobsPage() {
                 className="kanban-column"
               >
                 <div className="kanban-stack">
-                  {bucketJobs.length === 0 ? <div className="kanban-empty">Belum ada job</div> : null}
+                  {bucketJobs.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center p-6 text-center rounded-2xl border border-slate-200 bg-slate-50/50 border-dashed w-full h-full min-h-[160px]">
+                      <span className="text-sm text-slate-400 font-medium">Kosong</span>
+                    </div>
+                  ) : null}
                   {bucketJobs.map((job) => (
                     <article key={job.id} className="kanban-card">
                       <Link to={`/jobs/${job.id}`} className="mono">{job.number}</Link>

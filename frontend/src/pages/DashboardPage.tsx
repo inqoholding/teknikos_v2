@@ -13,7 +13,7 @@ import {
 } from "../api/hooks";
 import { PageError, PageLoader } from "../components/PageState";
 import { DeadlineList, ScheduleCalendar } from "../components/ScheduleCalendar";
-import { Badge, DonutSummary, EmptyAction, MiniBarChart, SectionCard, StatCard } from "../components/UI";
+import { Badge, DonutSummary, EmptyAction, MiniBarChart, SectionCard, StatCard, EmptyState } from "../components/UI";
 import { formatRupiah } from "../utils/currency";
 import { buildJobProgressMessage, buildTechnicianTaskMessage } from "../utils/whatsapp";
 
@@ -225,7 +225,11 @@ export default function DashboardPage() {
                 </Link>
               ))
             ) : (
-              <p className="chart-helper">Belum ada job terjadwal hari ini.</p>
+              <EmptyState
+                title="Belum ada dispatch hari ini"
+                description="Buat job operasional pertama Anda dan assign teknisi untuk melihat jadwal kerjanya di sini."
+                action={<Link to="/jobs?create=1" className="btn btn--primary">+ Buat Job</Link>}
+              />
             )}
           </div>
         </SectionCard>
@@ -478,21 +482,28 @@ export default function DashboardPage() {
             <span>Jadwal</span>
             <span className="align-right">Harga</span>
           </div>
-          {stats.recentJobs.map((job) => (
-            <div key={job.id} className="data-table">
-              <span className="mono">{job.number}</span>
-              <span>{job.title}</span>
-              <span>-</span>
-              <span>-</span>
-              <span>
-                <Badge tone={job.status === "pending" ? "warning" : job.status === "done" ? "success" : "info"}>
-                  {job.status.replaceAll("_", " ")}
-                </Badge>
-              </span>
-              <span>{job.schedule}</span>
-              <span className="align-right">{job.price}</span>
-            </div>
-          ))}
+          {stats.recentJobs.length === 0 ? (
+            <EmptyState
+              title="Antrian pekerjaan kosong"
+              description="Daftar 5 job terakhir akan muncul di tabel ini. Saat ini belum ada job aktif."
+            />
+          ) : (
+            stats.recentJobs.map((job) => (
+              <div key={job.id} className="data-table">
+                <span className="mono">{job.number}</span>
+                <span>{job.title}</span>
+                <span>-</span>
+                <span>-</span>
+                <span>
+                  <Badge tone={job.status === "pending" ? "warning" : job.status === "done" ? "success" : "info"}>
+                    {job.status.replaceAll("_", " ")}
+                  </Badge>
+                </span>
+                <span>{job.schedule}</span>
+                <span className="align-right">{job.price}</span>
+              </div>
+            ))
+          )}
         </div>
       </SectionCard>
 
