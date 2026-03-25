@@ -1,8 +1,8 @@
 import cors from "cors";
 import express from "express";
 import helmet from "helmet";
-import morgan from "morgan";
 import compression from "compression";
+import { logger } from "./lib/logger.js";
 import { toNodeHandler } from "better-auth/node";
 import { ZodError } from "zod";
 import type { AppError } from "./lib/errors.js";
@@ -57,7 +57,6 @@ app.use(
   }),
 );
 app.use(helmet());
-app.use(morgan("dev"));
 app.use(compression());
 app.use(express.json({ limit: "1mb" }));
 
@@ -79,11 +78,18 @@ app.use("/api", apiRouter);
 app.use((error: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   const typedError = error as Partial<AppError>;
   const isValidationError = error instanceof ZodError;
-  const isSqliteForeignKey = error.name === "SqliteError" && error.message.includes("FOREIGN KEY");
-  const isSqliteUnique = error.name === "SqliteError" && error.message.includes("UNIQUE");
+  
+  // Postgres (pg) error codes: https://www.postgresql.org/docs/current/errcodes-appendix.html
+  const pgError = (error as any).code;
+  const isForeignKeyError = pgError === "23503" || (error.name === "SqliteError" && error.message.includes("FOREIGN KEY"));
+  const isUniqueError = pgError === "23505" || (error.name === "SqliteError" && error.message.includes("UNIQUE"));
+
   const statusCode =
     typedError.statusCode ??
-    (isValidationError ? 400 : isSqliteForeignKey ? 400 : isSqliteUnique ? 409 : 500);
+    (isValidationError ? 400 : isForeignKeyError ? 400 : isUniqueError ? 409 : 500);
+
+  // Log error for production monitoring
+  console.error(`[SERVER_ERROR] ${statusCode}:`, error);
 
   res.status(statusCode).json({
     error: error.name || "INTERNAL_SERVER_ERROR",
@@ -92,15 +98,15 @@ app.use((error: Error, _req: express.Request, res: express.Response, _next: expr
         ? error.message
         : isValidationError
           ? "Data yang dikirim tidak valid."
-          : isSqliteForeignKey
+          : isForeignKeyError
             ? "Referensi data tidak valid untuk bisnis ini."
-            : isSqliteUnique
+            : isUniqueError
               ? "Data yang sama sudah ada."
-              : error.message || "Terjadi kesalahan pada server.",
+              : "Terjadi kesalahan pada server.",
     details: isValidationError ? error.flatten() : typedError.details,
   });
 });
 
 app.listen(env.PORT, () => {
-  console.log(`TeknikOS backend listening on http://localhost:${env.PORT}`);
+  logger.info(`TeknikOS backend listening on port ${env.PORT}`);
 });

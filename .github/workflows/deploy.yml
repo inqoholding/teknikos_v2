@@ -1,0 +1,67 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Root Dependencies
+        run: npm install
+
+      - name: Backend - Install and Build
+        run: |
+          cd backend
+          npm install
+          npm run build
+
+      - name: Frontend - Install and Build
+        run: |
+          cd frontend
+          npm install
+          npm run build
+
+  deploy:
+    needs: test-and-build
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          password: ${{ secrets.VPS_PASSWORD }}
+          script: |
+            cd /var/www/teknikos
+            git pull origin main
+            
+            # Restart DBs/WAHA if needed
+            docker-compose -f infrastructure/docker-compose.prod.yml up -d
+            
+            # Build and Restart Backend
+            cd backend
+            npm install
+            npm run build
+            pm2 restart teknikos-backend || pm2 start dist/server.js --name teknikos-backend
+            
+            # Build and Update Frontend
+            cd ../frontend
+            npm install
+            npm run build
+            
+            # Sync Nginx if changed
+            cp ../infrastructure/nginx/teknikos.conf /etc/nginx/sites-available/teknikos
+            nginx -t && systemctl reload nginx
