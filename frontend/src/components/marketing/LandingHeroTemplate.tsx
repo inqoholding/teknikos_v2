@@ -101,7 +101,7 @@ export function LandingHeroTemplate({ salesWhatsappLink }: { salesWhatsappLink: 
           </a>
         </div>
 
-        <div className="w-full flex justify-center mt-16 mb-10 overflow-x-auto no-scrollbar scroll-smooth">
+        <div className="w-full flex justify-center mt-28 mb-12 overflow-x-auto no-scrollbar scroll-smooth">
           <div className="flex bg-white/5 border border-white/10 p-1.5 rounded-2xl backdrop-blur-md">
             {features.map((feature) => (
               <button
@@ -134,7 +134,7 @@ export function LandingHeroTemplate({ salesWhatsappLink }: { salesWhatsappLink: 
                 app.teknikos.id/{activeFeature}
               </div>
             </div>
-            <div className="relative aspect-[16/10] overflow-hidden bg-black">
+            <div className="relative aspect-video overflow-hidden bg-black/50">
               {features.map((f) => (
                 <div
                   key={f.id}
@@ -147,7 +147,7 @@ export function LandingHeroTemplate({ salesWhatsappLink }: { salesWhatsappLink: 
                   <img 
                     src={f.img} 
                     alt={f.label} 
-                    className="w-full h-full object-cover object-top"
+                    className="w-full h-full object-cover object-top hover:scale-[1.02] transition-transform duration-1000"
                   />
                   <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-zinc-950 via-zinc-950/50 to-transparent"></div>
                 </div>
