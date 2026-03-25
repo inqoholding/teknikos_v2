@@ -2,7 +2,7 @@ module.exports = {
   apps: [
     {
       name: 'teknikos-backend',
-      script: './dist/server.js',
+      script: './dist/src/server.js',
       instances: 'max',
       exec_mode: 'cluster',
       autorestart: true,
