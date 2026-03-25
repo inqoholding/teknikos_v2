@@ -11,11 +11,11 @@ export function LandingHeroTemplate({ salesWhatsappLink }: { salesWhatsappLink: 
   const navigate = useNavigate();
 
   const features = [
-    { id: "dashboard", label: "Dashboard", icon: LayoutGrid, img: "/mockups/dashboard.png" },
-    { id: "kanban", label: "Job Kanban", icon: Kanban, img: "/mockups/kanban.png" },
-    { id: "teknisi", label: "Teknisi", icon: Users, img: "/mockups/teknisi.png" },
-    { id: "inventori", label: "Inventori", icon: Package, img: "/mockups/inventori.png" },
-    { id: "kontrak", label: "Kontrak B2B", icon: FileSignature, img: "/mockups/kontrak.png" },
+    { id: "dashboard", label: "Dashboard", icon: LayoutGrid, img: "/mockups/dashboard.png?v=2" },
+    { id: "kanban", label: "Job Kanban", icon: Kanban, img: "/mockups/kanban.png?v=2" },
+    { id: "teknisi", label: "Teknisi", icon: Users, img: "/mockups/teknisi.png?v=2" },
+    { id: "inventori", label: "Inventori", icon: Package, img: "/mockups/inventori.png?v=2" },
+    { id: "kontrak", label: "Kontrak B2B", icon: FileSignature, img: "/mockups/kontrak.png?v=2" },
   ];
 
   return (
@@ -101,7 +101,7 @@ export function LandingHeroTemplate({ salesWhatsappLink }: { salesWhatsappLink: 
           </a>
         </div>
 
-        <div className="w-full flex justify-center mb-8 overflow-x-auto no-scrollbar scroll-smooth">
+        <div className="w-full flex justify-center mt-16 mb-10 overflow-x-auto no-scrollbar scroll-smooth">
           <div className="flex bg-white/5 border border-white/10 p-1.5 rounded-2xl backdrop-blur-md">
             {features.map((feature) => (
               <button
@@ -120,7 +120,7 @@ export function LandingHeroTemplate({ salesWhatsappLink }: { salesWhatsappLink: 
           </div>
         </div>
 
-        <div className="w-full max-w-5xl group relative">
+        <div className="w-full max-w-4xl group relative">
           <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500 to-green-600 rounded-[2.5rem] blur opacity-20 group-hover:opacity-40 transition duration-1000"></div>
           <div className="relative rounded-[2rem] border border-white/10 bg-zinc-950 overflow-hidden shadow-2xl">
             <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-emerald-500/50 to-transparent"></div>
