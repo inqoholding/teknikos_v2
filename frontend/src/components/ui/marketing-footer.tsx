@@ -79,7 +79,7 @@ export function MarketingFooter({
 }: MarketingFooterProps) {
   return (
     <section className="mx-auto w-full max-w-7xl px-6 pb-16 pt-6">
-      <div className="rounded-[32px] border border-[#d7eadc] bg-[linear-gradient(180deg,rgba(255,255,255,0.88),rgba(239,248,242,0.92))] p-8 shadow-[0_24px_80px_rgba(18,66,49,0.08)] md:p-10">
+      <div className="rounded-[32px] border border-emerald-500/20 bg-zinc-900/50 backdrop-blur-xl p-8 shadow-2xl md:p-10">
         <footer>
           <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-[1.35fr_repeat(4,0.85fr)]">
             <div>
@@ -88,19 +88,19 @@ export function MarketingFooter({
                   T
                 </div>
                 <div>
-                  <p className="font-['Space_Grotesk'] text-xl font-semibold tracking-[-0.04em] text-[#10231b]">TeknikOS</p>
-                  <p className="text-[11px] uppercase tracking-[0.16em] text-[#5d6d65]">SaaS jasa teknik Indonesia</p>
+                  <p className="font-['Space_Grotesk'] text-xl font-semibold tracking-[-0.04em] text-white">TeknikOS</p>
+                  <p className="text-[11px] uppercase tracking-[0.16em] text-emerald-500/80">SaaS jasa teknik Indonesia</p>
                 </div>
               </div>
-              <p className="mt-5 max-w-sm text-sm leading-7 text-[#55655d]">{tagline}</p>
+              <p className="mt-5 max-w-sm text-sm leading-7 text-zinc-400">{tagline}</p>
             </div>
 
             {menuItems.map((section) => (
               <div key={section.title}>
-                <h3 className="mb-4 text-sm font-semibold uppercase tracking-[0.14em] text-[#10231b]">{section.title}</h3>
-                <ul className="space-y-3 text-sm text-[#5d6d65]">
+                <h3 className="mb-4 text-sm font-semibold uppercase tracking-[0.14em] text-white">{section.title}</h3>
+                <ul className="space-y-3 text-sm text-zinc-400">
                   {section.links.map((link) => (
-                    <li key={`${section.title}-${link.text}`} className="font-medium transition-colors hover:text-[#0d6a50]">
+                    <li key={`${section.title}-${link.text}`} className="font-medium transition-colors hover:text-emerald-400">
                       <FooterAnchor link={link} />
                     </li>
                   ))}
@@ -109,11 +109,11 @@ export function MarketingFooter({
             ))}
           </div>
 
-          <div className="mt-10 flex flex-col gap-4 border-t border-[#d7eadc] pt-6 text-sm font-medium text-[#5d6d65] md:flex-row md:items-center md:justify-between">
+          <div className="mt-10 flex flex-col gap-4 border-t border-white/10 pt-6 text-sm font-medium text-zinc-500 md:flex-row md:items-center md:justify-between">
             <p>{copyright}</p>
             <ul className="flex flex-wrap gap-4">
               {bottomLinks.map((link) => (
-                <li key={`bottom-${link.text}`} className="transition-colors hover:text-[#0d6a50]">
+                <li key={`bottom-${link.text}`} className="transition-colors hover:text-emerald-400">
                   <FooterAnchor link={link} />
                 </li>
               ))}

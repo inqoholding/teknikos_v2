@@ -6,7 +6,7 @@ const SALES_WHATSAPP_LINK =
 
 export default function HomePage() {
   return (
-    <div className="landing-page bg-[#0A0A0B] text-slate-100 min-h-screen font-sans overflow-x-hidden">
+    <div className="landing-page bg-[#01140E] text-slate-100 min-h-screen font-sans overflow-x-hidden">
       <LandingHeroTemplate salesWhatsappLink={SALES_WHATSAPP_LINK} />
       <MarketingFooter />
     </div>
