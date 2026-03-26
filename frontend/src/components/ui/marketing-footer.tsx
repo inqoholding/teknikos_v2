@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { DATA_HANDLING_URL, PRIVACY_URL, SALES_WHATSAPP_LINK, SITE_URL, SUPPORT_URL, TERMS_URL } from "../../lib/site";
 
 type FooterLink = {
   text: string;
@@ -42,7 +43,7 @@ export function MarketingFooter({
       links: [
         { text: "Fitur", url: "#fitur" },
         { text: "Harga", url: "#harga" },
-        { text: "Alur kerja", url: "#workflow" },
+        { text: "Support", url: "/support" },
         { text: "Demo owner", url: "/demo-owner-dashboard" },
       ],
     },
@@ -51,30 +52,32 @@ export function MarketingFooter({
       links: [
         { text: "Daftar", url: "/register" },
         { text: "Login", url: "/login" },
-        { text: "Tanya sales", url: "https://wa.me/6281354444967?text=Halo%20sales%20TeknikOS,%20saya%20ingin%20tanya%20demo%20dan%20langganan.", external: true },
+        { text: "Tanya sales", url: SALES_WHATSAPP_LINK, external: true },
       ],
     },
     {
-      title: "Demo",
+      title: "Legal",
       links: [
-        { text: "Dashboard owner", url: "/demo-owner-dashboard" },
-        { text: "Lihat harga", url: "#harga" },
-        { text: "Lihat fitur", url: "#fitur" },
+        { text: "Privacy Policy", url: "/privacy" },
+        { text: "Terms of Service", url: "/terms" },
+        { text: "Data Handling", url: "/data-handling" },
       ],
     },
     {
       title: "Kontak",
       links: [
-        { text: "WhatsApp Sales", url: "https://wa.me/6281354444967?text=Halo%20sales%20TeknikOS,%20saya%20ingin%20tanya%20demo%20dan%20langganan.", external: true },
+        { text: "WhatsApp Support", url: SUPPORT_URL, external: true },
+        { text: "Website", url: SITE_URL, external: true },
         { text: "Mulai gratis", url: "/register" },
       ],
     },
   ],
   copyright = "© 2026 TeknikOS. All rights reserved.",
   bottomLinks = [
-    { text: "Fitur", url: "#fitur" },
-    { text: "Harga", url: "#harga" },
-    { text: "Login", url: "/login" },
+    { text: "Privacy", url: PRIVACY_URL, external: true },
+    { text: "Terms", url: TERMS_URL, external: true },
+    { text: "Data Handling", url: DATA_HANDLING_URL, external: true },
+    { text: "Support", url: "/support" },
   ],
 }: MarketingFooterProps) {
   return (

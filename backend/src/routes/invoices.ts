@@ -12,17 +12,26 @@ import {
 } from "../lib/ownership.js";
 import { getCurrentBusiness, requireBusiness, requireOwnerAccess, requireSession } from "../lib/session.js";
 import { formatDateShort, formatRupiahCompact, invoiceStatus } from "../utils/serializers.js";
+import { entityIdSchema, nullableOptionalTextField } from "../lib/validation.js";
 
 const invoiceSchema = z.object({
-  customerId: z.string().min(1),
-  jobId: z.string().optional().nullable(),
+  customerId: entityIdSchema,
+  jobId: entityIdSchema.optional().nullable(),
   total: z.number().int().min(0),
   status: z.enum(["Draft", "Sent", "Paid", "Overdue"]).default("Draft"),
   dueDate: z.coerce.date(),
   paidAmount: z.number().int().min(0).optional(),
-  paymentMethod: z.string().optional().nullable(),
+  paymentMethod: nullableOptionalTextField("Metode pembayaran", 80),
   paidAt: z.coerce.date().optional().nullable(),
-});
+}).strict();
+
+const invoiceParamsSchema = z.object({
+  id: entityIdSchema,
+}).strict();
+
+const invoiceQuerySchema = z.object({
+  status: z.enum(["Draft", "Sent", "Paid", "Overdue"]).optional().or(z.literal("")).default(""),
+}).strict();
 
 async function nextInvoiceNumber() {
   return `INV-${new Date().getFullYear()}-${String(Date.now()).slice(-4)}`;
@@ -60,7 +69,7 @@ invoicesRouter.use((_req, res, next) => {
 
 invoicesRouter.get("/", async (req, res) => {
   const businessId = requireBusiness(res);
-  const status = typeof req.query.status === "string" ? req.query.status : "";
+  const { status } = invoiceQuerySchema.parse(req.query);
   const rows = await db
     .select({
       invoice: invoices,
@@ -128,9 +137,10 @@ invoicesRouter.post("/", async (req, res) => {
 invoicesRouter.patch("/:id", async (req, res) => {
   const businessId = requireBusiness(res);
   const business = await getCurrentBusiness(res);
+  const { id } = invoiceParamsSchema.parse(req.params);
   const payload = invoiceSchema.partial().parse(req.body);
   assertSubscriptionWritable(business.subscriptionStatus, business.currentPeriodEndsAt);
-  const currentInvoice = await requireInvoiceForBusiness(req.params.id, businessId);
+  const currentInvoice = await requireInvoiceForBusiness(id, businessId);
   const nextCustomerId = payload.customerId ?? currentInvoice.customerId;
   const nextJobId = payload.jobId === undefined ? currentInvoice.jobId : payload.jobId || null;
   await validateInvoiceRelations({
@@ -158,7 +168,7 @@ invoicesRouter.patch("/:id", async (req, res) => {
           : payload.paidAt,
       updatedAt: new Date(),
     })
-    .where(and(eq(invoices.id, req.params.id), eq(invoices.businessId, businessId)))
+    .where(and(eq(invoices.id, id), eq(invoices.businessId, businessId)))
     .returning();
 
   if (!updated) {

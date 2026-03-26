@@ -16,25 +16,26 @@ import {
 } from "../lib/waha.js";
 import { getSessionUser, isStaffRole, requireBusiness, requireOwnerAccess, requireSession } from "../lib/session.js";
 import { slugify } from "../utils/serializers.js";
+import { optionalEmailField, phoneField, textField } from "../lib/validation.js";
 
 const setupSchema = z.object({
-  name: z.string().min(2),
-  phone: z.string().min(6),
-  email: z.string().email().optional().or(z.literal("")),
-  address: z.string().min(4),
-  city: z.string().min(2),
-  serviceType: z.string().min(2).default("AC"),
+  name: textField("Nama bisnis", 2, 120),
+  phone: phoneField,
+  email: optionalEmailField,
+  address: textField("Alamat", 4, 240),
+  city: textField("Kota", 2, 80),
+  serviceType: textField("Jenis layanan", 2, 80).default("AC"),
   plan: z.enum(BUSINESS_PLANS).default("Starter"),
-});
+}).strict();
 
 const updateWhatsappSchema = z.object({
   mode: z.enum(["basic", "automation"]),
-});
+}).strict();
 
 const sendWhatsappSchema = z.object({
-  phone: z.string().min(6),
-  message: z.string().min(1),
-});
+  phone: phoneField,
+  message: textField("Pesan", 1, 2000),
+}).strict();
 
 function serializeWhatsappState(business: typeof businesses.$inferSelect, extras?: { qrCodeDataUrl?: string | null }) {
   const mode = business.whatsappMode === "automation" ? "automation" : "basic";

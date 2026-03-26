@@ -9,31 +9,40 @@ import { auth } from "../lib/auth.js";
 import { conflict, notFound } from "../lib/errors.js";
 import { assertSubscriptionWritable, assertTechnicianLimit } from "../lib/plans.js";
 import { getCurrentBusiness, requireBusiness, requireOwnerAccess, requireSession } from "../lib/session.js";
+import { emailField, entityIdSchema, optionalTextField, phoneField, shortSearchField, stringArrayField, textField } from "../lib/validation.js";
 
 const technicianSchema = z.object({
-  name: z.string().min(2),
-  phone: z.string().min(6),
-  specialties: z.array(z.string()).min(1),
+  name: textField("Nama teknisi", 2, 120),
+  phone: phoneField,
+  specialties: stringArrayField("Spesialisasi", 60, 20, 1),
   status: z.enum(["Aktif", "Bertugas", "Standby", "Tidak Aktif"]).default("Aktif"),
   rating: z.number().min(0).max(5).default(0),
   latitude: z.number().optional().nullable(),
   longitude: z.number().optional().nullable(),
   lastSeenAt: z.coerce.date().optional().nullable(),
-});
+}).strict();
 
 const provisionTechnicianAccountSchema = z.object({
-  email: z.string().email(),
+  email: emailField,
   password: z.string().min(8).optional(),
-});
+}).strict();
 
 const updateTechnicianAccountSchema = z.object({
-  email: z.string().email().optional(),
+  email: emailField.optional(),
   newPassword: z.string().min(8).optional(),
-});
+}).strict();
 
 const resetTechnicianPasswordSchema = z.object({
   newPassword: z.string().min(8).optional(),
-});
+}).strict();
+
+const technicianParamsSchema = z.object({
+  id: entityIdSchema,
+}).strict();
+
+const technicianQuerySchema = z.object({
+  q: shortSearchField,
+}).strict();
 
 function generateTemporaryPassword() {
   const seed = Math.random().toString(36).slice(2, 8).toUpperCase();
@@ -72,7 +81,7 @@ techniciansRouter.use((_req, res, next) => {
 
 techniciansRouter.get("/", async (req, res) => {
   const businessId = requireBusiness(res);
-  const q = typeof req.query.q === "string" ? req.query.q : "";
+  const { q } = technicianQuerySchema.parse(req.query);
   const filters = [eq(technicians.businessId, businessId)];
 
   if (q) {
@@ -118,6 +127,7 @@ techniciansRouter.post("/", async (req, res) => {
 techniciansRouter.patch("/:id", async (req, res) => {
   const businessId = requireBusiness(res);
   const business = await getCurrentBusiness(res);
+  const { id } = technicianParamsSchema.parse(req.params);
   const payload = technicianSchema.partial().parse(req.body);
   assertSubscriptionWritable(business.subscriptionStatus, business.currentPeriodEndsAt);
   const [updated] = await db
@@ -126,7 +136,7 @@ techniciansRouter.patch("/:id", async (req, res) => {
       ...payload,
       updatedAt: new Date(),
     })
-    .where(and(eq(technicians.id, req.params.id), eq(technicians.businessId, businessId)))
+    .where(and(eq(technicians.id, id), eq(technicians.businessId, businessId)))
     .returning();
 
   if (!updated) {
@@ -150,13 +160,14 @@ techniciansRouter.patch("/:id", async (req, res) => {
 techniciansRouter.post("/:id/account", async (req, res) => {
   const businessId = requireBusiness(res);
   const business = await getCurrentBusiness(res);
+  const { id } = technicianParamsSchema.parse(req.params);
   const payload = provisionTechnicianAccountSchema.parse(req.body);
   assertSubscriptionWritable(business.subscriptionStatus, business.currentPeriodEndsAt);
 
   const [technician] = await db
     .select()
     .from(technicians)
-    .where(and(eq(technicians.id, req.params.id), eq(technicians.businessId, businessId)));
+    .where(and(eq(technicians.id, id), eq(technicians.businessId, businessId)));
 
   if (!technician) {
     throw notFound("Teknisi tidak ditemukan.");
@@ -262,13 +273,14 @@ techniciansRouter.post("/:id/account", async (req, res) => {
 techniciansRouter.post("/:id/account/reset-password", async (req, res) => {
   const businessId = requireBusiness(res);
   const business = await getCurrentBusiness(res);
+  const { id } = technicianParamsSchema.parse(req.params);
   const payload = resetTechnicianPasswordSchema.parse(req.body);
   assertSubscriptionWritable(business.subscriptionStatus, business.currentPeriodEndsAt);
 
   const [technician] = await db
     .select()
     .from(technicians)
-    .where(and(eq(technicians.id, req.params.id), eq(technicians.businessId, businessId)));
+    .where(and(eq(technicians.id, id), eq(technicians.businessId, businessId)));
 
   if (!technician) {
     throw notFound("Teknisi tidak ditemukan.");
@@ -321,13 +333,14 @@ techniciansRouter.post("/:id/account/reset-password", async (req, res) => {
 techniciansRouter.patch("/:id/account", async (req, res) => {
   const businessId = requireBusiness(res);
   const business = await getCurrentBusiness(res);
+  const { id } = technicianParamsSchema.parse(req.params);
   const payload = updateTechnicianAccountSchema.parse(req.body);
   assertSubscriptionWritable(business.subscriptionStatus, business.currentPeriodEndsAt);
 
   const [technician] = await db
     .select()
     .from(technicians)
-    .where(and(eq(technicians.id, req.params.id), eq(technicians.businessId, businessId)));
+    .where(and(eq(technicians.id, id), eq(technicians.businessId, businessId)));
 
   if (!technician) {
     throw notFound("Teknisi tidak ditemukan.");
@@ -414,12 +427,13 @@ techniciansRouter.patch("/:id/account", async (req, res) => {
 techniciansRouter.post("/:id/account/force-logout", async (req, res) => {
   const businessId = requireBusiness(res);
   const business = await getCurrentBusiness(res);
+  const { id } = technicianParamsSchema.parse(req.params);
   assertSubscriptionWritable(business.subscriptionStatus, business.currentPeriodEndsAt);
 
   const [technician] = await db
     .select()
     .from(technicians)
-    .where(and(eq(technicians.id, req.params.id), eq(technicians.businessId, businessId)));
+    .where(and(eq(technicians.id, id), eq(technicians.businessId, businessId)));
 
   if (!technician) {
     throw notFound("Teknisi tidak ditemukan.");
@@ -445,12 +459,13 @@ techniciansRouter.post("/:id/account/force-logout", async (req, res) => {
 techniciansRouter.post("/:id/account/disable", async (req, res) => {
   const businessId = requireBusiness(res);
   const business = await getCurrentBusiness(res);
+  const { id } = technicianParamsSchema.parse(req.params);
   assertSubscriptionWritable(business.subscriptionStatus, business.currentPeriodEndsAt);
 
   const [technician] = await db
     .select()
     .from(technicians)
-    .where(and(eq(technicians.id, req.params.id), eq(technicians.businessId, businessId)));
+    .where(and(eq(technicians.id, id), eq(technicians.businessId, businessId)));
 
   if (!technician) {
     throw notFound("Teknisi tidak ditemukan.");
@@ -502,10 +517,11 @@ techniciansRouter.post("/:id/account/disable", async (req, res) => {
 techniciansRouter.delete("/:id", async (req, res) => {
   const businessId = requireBusiness(res);
   const business = await getCurrentBusiness(res);
+  const { id } = technicianParamsSchema.parse(req.params);
   assertSubscriptionWritable(business.subscriptionStatus, business.currentPeriodEndsAt);
   const [deleted] = await db
     .delete(technicians)
-    .where(and(eq(technicians.id, req.params.id), eq(technicians.businessId, businessId)))
+    .where(and(eq(technicians.id, id), eq(technicians.businessId, businessId)))
     .returning();
 
   if (!deleted) {

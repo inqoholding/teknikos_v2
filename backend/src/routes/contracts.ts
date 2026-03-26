@@ -8,16 +8,21 @@ import { assertPlanFeature, assertSubscriptionWritable } from "../lib/plans.js";
 import { requireCustomerForBusiness } from "../lib/ownership.js";
 import { getCurrentBusiness, requireBusiness, requireOwnerAccess, requireSession } from "../lib/session.js";
 import { contractStatus, formatDateShort, formatRupiahCompact } from "../utils/serializers.js";
+import { entityIdSchema, textField } from "../lib/validation.js";
 
 const contractSchema = z.object({
-  customerId: z.string().min(1),
-  plan: z.string().min(2),
-  serviceInterval: z.string().min(2).default("Bulanan"),
+  customerId: entityIdSchema,
+  plan: textField("Paket kontrak", 2, 120),
+  serviceInterval: textField("Interval servis", 2, 60).default("Bulanan"),
   unitCount: z.number().int().min(1).default(1),
   value: z.number().int().min(0),
   nextServiceAt: z.coerce.date(),
   status: z.enum(["Aktif", "Hampir Jatuh Tempo", "Expired"]).optional(),
-});
+}).strict();
+
+const contractParamsSchema = z.object({
+  id: entityIdSchema,
+}).strict();
 
 export const contractsRouter = Router();
 
@@ -82,6 +87,7 @@ contractsRouter.post("/", async (req, res) => {
 contractsRouter.patch("/:id", async (req, res) => {
   const businessId = requireBusiness(res);
   const business = await getCurrentBusiness(res);
+  const { id } = contractParamsSchema.parse(req.params);
   const payload = contractSchema.partial().parse(req.body);
   assertPlanFeature(business.plan, "contractsEnabled");
   assertSubscriptionWritable(business.subscriptionStatus, business.currentPeriodEndsAt);
@@ -99,7 +105,7 @@ contractsRouter.patch("/:id", async (req, res) => {
         (payload.nextServiceAt ? contractStatus(payload.nextServiceAt) : undefined),
       updatedAt: new Date(),
     })
-    .where(and(eq(contracts.id, req.params.id), eq(contracts.businessId, businessId)))
+    .where(and(eq(contracts.id, id), eq(contracts.businessId, businessId)))
     .returning();
 
   if (!updated) {
@@ -112,11 +118,12 @@ contractsRouter.patch("/:id", async (req, res) => {
 contractsRouter.delete("/:id", async (req, res) => {
   const businessId = requireBusiness(res);
   const business = await getCurrentBusiness(res);
+  const { id } = contractParamsSchema.parse(req.params);
   assertPlanFeature(business.plan, "contractsEnabled");
   assertSubscriptionWritable(business.subscriptionStatus, business.currentPeriodEndsAt);
   const [deleted] = await db
     .delete(contracts)
-    .where(and(eq(contracts.id, req.params.id), eq(contracts.businessId, businessId)))
+    .where(and(eq(contracts.id, id), eq(contracts.businessId, businessId)))
     .returning();
 
   if (!deleted) {

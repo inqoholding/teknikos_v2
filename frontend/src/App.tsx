@@ -4,6 +4,10 @@ import { AdminShellLayout, AppShellLayout } from "./components/Layout";
 import { GuestGuard, OnboardingGuard, PendingPaymentGuard, ProtectedAppGuard, StaffGuard } from "./components/RouteGuards";
 
 const HomePage = lazy(() => import("./pages/HomePage"));
+const PrivacyPolicyPage = lazy(() => import("./pages/PrivacyPolicyPage"));
+const TermsOfServicePage = lazy(() => import("./pages/TermsOfServicePage"));
+const DataHandlingPage = lazy(() => import("./pages/DataHandlingPage"));
+const SupportPage = lazy(() => import("./pages/SupportPage"));
 const LoginPage = lazy(() => import("./pages/LoginPage"));
 const RegisterPage = lazy(() => import("./pages/RegisterPage"));
 const OnboardingPage = lazy(() => import("./pages/OnboardingPage"));
@@ -50,6 +54,10 @@ export default function App() {
       <Suspense fallback={<LoadingFallback />}>
         <Routes>
           <Route path="/" element={<HomePage />} />
+          <Route path="/privacy" element={<PrivacyPolicyPage />} />
+          <Route path="/terms" element={<TermsOfServicePage />} />
+          <Route path="/data-handling" element={<DataHandlingPage />} />
+          <Route path="/support" element={<SupportPage />} />
           <Route path="/demo-owner-dashboard" element={<DemoWorkspaceLayout />}>
             <Route index element={<DemoDashboardPage />} />
             <Route path="jobs" element={<DemoJobsPage />} />

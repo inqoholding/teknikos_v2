@@ -14,6 +14,21 @@ import { createRateLimitMiddleware } from "./lib/rate-limit.js";
 import { apiRouter } from "./routes/index.js";
 
 const app = express();
+app.set("trust proxy", 1);
+
+const publicApiRateLimit = createRateLimitMiddleware({
+  id: "public-api",
+  windowMs: 5 * 60 * 1000,
+  max: 300,
+});
+
+const publicWriteRateLimit = createRateLimitMiddleware({
+  id: "public-write",
+  windowMs: 5 * 60 * 1000,
+  max: 90,
+  methods: ["POST", "PATCH", "PUT", "DELETE"],
+});
+
 const authRateLimit = createRateLimitMiddleware({
   id: "auth",
   windowMs: 15 * 60 * 1000,
@@ -67,6 +82,8 @@ app.get("/api/health", (_req, res) => {
   });
 });
 
+app.use("/api", publicApiRateLimit);
+app.use("/api", publicWriteRateLimit);
 app.use("/api/auth", authRateLimit);
 app.use("/api/auth", requireCsrf);
 app.all("/api/auth/{*any}", toNodeHandler(auth));

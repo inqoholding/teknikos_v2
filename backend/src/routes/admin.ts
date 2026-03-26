@@ -18,19 +18,24 @@ import {
 import { requireAdminRole, requireSession, requireStaffRole } from "../lib/session.js";
 import { formatDateShort } from "../utils/serializers.js";
 import { hashPassword } from "better-auth/crypto";
+import { entityIdSchema, nullableOptionalTextField } from "../lib/validation.js";
 
 const updateSubscriptionSchema = z.object({
   plan: z.enum(BUSINESS_PLANS).optional(),
   subscriptionStatus: z.enum(SUBSCRIPTION_STATUSES).optional(),
   trialEndsAt: z.coerce.date().optional().nullable(),
   currentPeriodEndsAt: z.coerce.date().optional().nullable(),
-  subscriptionNotes: z.string().max(500).optional().nullable(),
-});
+  subscriptionNotes: nullableOptionalTextField("Catatan subscription", 500),
+}).strict();
 
 const resetClientPasswordSchema = z.object({
-  businessId: z.string().min(1),
+  businessId: entityIdSchema,
   newPassword: z.string().min(8).optional(),
-});
+}).strict();
+
+const businessParamsSchema = z.object({
+  businessId: entityIdSchema,
+}).strict();
 
 function generateTemporaryPassword() {
   const seed = Math.random().toString(36).slice(2, 8).toUpperCase();
@@ -221,7 +226,7 @@ adminRouter.get("/calendar", async (_req, res) => {
 adminRouter.patch("/subscriptions/:businessId", async (req, res) => {
   requireAdminRole(res);
   const payload = updateSubscriptionSchema.parse(req.body);
-  const businessId = req.params.businessId;
+  const { businessId } = businessParamsSchema.parse(req.params);
   const [existing] = await db.select().from(businesses).where(eq(businesses.id, businessId));
 
   if (!existing) {

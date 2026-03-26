@@ -7,20 +7,25 @@ import { notFound } from "../lib/errors.js";
 import { assertPlanFeature, assertSubscriptionWritable } from "../lib/plans.js";
 import { getCurrentBusiness, requireBusiness, requireOwnerAccess, requireSession } from "../lib/session.js";
 import { formatRupiahCompact, inventoryStatus } from "../utils/serializers.js";
+import { entityIdSchema, textField } from "../lib/validation.js";
 
 const inventorySchema = z.object({
-  name: z.string().min(2),
-  sku: z.string().min(2),
-  category: z.string().min(2),
+  name: textField("Nama item", 2, 120),
+  sku: textField("SKU", 2, 60),
+  category: textField("Kategori", 2, 80),
   stock: z.number().int().min(0).default(0),
   minStock: z.number().int().min(0).default(0),
   buyPrice: z.number().int().min(0),
   sellPrice: z.number().int().min(0),
-});
+}).strict();
 
 const adjustStockSchema = z.object({
   delta: z.number().int(),
-});
+}).strict();
+
+const inventoryParamsSchema = z.object({
+  id: entityIdSchema,
+}).strict();
 
 export const inventoryRouter = Router();
 
@@ -84,6 +89,7 @@ inventoryRouter.post("/", async (req, res) => {
 inventoryRouter.patch("/:id", async (req, res) => {
   const businessId = requireBusiness(res);
   const business = await getCurrentBusiness(res);
+  const { id } = inventoryParamsSchema.parse(req.params);
   const payload = inventorySchema.partial().parse(req.body);
   assertPlanFeature(business.plan, "inventoryEnabled");
   assertSubscriptionWritable(business.subscriptionStatus, business.currentPeriodEndsAt);
@@ -93,7 +99,7 @@ inventoryRouter.patch("/:id", async (req, res) => {
       ...payload,
       updatedAt: new Date(),
     })
-    .where(and(eq(inventory.id, req.params.id), eq(inventory.businessId, businessId)))
+    .where(and(eq(inventory.id, id), eq(inventory.businessId, businessId)))
     .returning();
 
   if (!updated) {
@@ -106,13 +112,14 @@ inventoryRouter.patch("/:id", async (req, res) => {
 inventoryRouter.patch("/:id/adjust-stock", async (req, res) => {
   const businessId = requireBusiness(res);
   const business = await getCurrentBusiness(res);
+  const { id } = inventoryParamsSchema.parse(req.params);
   const payload = adjustStockSchema.parse(req.body);
   assertPlanFeature(business.plan, "inventoryEnabled");
   assertSubscriptionWritable(business.subscriptionStatus, business.currentPeriodEndsAt);
   const [item] = await db
     .select()
     .from(inventory)
-    .where(and(eq(inventory.id, req.params.id), eq(inventory.businessId, businessId)));
+    .where(and(eq(inventory.id, id), eq(inventory.businessId, businessId)));
 
   if (!item) {
     res.status(404).json({ error: "NOT_FOUND", message: "Item inventori tidak ditemukan." });
@@ -135,11 +142,12 @@ inventoryRouter.patch("/:id/adjust-stock", async (req, res) => {
 inventoryRouter.delete("/:id", async (req, res) => {
   const businessId = requireBusiness(res);
   const business = await getCurrentBusiness(res);
+  const { id } = inventoryParamsSchema.parse(req.params);
   assertPlanFeature(business.plan, "inventoryEnabled");
   assertSubscriptionWritable(business.subscriptionStatus, business.currentPeriodEndsAt);
   const [deleted] = await db
     .delete(inventory)
-    .where(and(eq(inventory.id, req.params.id), eq(inventory.businessId, businessId)))
+    .where(and(eq(inventory.id, id), eq(inventory.businessId, businessId)))
     .returning();
 
   if (!deleted) {

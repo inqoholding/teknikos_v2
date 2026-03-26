@@ -30,5 +30,5 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - WAHA_API_KEY=WAHA_API_SECRET_KEY_12345
+      - WAHA_API_KEY=${WAHA_API_KEY}
     restart: unless-stopped

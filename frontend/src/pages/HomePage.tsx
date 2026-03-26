@@ -1,13 +1,20 @@
 import { LandingHeroTemplate } from "../components/marketing/LandingHeroTemplate";
+import { CookieNotice } from "../components/marketing/CookieNotice";
 import { MarketingFooter } from "../components/ui/marketing-footer";
-
-const SALES_WHATSAPP_LINK =
-  "https://wa.me/6281354444967?text=Halo%20sales%20TeknikOS,%20saya%20ingin%20tanya%20demo%20dan%20langganan.";
+import { useDocumentMeta } from "../hooks/useDocumentMeta";
+import { SALES_WHATSAPP_LINK, SITE_DESCRIPTION, SITE_TITLE } from "../lib/site";
 
 export default function HomePage() {
+  useDocumentMeta({
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    path: "/",
+  });
+
   return (
     <div className="landing-page bg-[#01140E] text-slate-100 min-h-screen font-sans overflow-x-hidden">
       <LandingHeroTemplate salesWhatsappLink={SALES_WHATSAPP_LINK} />
+      <CookieNotice />
       <MarketingFooter />
     </div>
   );

@@ -7,14 +7,23 @@ import { notFound } from "../lib/errors.js";
 import { assertSubscriptionWritable } from "../lib/plans.js";
 import { getCurrentBusiness, requireBusiness, requireOwnerAccess, requireSession } from "../lib/session.js";
 import { contractStatus, formatDateShort, formatRupiahCompact, formatSchedule, invoiceStatus } from "../utils/serializers.js";
+import { entityIdSchema, optionalEmailField, phoneField, shortSearchField, stringArrayField, textField } from "../lib/validation.js";
 
 const customerSchema = z.object({
-  name: z.string().min(2),
-  phone: z.string().min(6),
-  email: z.string().email().optional().or(z.literal("")),
-  address: z.string().min(4),
-  units: z.array(z.string()).default([]),
-});
+  name: textField("Nama pelanggan", 2, 120),
+  phone: phoneField,
+  email: optionalEmailField,
+  address: textField("Alamat", 4, 240),
+  units: stringArrayField("Unit pelanggan", 120, 25).default([]),
+}).strict();
+
+const customerParamsSchema = z.object({
+  id: entityIdSchema,
+}).strict();
+
+const customerQuerySchema = z.object({
+  q: shortSearchField,
+}).strict();
 
 export const customersRouter = Router();
 
@@ -30,7 +39,7 @@ customersRouter.use((_req, res, next) => {
 
 customersRouter.get("/", async (req, res) => {
   const businessId = requireBusiness(res);
-  const q = typeof req.query.q === "string" ? req.query.q : "";
+  const { q } = customerQuerySchema.parse(req.query);
   const filter = and(
     eq(customers.businessId, businessId),
     q
@@ -117,10 +126,11 @@ customersRouter.get("/", async (req, res) => {
 
 customersRouter.get("/:id", async (req, res) => {
   const businessId = requireBusiness(res);
+  const { id } = customerParamsSchema.parse(req.params);
   const [customer] = await db
     .select()
     .from(customers)
-    .where(and(eq(customers.id, req.params.id), eq(customers.businessId, businessId)));
+    .where(and(eq(customers.id, id), eq(customers.businessId, businessId)));
 
   if (!customer) {
     res.status(404).json({ error: "NOT_FOUND", message: "Pelanggan tidak ditemukan." });
@@ -189,6 +199,7 @@ customersRouter.post("/", async (req, res) => {
 customersRouter.patch("/:id", async (req, res) => {
   const businessId = requireBusiness(res);
   const business = await getCurrentBusiness(res);
+  const { id } = customerParamsSchema.parse(req.params);
   const payload = customerSchema.partial().parse(req.body);
   assertSubscriptionWritable(business.subscriptionStatus, business.currentPeriodEndsAt);
   const [updated] = await db
@@ -198,7 +209,7 @@ customersRouter.patch("/:id", async (req, res) => {
       email: payload.email === "" ? null : payload.email,
       updatedAt: new Date(),
     })
-    .where(and(eq(customers.id, req.params.id), eq(customers.businessId, businessId)))
+    .where(and(eq(customers.id, id), eq(customers.businessId, businessId)))
     .returning();
 
   if (!updated) {
@@ -211,10 +222,11 @@ customersRouter.patch("/:id", async (req, res) => {
 customersRouter.delete("/:id", async (req, res) => {
   const businessId = requireBusiness(res);
   const business = await getCurrentBusiness(res);
+  const { id } = customerParamsSchema.parse(req.params);
   assertSubscriptionWritable(business.subscriptionStatus, business.currentPeriodEndsAt);
   const [deleted] = await db
     .delete(customers)
-    .where(and(eq(customers.id, req.params.id), eq(customers.businessId, businessId)))
+    .where(and(eq(customers.id, id), eq(customers.businessId, businessId)))
     .returning();
 
   if (!deleted) {

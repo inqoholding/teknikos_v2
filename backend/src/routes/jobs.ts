@@ -13,15 +13,16 @@ import {
 } from "../lib/ownership.js";
 import { getCurrentBusiness, getSessionUser, isTechnicianRole, requireBusiness, requireOwnerAccess, requireSession } from "../lib/session.js";
 import { formatDateShort, formatRupiahCompact, formatSchedule } from "../utils/serializers.js";
+import { entityIdSchema, nullableOptionalTextField, shortSearchField, textField } from "../lib/validation.js";
 
 const jobItemSchema = z.object({
-  inventoryId: z.string().optional().nullable(),
+  inventoryId: entityIdSchema.optional().nullable(),
   kind: z.enum(["service", "sparepart"]).default("service"),
-  name: z.string().min(2),
+  name: textField("Nama item job", 2, 120),
   quantity: z.number().int().min(1).default(1),
   unitPrice: z.number().int().min(0).default(0),
-  note: z.string().optional(),
-});
+  note: nullableOptionalTextField("Catatan item", 300),
+}).strict();
 
 const photoValueSchema = z
   .string()
@@ -40,24 +41,34 @@ const jobStatusSchema = z.enum([
 ]);
 
 const jobSchema = z.object({
-  title: z.string().min(2),
-  customerId: z.string().min(1),
-  technicianId: z.string().optional().nullable(),
-  technicianIds: z.array(z.string()).optional(),
-  type: z.string().min(2),
+  title: textField("Judul job", 2, 140),
+  customerId: entityIdSchema,
+  technicianId: entityIdSchema.optional().nullable(),
+  technicianIds: z.array(entityIdSchema).max(10, "Maksimal 10 teknisi per job.").optional(),
+  type: textField("Tipe job", 2, 80),
   scheduleAt: z.coerce.date(),
   deadlineAt: z.coerce.date().optional().nullable(),
   price: z.number().int().min(0),
   status: jobStatusSchema.default("pending"),
   priority: z.enum(["Normal", "Urgent"]).default("Normal"),
-  description: z.string().default(""),
-  location: z.string().min(4),
+  description: z.string().trim().max(2000, "Deskripsi maksimal 2000 karakter.").default(""),
+  location: textField("Lokasi", 4, 240),
   beforePhotoUrl: photoValueSchema.optional().nullable(),
   afterPhotoUrl: photoValueSchema.optional().nullable(),
-  cancelReason: z.string().optional().nullable(),
-  items: z.array(jobItemSchema).default([]),
-});
+  cancelReason: nullableOptionalTextField("Alasan pembatalan", 500),
+  items: z.array(jobItemSchema).max(50, "Maksimal 50 item per job.").default([]),
+}).strict();
 const jobPatchSchema = jobSchema.partial();
+
+const jobParamsSchema = z.object({
+  id: entityIdSchema,
+}).strict();
+
+const jobQuerySchema = z.object({
+  status: jobStatusSchema.optional().or(z.literal("")).default(""),
+  technicianId: entityIdSchema.optional().or(z.literal("")).default(""),
+  q: shortSearchField,
+}).strict();
 
 const activeTechnicianStatuses = new Set(["assigned", "on_the_way", "in_progress", "done"]);
 const allowedTransitions: Record<string, string[]> = {
@@ -369,9 +380,7 @@ jobsRouter.use(requireSession);
 jobsRouter.get("/", async (req, res) => {
   const businessId = requireBusiness(res);
   const currentUser = getSessionUser(res);
-  const status = typeof req.query.status === "string" ? req.query.status : "";
-  const technicianId = typeof req.query.technicianId === "string" ? req.query.technicianId : "";
-  const q = typeof req.query.q === "string" ? req.query.q.trim().toLowerCase() : "";
+  const { status, technicianId, q } = jobQuerySchema.parse(req.query);
 
   const [rows, businessTechnicians] = await Promise.all([
     db
@@ -405,6 +414,7 @@ jobsRouter.get("/", async (req, res) => {
 jobsRouter.get("/:id", async (req, res) => {
   const businessId = requireBusiness(res);
   const currentUser = getSessionUser(res);
+  const { id } = jobParamsSchema.parse(req.params);
   const [row, businessTechnicians] = await Promise.all([
     db
       .select({
@@ -413,7 +423,7 @@ jobsRouter.get("/:id", async (req, res) => {
       })
       .from(jobs)
       .leftJoin(customers, eq(jobs.customerId, customers.id))
-      .where(and(eq(jobs.id, req.params.id), eq(jobs.businessId, businessId))),
+      .where(and(eq(jobs.id, id), eq(jobs.businessId, businessId))),
     db.select().from(technicians).where(eq(technicians.businessId, businessId)),
   ]);
 
@@ -518,12 +528,13 @@ jobsRouter.patch("/:id", async (req, res) => {
   const businessId = requireBusiness(res);
   const currentUser = getSessionUser(res);
   const business = await getCurrentBusiness(res);
+  const { id } = jobParamsSchema.parse(req.params);
   const payload = jobPatchSchema.parse(req.body);
   const safePayload = isTechnicianRole(currentUser.role) ? sanitizeTechnicianJobPatch(payload) : payload;
   assertSubscriptionWritable(business.subscriptionStatus, business.currentPeriodEndsAt);
   const businessTechnicians = await db.select().from(technicians).where(eq(technicians.businessId, businessId));
   const { items: _items, beforePhotoUrl, afterPhotoUrl, ...jobUpdates } = safePayload;
-  const currentJob = await requireJobForBusiness(req.params.id, businessId);
+  const currentJob = await requireJobForBusiness(id, businessId);
   assertTechnicianCanAccessJob(currentUser, currentJob, businessTechnicians);
 
   const nextStatus = safePayload.status ?? currentJob.status;
@@ -591,7 +602,7 @@ jobsRouter.patch("/:id", async (req, res) => {
             : undefined,
       updatedAt: new Date(),
     })
-    .where(and(eq(jobs.id, req.params.id), eq(jobs.businessId, businessId)))
+    .where(and(eq(jobs.id, id), eq(jobs.businessId, businessId)))
     .returning();
 
   if (!updated) {
@@ -609,9 +620,10 @@ jobsRouter.delete("/:id", async (req, res) => {
   const businessId = requireBusiness(res);
   requireOwnerAccess(res);
   const business = await getCurrentBusiness(res);
+  const { id } = jobParamsSchema.parse(req.params);
   assertSubscriptionWritable(business.subscriptionStatus, business.currentPeriodEndsAt);
-  await requireJobForBusiness(req.params.id, businessId);
-  await db.delete(jobs).where(and(eq(jobs.id, req.params.id), eq(jobs.businessId, businessId)));
+  await requireJobForBusiness(id, businessId);
+  await db.delete(jobs).where(and(eq(jobs.id, id), eq(jobs.businessId, businessId)));
   res.json({ data: { success: true } });
 });
 
@@ -619,8 +631,9 @@ jobsRouter.post("/:id/invoice", async (req, res) => {
   const businessId = requireBusiness(res);
   requireOwnerAccess(res);
   const business = await getCurrentBusiness(res);
+  const { id } = jobParamsSchema.parse(req.params);
   assertSubscriptionWritable(business.subscriptionStatus, business.currentPeriodEndsAt);
-  const job = await requireJobForBusiness(req.params.id, businessId);
+  const job = await requireJobForBusiness(id, businessId);
 
   if (job.status === "cancelled") {
     throw badRequest("Invoice tidak bisa dibuat dari job yang dibatalkan.");

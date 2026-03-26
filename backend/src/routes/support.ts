@@ -4,20 +4,21 @@ import { db } from "../db/index.js";
 import { adminInboxRequests, businesses } from "../db/app-schema.js";
 import { requireBusiness, requireOwnerAccess, requireSession } from "../lib/session.js";
 import { eq } from "drizzle-orm";
+import { emailField, optionalPhoneField, optionalTextField, textField } from "../lib/validation.js";
 
 const publicSupportRequestSchema = z.object({
   type: z.enum(["password_help"]),
-  requesterEmail: z.string().email(),
-  requesterName: z.string().trim().max(120).optional(),
-  requesterPhone: z.string().trim().max(40).optional(),
-  message: z.string().trim().max(500).optional(),
-});
+  requesterEmail: emailField,
+  requesterName: optionalTextField("Nama peminta", 120),
+  requesterPhone: optionalPhoneField,
+  message: optionalTextField("Pesan", 500),
+}).strict();
 
 const businessSupportRequestSchema = z.object({
   type: z.enum(["subscription_upgrade", "subscription_renewal"]),
   targetPlan: z.enum(["Starter", "Pro", "Bisnis"]).optional(),
-  message: z.string().trim().max(500).optional(),
-});
+  message: optionalTextField("Pesan", 500),
+}).strict();
 
 export const supportRouter = Router();
 
