@@ -270,11 +270,11 @@ export const settings = {
 
 export const appNav = [
   { to: "/dashboard", label: "Dashboard" },
-  { to: "/jobs", label: "Job Order" },
+  { to: "/jobs", label: "Pesanan Kerja" },
   { to: "/technicians", label: "Teknisi" },
   { to: "/customers", label: "Pelanggan" },
-  { to: "/invoices", label: "Invoice" },
-  { to: "/inventory", label: "Inventori" },
+  { to: "/invoices", label: "Tagihan" },
+  { to: "/inventory", label: "Stok Suku Cadang" },
   { to: "/contracts", label: "Kontrak" },
   { to: "/settings", label: "Pengaturan" },
 ];

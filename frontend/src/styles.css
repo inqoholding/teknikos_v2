@@ -793,15 +793,16 @@ h3,
 }
 
 .bar-chart__item {
-  display: flex;
   flex: 1;
+  min-width: 0;
+  display: flex;
   flex-direction: column;
   align-items: center;
   gap: 8px;
   justify-content: flex-end;
   border: 0;
   background: transparent;
-  padding: 22px 0 0;
+  padding: 22px 4px 0;
   cursor: pointer;
   text-align: center;
   position: relative;
@@ -816,8 +817,12 @@ h3,
 
 .bar-chart__item span {
   color: var(--text-muted);
-  font-size: 12px;
+  font-size: 11px;
   transition: color 180ms ease;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
 }
 
 .bar-chart__bar--empty {
