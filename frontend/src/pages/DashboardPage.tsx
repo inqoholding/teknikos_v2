@@ -107,7 +107,7 @@ export default function DashboardPage() {
           <polyline points="22 4 12 14.01 9 11.01" />
         </svg>
       ),
-      trend: { value: "12%", up: true }
+      trend: stats.todayJobs > 0 ? { value: "12%", up: true } : undefined
     },
     {
       label: "Tugas Aktif",
@@ -121,7 +121,7 @@ export default function DashboardPage() {
           <line x1="12" y1="16" x2="12.01" y2="16" />
         </svg>
       ),
-      trend: { value: "3%", up: false }
+      trend: stats.activeJobs > 0 ? { value: "3%", up: false } : undefined
     },
     {
       label: "Teknisi Aktif",
@@ -136,7 +136,7 @@ export default function DashboardPage() {
           <path d="M16 3.13a4 4 0 0 1 0 7.75" />
         </svg>
       ),
-      trend: { value: "2", up: true }
+      trend: stats.activeTechnicians > 0 ? { value: "2", up: true } : undefined
     },
     {
       label: "Pendapatan Bulan Ini",
@@ -149,7 +149,7 @@ export default function DashboardPage() {
           <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
         </svg>
       ),
-      trend: { value: "8%", up: true }
+      trend: stats.activeContracts > 0 ? { value: "8%", up: true } : undefined
     },
   ];
 
@@ -374,10 +374,12 @@ export default function DashboardPage() {
             </div>
 
             {!canUseWahaAutomation ? (
-              <div className="callout callout--warning">
-                <strong>Otomasi WhatsApp Belum Aktif</strong>
-                <p>Hubungkan nomor bisnis Anda dari halaman pengaturan WAHA untuk mengaktifkan notifikasi otomatis ke pelanggan dan teknisi.</p>
-                <Link to="/settings/whatsapp" className="btn btn--secondary btn--small" style={{ marginTop: "8px", display: "inline-block" }}>Ke Pengaturan WA &rarr;</Link>
+              <div className="callout callout--warning callout--cramped-fix">
+                <div className="callout__body">
+                  <strong>Otomasi WhatsApp Belum Aktif</strong>
+                  <p>Hubungkan nomor bisnis Anda dari halaman pengaturan WAHA untuk mengaktifkan notifikasi otomatis ke pelanggan dan teknisi.</p>
+                </div>
+                <Link to="/settings/whatsapp" className="btn btn--secondary btn--small" style={{ marginTop: "12px", display: "inline-block" }}>Ke Pengaturan WA &rarr;</Link>
               </div>
             ) : null}
 
