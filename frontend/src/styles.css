@@ -809,10 +809,7 @@ h3,
 }
 
 .bar-chart__item small {
-  color: var(--text-muted);
-  font-size: 11px;
-  line-height: 1.2;
-  transition: color 180ms ease;
+  display: none; /* Hide static values to prevent tooltip overlap */
 }
 
 .bar-chart__item span {
