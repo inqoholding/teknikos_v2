@@ -17,17 +17,17 @@ import { useBusinessQuery, useLogoutMutation, useSessionQuery } from "../api/hoo
 
 const appNav: Array<{ label: string; to: string; feature?: string }> = [
   { label: "Dashboard", to: "/dashboard" },
-  { label: "Job Order", to: "/jobs" },
+  { label: "Pesanan Kerja", to: "/jobs" },
   { label: "Teknisi", to: "/technicians" },
   { label: "Pelanggan", to: "/customers" },
-  { label: "Invoice", to: "/invoices" },
-  { label: "Inventori", to: "/inventory", feature: "inventoryEnabled" },
+  { label: "Tagihan", to: "/invoices" },
+  { label: "Stok Suku Cadang", to: "/inventory", feature: "inventoryEnabled" },
   { label: "Kontrak", to: "/contracts", feature: "contractsEnabled" },
   { label: "Pengaturan", to: "/settings" },
 ];
 
 const technicianNav: Array<{ label: string; to: string; feature?: string }> = [
-  { label: "Job Order", to: "/jobs" },
+  { label: "Pesanan Kerja", to: "/jobs" },
   { label: "Pengaturan", to: "/settings" },
 ];
 
@@ -35,11 +35,11 @@ const adminNav = [{ label: "Kelola Subscription", to: "/admin" }];
 
 const navIcons = {
   Dashboard: LayoutDashboard,
-  "Job Order": ClipboardList,
+  "Pesanan Kerja": ClipboardList,
   Teknisi: Users,
   Pelanggan: UserCircle,
-  Invoice: FileText,
-  Inventori: Package,
+  Tagihan: FileText,
+  "Stok Suku Cadang": Package,
   Kontrak: FileCheck,
   Pengaturan: Settings,
 };
@@ -50,8 +50,8 @@ const titleMap: Record<string, { title: string; subtitle: string }> = {
     subtitle: "Pantau performa bisnis dan operasional teknisi hari ini",
   },
   "/jobs": {
-    title: "Job Order",
-    subtitle: "Kelola antrian kerja, penugasan teknisi, dan perubahan status job",
+    title: "Pesanan Kerja",
+    subtitle: "Kelola antrian kerja, penugasan teknisi, dan perubahan status tugas",
   },
   "/technicians": {
     title: "Teknisi",
@@ -62,11 +62,11 @@ const titleMap: Record<string, { title: string; subtitle: string }> = {
     subtitle: "Kelola database pelanggan, alamat, histori servis, dan unit terpasang",
   },
   "/invoices": {
-    title: "Invoice",
+    title: "Tagihan",
     subtitle: "Lacak tagihan, jatuh tempo, dan pembayaran yang sudah masuk",
   },
   "/inventory": {
-    title: "Inventori",
+    title: "Stok Suku Cadang",
     subtitle: "Kontrol stok sparepart, nilai persediaan, dan item yang hampir habis",
   },
   "/contracts": {
@@ -82,8 +82,8 @@ const titleMap: Record<string, { title: string; subtitle: string }> = {
 function resolveHeading(pathname: string) {
   if (pathname.startsWith("/jobs/")) {
     return {
-      title: "Detail Job",
-      subtitle: "Lihat progres, teknisi, item pekerjaan, dan aksi lanjutan per job",
+      title: "Detail Tugas",
+      subtitle: "Lihat progres, teknisi, item pekerjaan, dan aksi lanjutan per tugas",
     };
   }
 
@@ -130,11 +130,11 @@ export function AppShellLayout() {
           <div className="brand-mark__icon">T</div>
           <div>
             <strong>TeknikOS</strong>
-            <span>{business?.name ?? "Business"}</span>
+            <span>{business?.name ?? "Bisnis"}</span>
           </div>
         </Link>
         <div className="sidebar-intro">
-          <span>Workspace</span>
+          <span>Area Kerja</span>
           <strong>{business?.plan ?? "Starter"} plan</strong>
           <small>
             {business?.subscriptionStatusLabel ?? "Aktif"} · {business?.city ?? "Makassar"}
@@ -254,11 +254,11 @@ export function AdminShellLayout() {
           <div className="brand-mark__icon">T</div>
           <div>
             <strong>TeknikOS Admin</strong>
-            <span>Control room</span>
+            <span>Pusat kontrol</span>
           </div>
         </Link>
         <div className="sidebar-intro">
-          <span>Admin Workspace</span>
+          <span>Sistem Admin</span>
           <strong>{owner?.role === "moderator" ? "Moderator" : "Admin"}</strong>
           <small>Kelola plan, trial, dan status client</small>
         </div>
@@ -343,14 +343,14 @@ export function AuthScaffold({
         <p>{subtitle}</p>
         <div className="hero-stats">
           <div className="hero-stat">
-            <span>Job Hari Ini</span>
-            <strong>Live API</strong>
-            <small>Session + business ready</small>
+            <span>Tugas Hari Ini</span>
+            <strong>Sinkronisasi Live</strong>
+            <small>Koneksi bisnis siap pakai</small>
           </div>
           <div className="hero-stat">
             <span>Kontrak Aktif</span>
-            <strong>Backend Sync</strong>
-            <small>Owner dashboard tersambung</small>
+            <strong>Data Terpusat</strong>
+            <small>Dashboard owner tersambung</small>
           </div>
         </div>
         <div className="auth-hero-list">

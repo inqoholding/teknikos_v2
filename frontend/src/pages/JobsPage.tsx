@@ -3,7 +3,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import { getErrorMessage } from "../api/client";
 import { useBusinessQuery, useCreateJobMutation, useCustomersQuery, useJobsQuery, useSessionQuery, useTechniciansQuery } from "../api/hooks";
 import { PageError, PageLoader } from "../components/PageState";
-import { Badge, EmptyAction, SectionCard, EmptyState } from "../components/UI";
+import { Badge, EmptyAction, SectionCard, EmptyState, StatCard } from "../components/UI";
 
 const statusBuckets = [
   { key: "pending", title: "Menunggu" },
@@ -119,27 +119,58 @@ export default function JobsPage() {
 
   return (
     <div className="page-stack">
-      <div className="cards-grid cards-grid--job-overview">
-        <article className="sub-card">
-          <span>Job tampil</span>
-          <strong>{filteredJobs.length}</strong>
-          <small>{statusFilter || "Semua status"}</small>
-        </article>
-        <article className="sub-card">
-          <span>Menunggu</span>
-          <strong>{pendingCount}</strong>
-          <small>Butuh assignment</small>
-        </article>
-        <article className="sub-card">
-          <span>Aktif</span>
-          <strong>{activeCount}</strong>
-          <small>Masih berjalan</small>
-        </article>
-        <article className="sub-card">
-          <span>Selesai / urgent</span>
-          <strong>{doneCount} · {urgentCount}</strong>
-          <small>Done dan prioritas tinggi</small>
-        </article>
+      <div className="stats-grid">
+        <StatCard 
+          label="Job Tampil" 
+          value={String(filteredJobs.length)} 
+          hint={statusFilter || "Semua status"} 
+          type="info"
+          icon={
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+              <polyline points="14 2 14 8 20 8" />
+              <line x1="16" y1="13" x2="8" y2="13" />
+              <line x1="16" y1="17" x2="8" y2="17" />
+              <polyline points="10 9 9 9 8 9" />
+            </svg>
+          }
+        />
+        <StatCard 
+          label="Menunggu" 
+          value={String(pendingCount)} 
+          hint="Butuh assignment" 
+          type="warning" 
+          icon={
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="8" x2="12" y2="12" />
+              <line x1="12" y1="16" x2="12.01" y2="16" />
+            </svg>
+          }
+        />
+        <StatCard 
+          label="Aktif" 
+          value={String(activeCount)} 
+          hint="Sedang berjalan" 
+          type="info"
+          icon={
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+            </svg>
+          }
+        />
+        <StatCard 
+          label="Selesai" 
+          value={String(doneCount)} 
+          hint={`Urgent: ${urgentCount}`} 
+          type="success" 
+          icon={
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+              <polyline points="22 4 12 14.01 9 11.01" />
+            </svg>
+          }
+        />
       </div>
 
       <SectionCard title="Kontrol Job Order" description="Pindah tampilan, cari job, lalu ekspor atau buat order baru dari panel yang sama.">

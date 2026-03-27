@@ -1,4 +1,4 @@
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { getErrorMessage, isApiErrorStatus } from "../api/client";
 import { useBusinessQuery, useCreatePublicSupportRequestMutation, useLoginMutation, useSessionQuery } from "../api/hooks";
@@ -19,11 +19,33 @@ export default function LoginPage() {
   const navigate = useNavigate();
   const loginMutation = useLoginMutation();
   const publicSupportRequestMutation = useCreatePublicSupportRequestMutation();
-  const sessionQuery = useSessionQuery(false);
-  const businessQuery = useBusinessQuery(false);
+  const sessionQuery = useSessionQuery();
+  const { data: sessionData, isLoading: isSessionLoading } = sessionQuery;
+  const businessQuery = useBusinessQuery(Boolean(sessionData));
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const resetPasswordLink = buildResetPasswordLink(email);
+
+  // Redirect if already logged in (but only if not on /login/register explicitly)
+  // Or if on login page, we let them see the "already logged in" banner instead of auto-redirecting
+  useEffect(() => {
+    if (sessionData && !isSessionLoading) {
+      const role = sessionData.user.role;
+      if (role === "admin" || role === "moderator") {
+        navigate("/admin", { replace: true });
+        return;
+      }
+      
+      // We don't auto-redirect to payment-pending here to avoid the "trap"
+      // Users can see their session and choose to continue or logout
+    }
+  }, [sessionData, isSessionLoading, navigate]);
+
+  async function handleLogout() {
+    await sessionQuery.refetch(); // Ensure we have latest
+    // Use the logout logic from hooks if possible, or just call the API
+    // For now we rely on the session check below to show the banner
+  }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -85,6 +107,17 @@ export default function LoginPage() {
           <h2>Masuk</h2>
           <p>Gunakan akun owner untuk masuk ke dashboard.</p>
         </div>
+
+        {sessionData && !isSessionLoading ? (
+          <div className="callout callout--info" style={{ marginBottom: "20px" }}>
+            <p>Anda sudah masuk sebagai <strong>{sessionData.user.email}</strong></p>
+            <div className="button-row button-row--left" style={{ marginTop: "12px" }}>
+              <Link to="/dashboard" className="btn btn--primary btn--small">Lanjut ke Dashboard</Link>
+              <button type="button" className="btn btn--secondary btn--small" onClick={() => window.location.assign("/api/auth/logout")}>Keluar & Ganti Akun</button>
+            </div>
+          </div>
+        ) : null}
+
         <label className="field">
           <span>Email</span>
           <input

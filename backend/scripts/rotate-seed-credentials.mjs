@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 import Database from "better-sqlite3";
 import dotenv from "dotenv";
 import { hashPassword } from "better-auth/crypto";
+import pg from "pg";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -25,6 +26,10 @@ for (const key of requiredKeys) {
   if (!process.env[key]) {
     throw new Error(`Missing required env key: ${key}`);
   }
+}
+
+function isPostgresUrl(databaseUrl) {
+  return /^(postgres|postgresql):/i.test(databaseUrl);
 }
 
 function generatePassword(prefix) {
@@ -62,28 +67,52 @@ const emailToEnvKey = new Map([
   [process.env.DEMO_OWNER_EMAIL, "DEMO_OWNER_PASSWORD"],
 ]);
 
-const db = new Database(process.env.DATABASE_URL);
-db.pragma("journal_mode = WAL");
-db.pragma("foreign_keys = ON");
+async function loadCredentialRows() {
+  if (isPostgresUrl(process.env.DATABASE_URL)) {
+    const client = new pg.Client({ connectionString: process.env.DATABASE_URL });
+    await client.connect();
+    try {
+      const result = await client.query(
+        `
+          SELECT u.id AS "userId", u.email AS email, a.id AS "accountId"
+          FROM "user" u
+          JOIN account a ON a.user_id = u.id
+          WHERE a.provider_id = 'credential'
+            AND u.email IN ($1, $2, $3)
+        `,
+        [process.env.ADMIN_EMAIL, process.env.MODERATOR_EMAIL, process.env.DEMO_OWNER_EMAIL],
+      );
+      return { driver: "pg", client, rows: result.rows };
+    } catch (error) {
+      await client.end();
+      throw error;
+    }
+  }
 
-const credentialRows = db
-  .prepare(
-    `
-      SELECT u.id AS userId, u.email AS email, a.id AS accountId
-      FROM user u
-      JOIN account a ON a.user_id = u.id
-      WHERE a.provider_id = 'credential'
-        AND u.email IN (?, ?, ?)
-    `,
-  )
-  .all(process.env.ADMIN_EMAIL, process.env.MODERATOR_EMAIL, process.env.DEMO_OWNER_EMAIL);
+  const db = new Database(process.env.DATABASE_URL);
+  db.pragma("journal_mode = WAL");
+  db.pragma("foreign_keys = ON");
+  const rows = db
+    .prepare(
+      `
+        SELECT u.id AS userId, u.email AS email, a.id AS accountId
+        FROM user u
+        JOIN account a ON a.user_id = u.id
+        WHERE a.provider_id = 'credential'
+          AND u.email IN (?, ?, ?)
+      `,
+    )
+    .all(process.env.ADMIN_EMAIL, process.env.MODERATOR_EMAIL, process.env.DEMO_OWNER_EMAIL);
+
+  return { driver: "sqlite", db, rows };
+}
+
+const connection = await loadCredentialRows();
+const credentialRows = connection.rows;
 
 if (credentialRows.length !== 3) {
   throw new Error(`Expected 3 credential users, found ${credentialRows.length}`);
 }
-
-const updateAccount = db.prepare("UPDATE account SET password = ?, updated_at = ? WHERE id = ?");
-const deleteSessions = db.prepare("DELETE FROM session WHERE user_id = ?");
 
 const updates = [];
 for (const row of credentialRows) {
@@ -99,13 +128,39 @@ for (const row of credentialRows) {
   });
 }
 
-db.transaction(() => {
-  const now = Date.now();
-  for (const update of updates) {
-    updateAccount.run(update.hashedPassword, now, update.accountId);
-    deleteSessions.run(update.userId);
+if (connection.driver === "pg") {
+  try {
+    await connection.client.query("BEGIN");
+    const now = new Date();
+    for (const update of updates) {
+      await connection.client.query("UPDATE account SET password = $1, updated_at = $2 WHERE id = $3", [
+        update.hashedPassword,
+        now,
+        update.accountId,
+      ]);
+      await connection.client.query("DELETE FROM session WHERE user_id = $1", [update.userId]);
+    }
+    await connection.client.query("COMMIT");
+  } catch (error) {
+    await connection.client.query("ROLLBACK");
+    throw error;
+  } finally {
+    await connection.client.end();
   }
-})();
+} else {
+  const updateAccount = connection.db.prepare("UPDATE account SET password = ?, updated_at = ? WHERE id = ?");
+  const deleteSessions = connection.db.prepare("DELETE FROM session WHERE user_id = ?");
+
+  connection.db.transaction(() => {
+    const now = Math.floor(Date.now() / 1000);
+    for (const update of updates) {
+      updateAccount.run(update.hashedPassword, now, update.accountId);
+      deleteSessions.run(update.userId);
+    }
+  })();
+
+  connection.db.close();
+}
 
 let envSource = fs.readFileSync(envPath, "utf8");
 for (const [key, value] of Object.entries(nextPasswords)) {

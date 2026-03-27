@@ -135,11 +135,11 @@ export default function AdminSubscriptionsPage() {
   return (
     <div className="page-stack">
       <div className="stats-grid">
-        <StatCard label="Client Aktif" value={String(activeCount)} hint="Subscription sehat" tone="success" />
+        <StatCard label="Client Aktif" value={String(activeCount)} hint="Subscription sehat" type="success" />
         <StatCard label="Masih Trial" value={String(trialCount)} hint="Perlu follow up closing" />
-        <StatCard label="Pending Payment" value={String(pendingCount)} hint="Perlu ditindak admin" tone="warning" />
-        <StatCard label="Perlu Tindakan" value={String(issueCount)} hint="Past due / paused / cancelled" tone="warning" />
-        <StatCard label="Inbox Admin" value={String(inboxOpenCount)} hint="Permintaan client & alert subscription" tone="warning" />
+        <StatCard label="Pending Payment" value={String(pendingCount)} hint="Perlu ditindak admin" type="warning" />
+        <StatCard label="Perlu Tindakan" value={String(issueCount)} hint="Past due / paused / cancelled" type="warning" />
+        <StatCard label="Inbox Admin" value={String(inboxOpenCount)} hint="Permintaan client & alert subscription" type="warning" />
       </div>
 
       <div className="dashboard-grid">

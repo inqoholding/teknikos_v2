@@ -331,11 +331,38 @@ export default function JobDetailPage() {
     });
   }
 
+  const statusSteps = [
+    { key: "pending", label: "Menunggu" },
+    { key: "assigned", label: "Ditugaskan" },
+    { key: "on_the_way", label: "Ojek" },
+    { key: "in_progress", label: "Proses" },
+    { key: "done", label: "Selesai" },
+  ];
+
+  const currentStepIndex = statusSteps.findIndex((s) => s.key === job.status);
+
   return (
     <div className="page-stack">
       <div className="button-row button-row--left" style={{ marginBottom: "-8px" }}>
         <Link to="/jobs" className="ghost-button">&larr; Kembali ke Jobs</Link>
       </div>
+
+      <div className="status-steps">
+        {statusSteps.map((s, idx) => {
+          const isCompleted = idx < currentStepIndex || job.status === "done";
+          const isActive = idx === currentStepIndex && job.status !== "done";
+          
+          return (
+            <div key={s.key} className={`status-step ${isCompleted ? "status-step--completed" : ""} ${isActive ? "status-step--active" : ""}`}>
+              <strong>{s.label}</strong>
+              <div className="status-step__bar">
+                <div className="status-step__fill" style={{ transform: isCompleted ? "translateX(0)" : isActive ? "translateX(-50%)" : "translateX(-100%)" }} />
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
       <SectionCard
         title={`${job.number} · ${job.title}`}
         action={
@@ -409,29 +436,29 @@ export default function JobDetailPage() {
               </div>
             </SectionCard>
 
-            <SectionCard title="Before / After Photo" description="Upload dokumentasi kerja agar owner dan pelanggan punya bukti visual yang rapi.">
+            <SectionCard title="Before / After Photo" description="Dokumentasi visual untuk owner dan pelanggan.">
               <div className="photo-grid">
                 <div className="photo-card">
-                  {beforePhotoUrl ? <img src={beforePhotoUrl} alt="Before service" className="photo-card__image" /> : <div className="photo-box">Before</div>}
+                  {beforePhotoUrl ? <img src={beforePhotoUrl} alt="Before" className="photo-card__image" /> : <div className="photo-box">Before Photo</div>}
                   <div className="photo-card__actions">
-                    <label className="btn btn--secondary">
-                      Upload Before
+                    <label className="btn btn--inverse-soft btn--small">
+                      {beforePhotoUrl ? "Ganti" : "Upload"}
                       <input type="file" accept="image/*" hidden onChange={(event) => void handlePhotoUpload(event, "before")} />
                     </label>
                     {beforePhotoUrl ? (
-                      <EmptyAction onClick={() => setBeforePhotoUrl(null)}>Hapus</EmptyAction>
+                      <button className="btn btn--secondary btn--small" onClick={() => setBeforePhotoUrl(null)}>Hapus</button>
                     ) : null}
                   </div>
                 </div>
                 <div className="photo-card">
-                  {afterPhotoUrl ? <img src={afterPhotoUrl} alt="After service" className="photo-card__image" /> : <div className="photo-box photo-box--success">After</div>}
+                  {afterPhotoUrl ? <img src={afterPhotoUrl} alt="After" className="photo-card__image" /> : <div className="photo-box photo-box--success">After Photo</div>}
                   <div className="photo-card__actions">
-                    <label className="btn btn--secondary">
-                      Upload After
+                    <label className="btn btn--inverse-soft btn--small">
+                      {afterPhotoUrl ? "Ganti" : "Upload"}
                       <input type="file" accept="image/*" hidden onChange={(event) => void handlePhotoUpload(event, "after")} />
                     </label>
                     {afterPhotoUrl ? (
-                      <EmptyAction onClick={() => setAfterPhotoUrl(null)}>Hapus</EmptyAction>
+                      <button className="btn btn--secondary btn--small" onClick={() => setAfterPhotoUrl(null)}>Hapus</button>
                     ) : null}
                   </div>
                 </div>
@@ -673,6 +700,13 @@ export default function JobDetailPage() {
                 <div className="technician-checklist">
                   {technicians.map((technician) => {
                     const checked = technicianIds.includes(technician.id);
+                    const initials = technician.name
+                      .split(" ")
+                      .map((n) => n[0])
+                      .slice(0, 2)
+                      .join("")
+                      .toUpperCase();
+                      
                     return (
                       <label key={technician.id} className={`technician-chip ${checked ? "technician-chip--active" : ""}`}>
                         <input
@@ -686,6 +720,7 @@ export default function JobDetailPage() {
                             )
                           }
                         />
+                        <div className="technician-chip__avatar">{initials}</div>
                         <span>{technician.name}</span>
                       </label>
                     );

@@ -56,7 +56,11 @@ function getLocalDevOrigins() {
   return Array.from(origins);
 }
 
-const TRUSTED_ORIGINS = new Set<string>([getFrontendOrigin(), ...getLocalDevOrigins()]);
+const TRUSTED_ORIGINS = new Set<string>([
+  getFrontendOrigin(),
+  "http://156.67.220.110",
+  ...getLocalDevOrigins(),
+]);
 
 export function getTrustedOrigins() {
   return Array.from(TRUSTED_ORIGINS);

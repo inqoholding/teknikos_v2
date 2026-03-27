@@ -71,10 +71,57 @@ export default function InventoryPage() {
   return (
     <div className="page-stack">
       <div className="stats-grid">
-        <StatCard label="Total Item" value={String(inventory.length)} hint="Katalog aktif" />
-        <StatCard label="Kategori" value={String(categoryCount)} hint="Jenis stok tercatat" />
-        <StatCard label="Stok Rendah" value={String(lowStockItems.length)} hint="Perlu reorder" tone="warning" />
-        <StatCard label="Nilai Stok" value={formatRupiah(inventoryValue)} hint="Estimasi modal inventori" tone="success" />
+        <StatCard 
+          label="Total Katalog" 
+          value={String(inventory.length)} 
+          hint="Item aktif" 
+          type="info"
+          icon={
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 3v18" />
+              <rect x="5" y="8" width="14" height="10" rx="2" />
+              <path d="M9 8v-2a3 3 0 1 1 6 0v2" />
+            </svg>
+          }
+        />
+        <StatCard 
+          label="Kategori" 
+          value={String(categoryCount)} 
+          hint="Jenis stok" 
+          type="default"
+          icon={
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <line x1="3" y1="12" x2="21" y2="12" />
+              <line x1="3" y1="18" x2="21" y2="18" />
+            </svg>
+          }
+        />
+        <StatCard 
+          label="Stok Rendah" 
+          value={String(lowStockItems.length)} 
+          hint="Perlu reorder" 
+          type="warning" 
+          icon={
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="8" x2="12" y2="12" />
+              <line x1="12" y1="16" x2="12.01" y2="16" />
+            </svg>
+          }
+        />
+        <StatCard 
+          label="Nilai Stok" 
+          value={formatRupiah(inventoryValue)} 
+          hint="Estimasi modal" 
+          type="success" 
+          icon={
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="12" y1="1" x2="12" y2="23" />
+              <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+            </svg>
+          }
+        />
       </div>
 
       {showCreate ? (

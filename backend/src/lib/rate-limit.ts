@@ -1,5 +1,5 @@
 import type { NextFunction, Request, Response } from "express";
-import { redis } from "./redis.js";
+import { getRedisClient } from "./redis.js";
 
 type RateLimitOptions = {
   id: string;
@@ -68,6 +68,12 @@ export function createRateLimitMiddleware(options: RateLimitOptions) {
     const redisKey = `ratelimit:${options.id}:${key}`;
 
     try {
+      const redis = await getRedisClient();
+      if (!redis) {
+        next();
+        return;
+      }
+
       const current = await redis.incr(redisKey);
       if (current === 1) {
         await redis.pExpire(redisKey, options.windowMs);

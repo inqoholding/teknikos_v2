@@ -55,7 +55,7 @@ export default function DemoDashboardPage() {
 
         <div className="stats-grid">
           {demoStats.map((item) => (
-            <StatCard key={item.label} label={item.label} value={item.value} hint={item.hint} tone={item.tone} />
+            <StatCard key={item.label} label={item.label} value={item.value} hint={item.hint} type={item.tone as any} />
           ))}
         </div>
 

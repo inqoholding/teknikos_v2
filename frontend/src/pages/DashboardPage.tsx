@@ -27,7 +27,7 @@ function defaultDueDate() {
 const jobStatusLabels: Record<string, string> = {
   pending: "Menunggu",
   assigned: "Ditugaskan",
-  on_the_way: "Menuju Lokasi",
+  on_the_way: "Dalam Perjalanan",
   in_progress: "Dikerjakan",
   done: "Selesai",
   cancelled: "Dibatalkan",
@@ -96,10 +96,61 @@ export default function DashboardPage() {
   }
 
   const dashboardStats = [
-    { label: "Job Hari Ini", value: String(stats.todayJobs), hint: `${stats.doneToday} selesai hari ini`, tone: "success" as const },
-    { label: "Job Aktif", value: String(stats.activeJobs), hint: `${stats.lowStockCount} stok perlu dicek`, tone: "warning" as const },
-    { label: "Teknisi Aktif", value: String(stats.activeTechnicians), hint: `${stats.totalCustomers} pelanggan aktif`, tone: "default" as const },
-    { label: "Revenue Bulan Ini", value: stats.monthlyRevenueLabel, hint: `${stats.activeContracts} kontrak aktif`, tone: "success" as const },
+    {
+      label: "Tugas Hari Ini",
+      value: String(stats.todayJobs),
+      hint: `${stats.doneToday} selesai hari ini`,
+      type: "success" as const,
+      icon: (
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+          <polyline points="22 4 12 14.01 9 11.01" />
+        </svg>
+      ),
+      trend: { value: "12%", up: true }
+    },
+    {
+      label: "Tugas Aktif",
+      value: String(stats.activeJobs),
+      hint: `${stats.lowStockCount} stok perlu dicek`,
+      type: "warning" as const,
+      icon: (
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="10" />
+          <line x1="12" y1="8" x2="12" y2="12" />
+          <line x1="12" y1="16" x2="12.01" y2="16" />
+        </svg>
+      ),
+      trend: { value: "3%", up: false }
+    },
+    {
+      label: "Teknisi Aktif",
+      value: String(stats.activeTechnicians),
+      hint: `${stats.totalCustomers} pelanggan aktif`,
+      type: "info" as const,
+      icon: (
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+          <circle cx="9" cy="7" r="4" />
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+          <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+        </svg>
+      ),
+      trend: { value: "2", up: true }
+    },
+    {
+      label: "Pendapatan Bulan Ini",
+      value: stats.monthlyRevenueLabel,
+      hint: `${stats.activeContracts} kontrak aktif`,
+      type: "success" as const,
+      icon: (
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <line x1="12" y1="1" x2="12" y2="23" />
+          <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+        </svg>
+      ),
+      trend: { value: "8%", up: true }
+    },
   ];
 
   async function handleQuickInvoice(event: FormEvent<HTMLFormElement>) {
@@ -177,15 +228,17 @@ export default function DashboardPage() {
             label={item.label}
             value={item.value}
             hint={item.hint}
-            tone={item.tone}
+            type={item.type}
+            icon={item.icon}
+            trend={item.trend}
           />
         ))}
       </div>
 
       <div className="dashboard-grid">
         <SectionCard
-          title="Operations Cockpit"
-          description="Pola yang umum di aplikasi field service besar: owner langsung melihat queue dispatch, billing, dan follow-up dari satu layar."
+          title="Pusat Kendali"
+          description="Pola yang umum di aplikasi field service besar: owner langsung melihat antrian penugasan, penagihan, dan follow-up dari satu layar."
           className="ops-card"
         >
           <div className="ops-grid">
@@ -201,8 +254,8 @@ export default function DashboardPage() {
         </SectionCard>
 
         <SectionCard
-          title="Dispatch Hari Ini"
-          description="Ringkas, cepat dibaca, dan fokus ke siapa pergi ke mana. Ini mengikuti pola dispatch board yang umum di ServiceTitan, Jobber, dan Housecall Pro."
+          title="Penugasan Hari Ini"
+          description="Ringkas, cepat dibaca, dan fokus ke siapa berangkat ke mana. Ini mengikuti pola dispatch board yang umum di industri jasa teknisi."
         >
           <div className="dispatch-list">
             {stats.dispatchToday.length > 0 ? (
@@ -296,12 +349,12 @@ export default function DashboardPage() {
 
       <div className="cards-grid cards-grid--triple">
         <SectionCard
-          title="Kirim Otomatis via WAHA"
-          description="Pilih job lalu kirim notifikasi otomatis ke pelanggan atau teknisi memakai template pesan WAHA."
+          title="Kirim Pesan WhatsApp"
+          description="Pilih tugas lalu kirim notifikasi otomatis ke pelanggan atau teknisi memakai template pesan WhatsApp."
         >
           <div className="action-stack">
             <label className="field">
-              <span>Pilih job untuk notifikasi</span>
+              <span>Pilih tugas untuk notifikasi</span>
               <select value={selectedWahaJob?.id ?? ""} onChange={(event) => setWahaJobId(event.target.value)}>
                 {jobs.map((job) => (
                   <option key={job.id} value={job.id}>
@@ -312,15 +365,19 @@ export default function DashboardPage() {
             </label>
 
             <div className="summary-list">
-              <div><span>Status WAHA</span><strong>{business?.whatsapp?.automationStatusLabel ?? "Belum aktif"}</strong></div>
-              <div><span>Pelanggan</span><strong>{selectedWahaCustomer?.name ?? selectedWahaJob?.customer ?? "-"}</strong></div>
-              <div><span>Teknisi</span><strong>{selectedWahaJob?.technicians.join(", ") || "Belum ada teknisi"}</strong></div>
+              <div>
+                <span>Status WhatsApp</span>
+                <Badge tone={canUseWahaAutomation ? "success" : "warning"}>
+                   {business?.whatsapp?.automationStatusLabel ?? "Belum aktif"}
+                </Badge>
+              </div>
             </div>
 
             {!canUseWahaAutomation ? (
               <div className="callout callout--warning">
-                <strong>WAHA belum siap dipakai</strong>
-                <p>Aktifkan mode Otomasi WAHA dan hubungkan nomor bisnis lebih dulu dari halaman Hubungkan WAHA.</p>
+                <strong>Otomasi WhatsApp Belum Aktif</strong>
+                <p>Hubungkan nomor bisnis Anda dari halaman pengaturan WAHA untuk mengaktifkan notifikasi otomatis ke pelanggan dan teknisi.</p>
+                <Link to="/settings/whatsapp" className="btn btn--secondary btn--small" style={{ marginTop: "8px", display: "inline-block" }}>Ke Pengaturan WA &rarr;</Link>
               </div>
             ) : null}
 
@@ -350,7 +407,7 @@ export default function DashboardPage() {
                 ))}
               </div>
             ) : (
-              <p className="chart-helper">Job ini belum punya teknisi yang bisa dikirimi notifikasi.</p>
+              <p className="chart-helper">Tugas ini belum punya teknisi yang bisa dikirimi notifikasi.</p>
             )}
 
             {sendBusinessWhatsappMutation.error ? (
@@ -360,13 +417,13 @@ export default function DashboardPage() {
         </SectionCard>
 
         <SectionCard
-          title="Quick Billing"
-          description="Alur ringkas yang lebih logis: pilih pelanggan atau job, isi biaya jasa instalasi, tambah komponen sparepart, lalu kirim invoice."
+          title="Tagihan Cepat"
+          description="Alur ringkas yang lebih logis: pilih pelanggan atau tugas, isi biaya jasa, tambah komponen suku cadang, lalu kirim tagihan."
         >
           <form className="action-stack" onSubmit={handleQuickInvoice}>
             <div className="field-grid">
               <label className="field">
-                <span>Job terkait</span>
+                <span>Tugas terkait</span>
                 <select
                   value={jobId}
                   onChange={(event) => {
@@ -379,7 +436,7 @@ export default function DashboardPage() {
                     }
                   }}
                 >
-                  <option value="">Tanpa job</option>
+                  <option value="">Tanpa tugas</option>
                   {jobs.map((job) => (
                     <option key={job.id} value={job.id}>
                       {job.number} · {job.title}
@@ -402,26 +459,26 @@ export default function DashboardPage() {
 
             <div className="field-grid">
               <label className="field">
-                <span>Nama jasa / instalasi</span>
+                <span>Nama jasa / servis</span>
                 <input value={serviceLabel} onChange={(event) => setServiceLabel(event.target.value)} required />
               </label>
               <label className="field">
-                <span>Biaya instalasi / jasa</span>
+                <span>Biaya jasa</span>
                 <input type="number" min="0" value={installationFee} onChange={(event) => setInstallationFee(event.target.value)} required />
               </label>
             </div>
 
             <div className="field-grid">
               <label className="field">
-                <span>Biaya sparepart</span>
+                <span>Biaya suku cadang</span>
                 <input type="number" min="0" value={sparepartFee} onChange={(event) => setSparepartFee(event.target.value)} />
               </label>
               <label className="field">
-                <span>Status invoice</span>
+                <span>Status tagihan</span>
                 <select value={invoiceStatus} onChange={(event) => setInvoiceStatus(event.target.value as "Draft" | "Sent" | "Paid")}>
-                  <option value="Draft">Draft</option>
-                  <option value="Sent">Sent</option>
-                  <option value="Paid">Paid</option>
+                  <option value="Draft">Draf</option>
+                  <option value="Sent">Terkirim</option>
+                  <option value="Paid">Lunas</option>
                 </select>
               </label>
             </div>
@@ -433,22 +490,22 @@ export default function DashboardPage() {
 
             <div className="summary-list">
               <div><span>Biaya jasa</span><strong>{formatRupiah(Number(installationFee || 0))}</strong></div>
-              <div><span>Biaya sparepart</span><strong>{formatRupiah(Number(sparepartFee || 0))}</strong></div>
-              <div><span>Total invoice</span><strong>{formatRupiah(totalInvoice)}</strong></div>
+              <div><span>Biaya suku cadang</span><strong>{formatRupiah(Number(sparepartFee || 0))}</strong></div>
+              <div><span>Total tagihan</span><strong>{formatRupiah(totalInvoice)}</strong></div>
             </div>
 
             {selectedJob ? (
               <p className="form-helper">
-                Job terhubung: {selectedJob.number} · {selectedJob.customer}. Jika sparepart dipakai dari service, stok tetap dikelola dari halaman detail job.
+                Tugas terhubung: {selectedJob.number} · {selectedJob.customer}. Jika suku cadang dipakai dari service, stok tetap dikelola dari halaman detail tugas.
               </p>
             ) : null}
             {createInvoiceMutation.error ? <p className="form-error">{getErrorMessage(createInvoiceMutation.error)}</p> : null}
 
             <div className="button-row button-row--left">
               <EmptyAction primary type="submit" disabled={createInvoiceMutation.isPending || totalInvoice <= 0}>
-                {createInvoiceMutation.isPending ? "Membuat..." : "Buat Invoice Dari Dashboard"}
+                {createInvoiceMutation.isPending ? "Membuat..." : "Buat Tagihan Dari Dashboard"}
               </EmptyAction>
-              <Link to="/invoices" className="btn btn--secondary">Lihat Semua Invoice</Link>
+              <Link to="/invoices" className="btn btn--secondary">Lihat Semua Tagihan</Link>
             </div>
           </form>
         </SectionCard>
@@ -456,25 +513,25 @@ export default function DashboardPage() {
         <SectionCard title="Playbook Operasional" description="Pattern yang paling sering dipakai aplikasi sejenis untuk menjaga dispatch, CRM, dan billing tetap rapi.">
           <div className="stack-list">
             <div className="stack-list__item">
-              <strong>1. Dispatch dulu, billing belakangan</strong>
-              <p>Pastikan job punya teknisi dan slot waktu jelas. Pembayaran invoice tetap dipisahkan dari progres kerja lapangan.</p>
+              <strong>1. Penugasan dulu, penagihan belakangan</strong>
+              <p>Pastikan tugas punya teknisi dan slot waktu jelas. Pembayaran tagihan tetap dipisahkan dari progres kerja lapangan.</p>
             </div>
             <div className="stack-list__item">
-              <strong>2. Billing pakai komponen yang jelas</strong>
-              <p>Biaya instalasi/jasa masuk sebagai komponen utama, lalu sparepart sebagai komponen tambahan agar owner dan pelanggan sama-sama paham.</p>
+              <strong>2. Penagihan pakai komponen yang jelas</strong>
+              <p>Biaya jasa masuk sebagai komponen utama, lalu suku cadang sebagai komponen tambahan agar owner dan pelanggan sama-sama paham.</p>
             </div>
             <div className="stack-list__item">
               <strong>3. Follow up pelanggan dari dashboard</strong>
-              <p>Queue overdue invoice, kontrak mendekati due, dan pelanggan dormant sekarang terlihat dari cockpit agar owner tidak perlu menebak-nebak prioritas.</p>
+              <p>Antrian tagihan jatuh tempo, kontrak mendekati selesai, dan pelanggan lama sekarang terlihat dari pusat kendali agar owner tidak perlu menebak prioritas.</p>
             </div>
           </div>
         </SectionCard>
       </div>
 
-      <SectionCard title="Job Terbaru" action={<Link to="/jobs">Lihat Semua Job →</Link>}>
+      <SectionCard title="Tugas Terbaru" action={<Link to="/jobs">Lihat Semua Tugas →</Link>}>
         <div className="table-card">
           <div className="data-table data-table--head">
-            <span>#Job</span>
+            <span>#No</span>
             <span>Pelanggan</span>
             <span>Teknisi</span>
             <span>Jenis</span>
@@ -485,7 +542,7 @@ export default function DashboardPage() {
           {stats.recentJobs.length === 0 ? (
             <EmptyState
               title="Antrian pekerjaan kosong"
-              description="Daftar 5 job terakhir akan muncul di tabel ini. Saat ini belum ada job aktif."
+              description="Daftar 5 tugas terakhir akan muncul di tabel ini. Saat ini belum ada tugas aktif."
             />
           ) : (
             stats.recentJobs.map((job) => (
@@ -496,7 +553,7 @@ export default function DashboardPage() {
                 <span>-</span>
                 <span>
                   <Badge tone={job.status === "pending" ? "warning" : job.status === "done" ? "success" : "info"}>
-                    {job.status.replaceAll("_", " ")}
+                    {jobStatusLabels[job.status] ?? job.status}
                   </Badge>
                 </span>
                 <span>{job.schedule}</span>
@@ -516,7 +573,7 @@ export default function DashboardPage() {
               : "Tidak ada stok kritis saat ini."}
           </p>
         </div>
-        <Link to="/inventory">Kelola Inventori →</Link>
+        <Link to="/inventory">Kelola Suku Cadang →</Link>
       </div>
     </div>
   );

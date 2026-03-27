@@ -45,18 +45,32 @@ export function StatCard({
   label,
   value,
   hint,
-  tone = "default",
+  trend,
+  icon,
+  type = "default",
 }: {
   label: string;
   value: string;
   hint: string;
-  tone?: "default" | "success" | "warning";
+  trend?: { value: string; up: boolean };
+  icon?: ReactNode;
+  type?: "default" | "success" | "warning" | "info";
 }) {
   return (
-    <article className="stat-card">
+    <article className={`stat-card stat-card--${type}`}>
+      <div className="flex justify-between items-start">
+        {icon ? <div className="stat-card__icon">{icon}</div> : null}
+        {trend ? (
+          <div className={`stat-card__trend stat-card__trend--${trend.up ? "up" : "down"}`}>
+            {trend.up ? "↑" : "↓"} {trend.value}
+          </div>
+        ) : null}
+      </div>
       <div className="stat-card__label">{label}</div>
       <div className="stat-card__value">{value}</div>
-      <div className={`stat-card__hint stat-card__hint--${tone}`}>{hint}</div>
+      <div className={`stat-card__hint stat-card__hint--${type === "default" ? "neutral" : type}`}>
+        {hint}
+      </div>
     </article>
   );
 }
@@ -97,22 +111,6 @@ export function MiniBarChart({
   return (
     <MotionConfig transition={{ type: "spring", stiffness: 320, damping: 28 }} reducedMotion="user">
       <div className={`bar-chart-wrap ${className}`.trim()}>
-        <div className="bar-chart-summary">
-          <div className="bar-chart-summary__card">
-            <span>Total 7 hari</span>
-            <strong>{hasRevenue ? formatRupiah(totalValue) : "Belum ada pemasukan"}</strong>
-          </div>
-          <div className="bar-chart-summary__card">
-            <span>Hari dipilih</span>
-            <strong>{selectedItem?.label ?? "-"}</strong>
-            <small>{selectedItem?.valueLabel ?? selectedItem?.value ?? 0}</small>
-          </div>
-          <div className="bar-chart-summary__card">
-            <span>Puncak tertinggi</span>
-            <strong>{peakItem?.label ?? "-"}</strong>
-            <small>{peakItem?.valueLabel ?? peakItem?.value ?? 0}</small>
-          </div>
-        </div>
         <div className="bar-chart">
           {items.map((item) => {
             const isPeak = peakItem?.label === item.label;
@@ -134,9 +132,9 @@ export function MiniBarChart({
                   <motion.div
                     layoutId="bar-chart-tooltip"
                     className="bar-chart__tooltip"
-                    initial={{ opacity: 0, y: 4 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 4 }}
+                    initial={{ opacity: 0, y: 4, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 4, scale: 0.95 }}
                   >
                     <strong>{item.label}</strong>
                     <span>{item.valueLabel ?? item.value}</span>
@@ -145,12 +143,31 @@ export function MiniBarChart({
                 <small>{item.valueLabel ?? item.value}</small>
                 <motion.div
                   className={`bar-chart__bar ${isPeak ? "bar-chart__bar--peak" : ""} ${isSelected ? "bar-chart__bar--selected" : ""} ${!hasRevenue ? "bar-chart__bar--empty" : ""}`}
-                  animate={{ height: `${Math.max((item.value / maxValue) * 100, 14)}%` }}
+                  animate={{ 
+                    height: `${Math.max((item.value / maxValue) * 100, 14)}%`,
+                    background: isSelected ? "var(--green-dark)" : isPeak ? "var(--green-default)" : "var(--green-mid)"
+                  }}
                 />
-                <span>{item.label}</span>
+                <span style={{ opacity: isSelected ? 1 : 0.7, fontWeight: isSelected ? 700 : 400 }}>{item.label}</span>
               </motion.button>
             );
           })}
+        </div>
+        <div className="bar-chart-summary">
+          <div className="bar-chart-summary__card glass-card">
+            <span>Total 7 hari</span>
+            <strong>{hasRevenue ? formatRupiah(totalValue) : "Belum ada pemasukan"}</strong>
+          </div>
+          <div className="bar-chart-summary__card">
+            <span>Hari dipilih</span>
+            <strong>{selectedItem?.label ?? "-"}</strong>
+            <small>{selectedItem?.valueLabel ?? selectedItem?.value ?? 0}</small>
+          </div>
+          <div className="bar-chart-summary__card">
+            <span>Puncak tertinggi</span>
+            <strong>{peakItem?.label ?? "-"}</strong>
+            <small>{peakItem?.valueLabel ?? peakItem?.value ?? 0}</small>
+          </div>
         </div>
         {!hasRevenue ? <p className="chart-helper">Revenue 7 hari akan muncul setelah ada invoice berstatus lunas.</p> : null}
       </div>
@@ -181,11 +198,11 @@ export function DonutSummary({
     .join(", ");
 
   return (
-    <div className="donut-summary">
+    <div className="donut-summary glass-card">
       <div className="donut-summary__chart" style={{ background: `conic-gradient(${gradient})` }}>
         <div className="donut-summary__center">
           <strong>{total}</strong>
-          <span>total job</span>
+          <span>Total Tugas</span>
         </div>
       </div>
       <div className="legend-list">
@@ -194,7 +211,7 @@ export function DonutSummary({
             <div className="legend-list__label">
               <span
                 className="legend-list__dot"
-                style={{ background: item.color ?? palette[index % palette.length] }}
+                style={{ background: item.color ?? palette[index % palette.length], boxShadow: `0 0 10px ${item.color ?? palette[index % palette.length]}66` }}
               />
               {item.label}
             </div>

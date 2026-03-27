@@ -34,11 +34,11 @@ const waLink =
 
 const demoNav = [
   { to: "/demo-owner-dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { to: "/demo-owner-dashboard/jobs", label: "Job Order", icon: ClipboardList },
+  { to: "/demo-owner-dashboard/jobs", label: "Pesanan Kerja", icon: ClipboardList },
   { to: "/demo-owner-dashboard/technicians", label: "Teknisi", icon: Users },
   { to: "/demo-owner-dashboard/customers", label: "Pelanggan", icon: UserCircle },
-  { to: "/demo-owner-dashboard/invoices", label: "Invoice", icon: FileText },
-  { to: "/demo-owner-dashboard/inventory", label: "Inventori", icon: Package },
+  { to: "/demo-owner-dashboard/invoices", label: "Tagihan", icon: FileText },
+  { to: "/demo-owner-dashboard/inventory", label: "Stok Suku Cadang", icon: Package },
   { to: "/demo-owner-dashboard/contracts", label: "Kontrak", icon: FileCheck },
   { to: "/demo-owner-dashboard/settings", label: "Pengaturan", icon: Settings },
 ];
@@ -149,7 +149,6 @@ export function DemoWorkspaceLayout() {
           </div>
         </Link>
         <div className="sidebar-intro">
-          <span>Workspace</span>
           <strong>{business.plan} plan</strong>
           <small>{business.subscriptionStatusLabel} · {business.city}</small>
         </div>
@@ -162,14 +161,9 @@ export function DemoWorkspaceLayout() {
           ))}
         </nav>
         <div className="app-shell__account">
-          <div className="avatar">BS</div>
-          <div>
-            <strong>Budi Santoso</strong>
-            <span>Demo owner</span>
-          </div>
-          <a href={waLink} className="btn btn--primary" target="_blank" rel="noreferrer">
+          <a href={waLink} className="btn btn--primary btn--block" target="_blank" rel="noreferrer">
             <MessageCircle size={16} />
-            Chat Sales
+            Hubungi Sales
           </a>
         </div>
       </aside>
@@ -252,21 +246,21 @@ export function DemoDashboardPage() {
 
   const interactiveQueueCards = [
     {
-      title: "Dispatch",
-      value: `${pendingDispatchCount} job`,
-      text: pendingDispatchCount > 0 ? "Masih ada job yang perlu assignment atau start kerja." : "Semua job utama sudah bergerak.",
+      title: "Penugasan",
+      value: `${pendingDispatchCount} tugas`,
+      text: pendingDispatchCount > 0 ? "Masih ada tugas yang perlu assignment atau mulai kerja." : "Semua tugas utama sudah bergerak.",
       tone: "warning" as const,
     },
     {
-      title: "Ready To Bill",
-      value: `${readyToBillCount} job`,
-      text: quickBillingState === "sent" ? "Invoice cepat baru saja dikirim dari panel demo." : "Pekerjaan selesai bisa langsung lanjut invoice cepat.",
+      title: "Siap Ditagih",
+      value: `${readyToBillCount} pesanan`,
+      text: quickBillingState === "sent" ? "Tagihan cepat baru saja dikirim dari panel demo." : "Pekerjaan selesai bisa langsung lanjut tagihan cepat.",
       tone: "info" as const,
     },
     {
-      title: "CRM Follow Up",
+      title: "Follow Up Pelanggan",
       value: `${completedJobCount + 4} akun`,
-      text: autoSendState === "customer" ? "Reminder pelanggan berhasil disimulasikan dari demo." : "Pelanggan dengan kontrak due atau invoice tertunda tetap kelihatan.",
+      text: autoSendState === "customer" ? "Reminder pelanggan berhasil disimulasikan dari demo." : "Pelanggan dengan kontrak due atau tagihan tertunda tetap kelihatan.",
       tone: "success" as const,
     },
   ];
@@ -293,7 +287,7 @@ export function DemoDashboardPage() {
   }
 
   function labelForNextAction(status: string) {
-    if (status === "pending") return "Assign teknisi";
+    if (status === "pending") return "Tugaskan teknisi";
     if (status === "assigned") return "Mulai jalan";
     if (status === "on_the_way") return "Tandai selesai";
     if (status === "done") return "Tandai lunas";
@@ -304,12 +298,12 @@ export function DemoDashboardPage() {
     <div className="page-stack">
       <div className="stats-grid">
         {interactiveStats.map((item) => (
-          <StatCard key={item.label} label={item.label} value={item.value} hint={item.hint} tone={item.tone} />
+          <StatCard key={item.label} label={item.label} value={item.value} hint={item.hint} type={item.tone as any} />
         ))}
       </div>
 
       <div className="dashboard-grid dashboard-grid--balanced">
-        <SectionCard title="Operations Cockpit" description="Panel pertama di dashboard live: dispatch, billing, dan CRM follow up dibaca dari satu layar.">
+        <SectionCard title="Pusat Kendali" description="Panel pertama di dashboard live: penugasan, tagihan, dan follow up pelanggan dibaca dari satu layar.">
           <div className="ops-grid">
             {interactiveQueueCards.map((card) => (
               <button
@@ -330,7 +324,7 @@ export function DemoDashboardPage() {
           </div>
         </SectionCard>
 
-        <SectionCard title="Dispatch Hari Ini" description="Ringkas, cepat dibaca, dan fokus ke siapa berangkat ke mana seperti dashboard live.">
+        <SectionCard title="Penugasan Hari Ini" description="Ringkas, cepat dibaca, dan fokus ke siapa berangkat ke mana seperti dashboard live.">
           <div className="dispatch-list">
             {interactiveJobs.map((job) => (
               <div key={job.id} className="dispatch-item dispatch-item--interactive">
@@ -350,7 +344,7 @@ export function DemoDashboardPage() {
                 </div>
                 <div className="dispatch-item__status">
                   <Badge tone={job.priority === "Urgent" ? "danger" : job.status === "done" ? "success" : job.status === "pending" ? "warning" : "info"}>
-                    {job.priority === "Urgent" ? `Urgent · ${job.status.replaceAll("_", " ")}` : job.status.replaceAll("_", " ")}
+                    {job.priority === "Urgent" ? `Urgent · ${job.status === "on_the_way" ? "Perjalanan" : job.status === "in_progress" ? "Dikerjakan" : job.status}` : job.status === "pending" ? "Menunggu" : job.status === "done" ? "Selesai" : job.status === "on_the_way" ? "Perjalanan" : job.status === "in_progress" ? "Dikerjakan" : job.status === "assigned" ? "Ditugaskan" : job.status === "paid" ? "Lunas" : job.status}
                   </Badge>
                   <button
                     type="button"
@@ -395,12 +389,12 @@ export function DemoDashboardPage() {
 
       <div className="dashboard-grid dashboard-grid--balanced">
         <SectionCard title="Revenue 7 Hari" description="Preview ritme pendapatan mingguan. Klik batang untuk melihat detail hari yang dipilih.">
-          <div className="summary-list">
-            <div>
+          <div className="summary-list summary-list--vertical">
+            <div className="flex justify-between items-center w-full">
               <span>Hari terpilih</span>
-              <strong>{selectedRevenue.label} · {formatRupiah(selectedRevenue.value)}</strong>
+              <strong>{selectedRevenue.label} - {formatRupiah(selectedRevenue.value)}</strong>
             </div>
-            <div>
+            <div className="flex justify-between items-center w-full mt-2">
               <span>Status omzet</span>
               <strong>{selectedRevenue.value >= 700_000 ? "Puncak penagihan" : selectedRevenue.value >= 500_000 ? "Normal sehat" : "Perlu follow up"}</strong>
             </div>
@@ -498,21 +492,21 @@ export function DemoDashboardPage() {
           </div>
         </SectionCard>
 
-        <SectionCard title="Quick Billing" description="Di dashboard live owner bisa langsung pilih job, isi total, lalu kirim invoice dari panel cepat.">
+        <SectionCard title="Tagihan Cepat" description="Di dashboard live owner bisa langsung pilih tugas, isi total, lalu kirim tagihan dari panel cepat.">
           <div className="summary-list">
             {quickBillingPreview.map((item) => (
               <div key={item.label}>
                 <span>{item.label}</span>
-                <strong>{item.label === "Status invoice" ? (quickBillingState === "sent" ? "Sent" : "Draft") : item.value}</strong>
+                <strong>{item.label === "Status tagihan" ? (quickBillingState === "sent" ? "Terkirim" : "Draf") : item.value}</strong>
               </div>
             ))}
           </div>
           <div className="button-row button-row--left">
             <button className="btn btn--secondary" onClick={() => setQuickBillingState((current) => (current === "draft" ? "sent" : "draft"))}>
-              {quickBillingState === "draft" ? "Buat Invoice Cepat" : "Ubah ke Draft"}
+              {quickBillingState === "draft" ? "Buat Tagihan Cepat" : "Ubah ke Draf"}
             </button>
             <button className="btn btn--primary" onClick={() => setQuickBillingState("sent")}>
-              Kirim Invoice
+              Kirim Tagihan
               <ArrowRight size={16} />
             </button>
           </div>

@@ -5,6 +5,7 @@ import { db } from "../db/index.js";
 import * as schema from "../db/schema.js";
 import { env } from "./env.js";
 import { getTrustedOrigins } from "./origins.js";
+import { detectDatabaseDialect } from "../db/runtime.js";
 
 if (!globalThis.crypto) {
   globalThis.crypto = webcrypto as Crypto;
@@ -12,7 +13,7 @@ if (!globalThis.crypto) {
 
 export const auth: ReturnType<typeof betterAuth> = betterAuth({
   database: drizzleAdapter(db, {
-    provider: "pg",
+    provider: detectDatabaseDialect(env.DATABASE_URL),
     schema,
   }),
   secret: env.BETTER_AUTH_SECRET,

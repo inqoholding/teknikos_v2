@@ -1,5 +1,6 @@
-import { Link } from "react-router-dom";
-import { useBusinessQuery, useCreateBusinessSupportRequestMutation } from "../api/hooks";
+import { Link, useNavigate } from "react-router-dom";
+import { useBusinessQuery, useCreateBusinessSupportRequestMutation, useLogoutMutation } from "../api/hooks";
+import { Badge } from "../components/UI";
 import { getErrorMessage } from "../api/client";
 import { PageError, PageLoader } from "../components/PageState";
 
@@ -23,7 +24,9 @@ function buildWhatsAppLink(input: {
 }
 
 export default function PendingPaymentPage() {
+  const navigate = useNavigate();
   const businessQuery = useBusinessQuery();
+  const logoutMutation = useLogoutMutation();
   const supportRequestMutation = useCreateBusinessSupportRequestMutation();
 
   if (businessQuery.isLoading) {
@@ -57,44 +60,54 @@ export default function PendingPaymentPage() {
     window.open(whatsappLink, "_blank", "noopener,noreferrer");
   }
 
+  async function handleLogout() {
+    await logoutMutation.mutateAsync();
+    navigate("/login", { replace: true });
+  }
+
   return (
-    <div className="page-stack">
-      <section className="surface-card waiting-payment-card">
-        <span className="eyebrow-pill">Pending Payment</span>
-        <h1>{heading}</h1>
-        <p>
+    <div className="auth-page">
+      <div className="auth-page__panel">
+        <section className="glass-card waiting-payment-card" style={{ padding: "40px", borderRadius: "32px" }}>
+        <span className="eyebrow-pill" style={{ background: "rgba(245, 158, 11, 0.1)", color: "#d97706" }}>Tagihan Tertunda</span>
+        <h1 style={{ marginTop: "16px", fontSize: "28px" }}>{heading}</h1>
+        <p className="lead-text" style={{ color: "var(--text-muted)", marginBottom: "32px" }}>
           Paket <strong>{business.plan}</strong> untuk <strong>{business.name}</strong> sudah
-          tercatat. Langkah berikutnya adalah menghubungi sales untuk lanjut pembayaran, perpanjangan, atau upgrade paket.
+          terdaftar. Silakan hubungi admin untuk aktivasi dashboard atau perpanjangan lisensi.
         </p>
 
-        <div className="summary-list">
-          <div><span>Nama bisnis</span><strong>{business.name}</strong></div>
-          <div><span>Plan dipilih</span><strong>{business.plan}</strong></div>
-          <div><span>Status</span><strong>{business.subscriptionStatusLabel ?? "Pending Payment"}</strong></div>
-          <div><span>Email owner</span><strong>{business.owner?.email ?? "-"}</strong></div>
+        <div className="summary-list" style={{ background: "var(--surface-tint)", padding: "20px", borderRadius: "20px", marginBottom: "32px" }}>
+          <div style={{ padding: "8px 0" }}><span>Bisnis</span><strong>{business.name}</strong></div>
+          <div style={{ padding: "8px 0" }}><span>Paket</span><strong>{business.plan}</strong></div>
+          <div style={{ padding: "8px 0" }}><span>Status</span><Badge tone="warning">{business.subscriptionStatusLabel ?? "Pending Payment"}</Badge></div>
+          <div style={{ padding: "8px 0" }}><span>Owner</span><strong>{business.owner?.email ?? "-"}</strong></div>
         </div>
 
-        <div className="callout callout--warning">
+        <div className="callout callout--info" style={{ marginBottom: "32px" }}>
           <div>
-            <strong>Akses dashboard penuh masih dikunci</strong>
-            <p>
-              Setelah status subscription aktif kembali, akses dashboard akan dibuka lagi tanpa menghapus data bisnis yang sudah ada.
+            <strong>Akses dashboard sedang dibatasi</strong>
+            <p style={{ fontSize: "13px" }}>
+              Data bisnis Anda aman. Setelah pembayaran dikonfirmasi, seluruh fitur operasional akan terbuka secara otomatis.
             </p>
           </div>
         </div>
 
-        <div className="button-row button-row--left">
-          <button className="btn btn--primary" type="button" onClick={() => handleRequest("subscription_renewal")}>
-            Perpanjang via WhatsApp
+        <div className="button-row" style={{ gap: "12px" }}>
+          <button className="btn btn--primary btn--block" type="button" onClick={() => handleRequest("subscription_renewal")}>
+            Aktivasi via WhatsApp
           </button>
-          <button className="btn btn--secondary" type="button" onClick={() => handleRequest("subscription_upgrade")}>
-            Upgrade Paket via Sales
+          <button className="btn btn--secondary btn--block" type="button" onClick={() => handleRequest("subscription_upgrade")}>
+            Upgrade ke Bisnis
           </button>
-          <Link className="btn btn--secondary" to="/login">
-            Kembali ke Login
-          </Link>
         </div>
-      </section>
+        
+        <div style={{ marginTop: "24px", textAlign: "center" }}>
+          <button className="btn btn--link" type="button" onClick={handleLogout} disabled={logoutMutation.isPending}>
+            {logoutMutation.isPending ? "Mengeluarkan Sesi..." : "Ganti Akun & Keluar"}
+          </button>
+        </div>
+        </section>
+      </div>
     </div>
   );
 }

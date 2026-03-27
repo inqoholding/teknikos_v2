@@ -1,7 +1,7 @@
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { getErrorMessage } from "../api/client";
-import { useRegisterMutation } from "../api/hooks";
+import { useBusinessQuery, useRegisterMutation, useSessionQuery } from "../api/hooks";
 import { AuthScaffold } from "../components/Layout";
 
 const plans = [
@@ -14,6 +14,9 @@ export default function RegisterPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const registerMutation = useRegisterMutation();
+  const sessionQuery = useSessionQuery();
+  const { data: sessionData, isLoading: isSessionLoading } = sessionQuery;
+  const businessQuery = useBusinessQuery(Boolean(sessionData));
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -21,6 +24,30 @@ export default function RegisterPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [selectedPlan, setSelectedPlan] = useState(searchParams.get("plan") || "Starter");
   const passwordsMatch = password.length > 0 && password === confirmPassword;
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (sessionData && !isSessionLoading) {
+      const role = sessionData.user.role;
+      if (role === "admin" || role === "moderator") {
+        navigate("/admin", { replace: true });
+        return;
+      }
+      if (role === "technician") {
+        navigate("/jobs", { replace: true });
+        return;
+      }
+
+      // Check business subscription status for owner
+      if (businessQuery.data) {
+        if (["pending_payment", "past_due", "paused", "cancelled"].includes(businessQuery.data.subscriptionStatus ?? "")) {
+          navigate("/payment-pending", { replace: true });
+          return;
+        }
+        navigate("/dashboard", { replace: true });
+      }
+    }
+  }, [sessionData, isSessionLoading, businessQuery.data, navigate]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();

@@ -4,9 +4,34 @@ import type { ApiErrorPayload } from "./types";
 export const CSRF_HEADER_NAME = "x-teknikos-csrf";
 export const CSRF_HEADER_VALUE = "1";
 
+function isLocalDevHostname(hostname: string) {
+  return hostname === "localhost" || hostname === "127.0.0.1" || hostname === "::1" || hostname.endsWith(".local");
+}
+
+function alignLocalDevApiUrl(apiUrl: string) {
+  if (typeof window === "undefined") {
+    return apiUrl;
+  }
+
+  try {
+    const parsed = new URL(apiUrl);
+    const pageHostname = window.location.hostname.toLowerCase();
+    const apiHostname = parsed.hostname.toLowerCase();
+
+    if (isLocalDevHostname(pageHostname) && isLocalDevHostname(apiHostname) && pageHostname !== apiHostname) {
+      parsed.hostname = pageHostname;
+      return parsed.toString().replace(/\/$/, "");
+    }
+  } catch {
+    return apiUrl;
+  }
+
+  return apiUrl;
+}
+
 function resolveApiUrl() {
   if (import.meta.env.VITE_API_URL) {
-    return import.meta.env.VITE_API_URL;
+    return alignLocalDevApiUrl(import.meta.env.VITE_API_URL);
   }
 
   if (typeof window === "undefined") {

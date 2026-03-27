@@ -4,16 +4,89 @@ import { getErrorMessage } from "../api/client";
 import { useSetupBusinessMutation } from "../api/hooks";
 
 const services = [
-  { label: "Servis AC", description: "Cuci, bongkar, isi freon, maintenance berkala.", active: true },
-  { label: "Plumber", description: "Pipa bocor, pompa, saluran mampet, sanitasi." },
-  { label: "Listrik", description: "Panel, instalasi, troubleshooting, lampu, MCB." },
-  { label: "Lainnya", description: "Perbaikan umum dan pekerjaan custom." },
+  { 
+    label: "Servis AC", 
+    description: "Cuci, bongkar, isi freon, maintenance berkala.",
+    icon: (
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" />
+        <path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
+        <path d="M7 12a5 5 0 0 1 10 0" />
+      </svg>
+    )
+  },
+  { 
+    label: "Plumber", 
+    description: "Pipa bocor, pompa, saluran mampet, sanitasi.",
+    icon: (
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 3v18" />
+        <path d="M10 18l2 2l2 -2" />
+        <path d="M10 6l2 -2l2 2" />
+      </svg>
+    )
+  },
+  { 
+    label: "Listrik", 
+    description: "Panel, instalasi, troubleshooting, lampu, MCB.",
+    icon: (
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M13 3l0 7l6 0l-8 11l0 -7l-6 0l8 -11" />
+      </svg>
+    )
+  },
+  { 
+    label: "Lainnya", 
+    description: "Perbaikan umum dan pekerjaan custom.",
+    icon: (
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" />
+        <path d="M12 9v6" />
+        <path d="M9 12h6" />
+      </svg>
+    )
+  },
 ];
 
 const planOptions = [
-  { key: "Starter", label: "Starter", description: "Mulai gratis untuk setup dasar." },
-  { key: "Pro", label: "Pro", description: "Rekomendasi untuk tim operasional aktif." },
-  { key: "Bisnis", label: "Bisnis", description: "Cocok untuk skala lebih besar." },
+  { 
+    key: "Starter", 
+    label: "Starter", 
+    description: "Mulai gratis untuk setup dasar.",
+    icon: (
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M5 12l5 5l10 -10" />
+      </svg>
+    )
+  },
+  { 
+    key: "Pro", 
+    label: "Pro", 
+    description: "Rekomendasi untuk tim operasional.",
+    icon: (
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" />
+        <path d="M12 7l0 10" />
+        <path d="M9 10l3 -3l3 3" />
+      </svg>
+    )
+  },
+  { 
+    key: "Bisnis", 
+    label: "Bisnis", 
+    description: "Cocok untuk skala lebih besar.",
+    icon: (
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M3 21l18 0" />
+        <path d="M5 21v-14l8 -4v18" />
+        <path d="M19 21v-10l-6 -3" />
+        <path d="M9 9l0 .01" />
+        <path d="M9 12l0 .01" />
+        <path d="M9 15l0 .01" />
+        <path d="M9 18l0 .01" />
+      </svg>
+    )
+  },
 ];
 
 export default function OnboardingPage() {
@@ -102,6 +175,12 @@ export default function OnboardingPage() {
             <span>Alamat lengkap</span>
             <textarea value={address} onChange={(event) => setAddress(event.target.value)} />
           </label>
+          <div className="section-card__header" style={{ marginTop: "24px" }}>
+            <div>
+              <h3>Pilih bidang bisnis & paket</h3>
+              <p>Sesuaikan TeknikOS dengan kebutuhan spesifik tim Anda.</p>
+            </div>
+          </div>
           <div className="service-grid">
             {services.map((service) => (
               <article
@@ -109,7 +188,7 @@ export default function OnboardingPage() {
                 className={`service-card ${selectedService === service.label ? "service-card--active" : ""}`}
                 onClick={() => setSelectedService(service.label)}
               >
-                <div className="service-card__icon">{service.label.slice(0, 2).toUpperCase()}</div>
+                <div className="service-card__icon">{service.icon}</div>
                 <strong>{service.label}</strong>
                 <p>{service.description}</p>
               </article>
@@ -122,7 +201,7 @@ export default function OnboardingPage() {
                 className={`service-card ${selectedPlan === plan.key ? "service-card--active" : ""}`}
                 onClick={() => setSelectedPlan(plan.key)}
               >
-                <div className="service-card__icon">{plan.label.slice(0, 2).toUpperCase()}</div>
+                <div className="service-card__icon">{plan.icon}</div>
                 <strong>{plan.label}</strong>
                 <p>{plan.description}</p>
               </article>
