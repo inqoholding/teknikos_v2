@@ -12,7 +12,7 @@ export const businesses = pgTable("businesses", {
   email: text("email"),
   address: text("address"),
   city: text("city"),
-  plan: text("plan").notNull().default("Pro"),
+  plan: text("plan").notNull().default("Starter"),
   subscriptionStatus: text("subscription_status").notNull().default("trialing"),
   trialEndsAt: timestamp("trial_ends_at"),
   currentPeriodEndsAt: timestamp("current_period_ends_at"),

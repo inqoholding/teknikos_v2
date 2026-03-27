@@ -247,7 +247,7 @@ export function LandingHeroTemplate({ salesWhatsappLink }: { salesWhatsappLink: 
               <li className="flex gap-3"><CheckCircle2 size={18} className="text-emerald-500 shrink-0" /> Manajemen Teknisi & Skill Tags</li>
               <li className="flex gap-3"><CheckCircle2 size={18} className="text-emerald-500 shrink-0" /> CRM Pelanggan & Unit Aset</li>
             </ul>
-            <button onClick={() => navigate('/register')} className="w-full rounded-full border border-white/20 bg-white/5 py-3 text-sm font-bold hover:bg-white/10 transition-colors">
+            <button onClick={() => navigate('/register?plan=Starter')} className="w-full rounded-full border border-white/20 bg-white/5 py-3 text-sm font-bold hover:bg-white/10 transition-colors">
               Ambil Starter
             </button>
           </div>
@@ -271,7 +271,7 @@ export function LandingHeroTemplate({ salesWhatsappLink }: { salesWhatsappLink: 
               <li className="flex gap-3 opacity-90"><CheckCircle2 size={18} className="text-emerald-400 shrink-0" /> Inventori & Stok Sparepart</li>
               <li className="flex gap-3 opacity-90"><CheckCircle2 size={18} className="text-emerald-400 shrink-0" /> Invoice PDF via WhatsApp</li>
             </ul>
-            <button onClick={() => navigate('/register')} className="w-full rounded-full bg-gradient-to-r from-emerald-500 to-green-600 py-3 text-sm font-bold text-white hover:scale-[1.02] transition-transform">
+            <button onClick={() => navigate('/register?plan=Pro')} className="w-full rounded-full bg-gradient-to-r from-emerald-500 to-green-600 py-3 text-sm font-bold text-white hover:scale-[1.02] transition-transform">
               Mulai Berlangganan
             </button>
           </div>
@@ -291,7 +291,7 @@ export function LandingHeroTemplate({ salesWhatsappLink }: { salesWhatsappLink: 
               <li className="flex gap-3"><CheckCircle2 size={18} className="text-zinc-500 shrink-0" /> Laporan Profitabilitas Berbasis Data</li>
               <li className="flex gap-3"><CheckCircle2 size={18} className="text-zinc-500 shrink-0" /> Dukungan Prioritas 24/7</li>
             </ul>
-            <button onClick={() => navigate('/register')} className="w-full rounded-full border border-white/20 bg-white/5 py-3 text-sm font-bold hover:bg-white/10 transition-colors">
+            <button onClick={() => navigate('/register?plan=Bisnis')} className="w-full rounded-full border border-white/20 bg-white/5 py-3 text-sm font-bold hover:bg-white/10 transition-colors">
               Ambil Bisnis
             </button>
           </div>

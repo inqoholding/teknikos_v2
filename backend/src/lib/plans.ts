@@ -81,6 +81,10 @@ export function normalizeBusinessPlan(plan?: string | null): BusinessPlan {
     return plan;
   }
 
+  if (plan === "Business") {
+    return "Bisnis";
+  }
+
   return "Starter";
 }
 

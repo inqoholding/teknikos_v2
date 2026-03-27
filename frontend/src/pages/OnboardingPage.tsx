@@ -49,7 +49,8 @@ export default function OnboardingPage() {
       {
         onSuccess: () => {
           window.sessionStorage.removeItem("teknikos:selected-plan");
-          navigate(selectedPlan === "Starter" ? "/dashboard" : "/payment-pending", { replace: true });
+          const isStarter = selectedPlan.toLowerCase() === "starter";
+          navigate(isStarter ? "/dashboard" : "/payment-pending", { replace: true });
         },
       },
     );
