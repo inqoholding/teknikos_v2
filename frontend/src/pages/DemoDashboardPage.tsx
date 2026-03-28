@@ -17,7 +17,7 @@ const queueCards = [
 ];
 
 const waLink =
-  "https://wa.me/6281354444967?text=Halo%20TeknikOS,%20saya%20ingin%20lanjut%20demo%20atau%20berlangganan.";
+  "https://wa.me/6281354444967?text=Halo%20Coreveta,%20saya%20ingin%20lanjut%20demo%20atau%20berlangganan.";
 
 export default function DemoDashboardPage() {
   return (
@@ -26,7 +26,7 @@ export default function DemoDashboardPage() {
         <div className="brand-mark brand-mark--hero">
           <div className="brand-mark__icon">T</div>
           <div>
-            <strong>TeknikOS</strong>
+            <strong>Coreveta</strong>
             <span>Demo Owner Dashboard</span>
           </div>
         </div>
@@ -107,7 +107,7 @@ export default function DemoDashboardPage() {
                   <div className="dispatch-item__body">
                     <strong>{title}</strong>
                     <p>{meta}</p>
-                    <small>Contoh tampilan dispatch owner TeknikOS</small>
+                    <small>Contoh tampilan dispatch owner Coreveta</small>
                   </div>
                   <div className="dispatch-item__status">
                     <Badge tone={status === "Urgent" ? "danger" : status === "Pending" ? "warning" : "info"}>

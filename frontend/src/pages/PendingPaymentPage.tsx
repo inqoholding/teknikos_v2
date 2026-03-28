@@ -13,7 +13,7 @@ function buildWhatsAppLink(input: {
   ownerEmail?: string | null;
 }) {
   const message = [
-    "Halo admin TeknikOS, saya ingin lanjut pembayaran subscription.",
+    "Halo admin Coreveta, saya ingin lanjut pembayaran subscription.",
     `Nama bisnis: ${input.businessName ?? "-"}`,
     `Plan: ${input.plan ?? "-"}`,
     `Owner: ${input.ownerName ?? "-"}`,

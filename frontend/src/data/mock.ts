@@ -32,6 +32,9 @@ export interface Technician {
   status: "Aktif" | "Bertugas" | "Standby" | "Tidak Aktif";
   rating: number;
   jobsCompleted: number;
+  attendanceType?: "Harian" | "Lokasi Job";
+  attendanceLocationLabel?: string;
+  lastCheckIn?: string;
 }
 
 export interface Customer {
@@ -119,6 +122,9 @@ export const technicians: Technician[] = [
     status: "Aktif",
     rating: 4.8,
     jobsCompleted: 124,
+    attendanceType: "Harian",
+    attendanceLocationLabel: "Workshop Pusat · Makassar",
+    lastCheckIn: "08:15",
   },
   {
     id: "tech-2",
@@ -128,6 +134,9 @@ export const technicians: Technician[] = [
     status: "Bertugas",
     rating: 4.7,
     jobsCompleted: 98,
+    attendanceType: "Lokasi Job",
+    attendanceLocationLabel: "PT Sinar Jaya (JOB-014)",
+    lastCheckIn: "09:45",
   },
   {
     id: "tech-3",
@@ -137,6 +146,9 @@ export const technicians: Technician[] = [
     status: "Standby",
     rating: 4.9,
     jobsCompleted: 147,
+    attendanceType: "Harian",
+    attendanceLocationLabel: "Klinik Arafah (Survey)",
+    lastCheckIn: "10:30",
   },
 ];
 

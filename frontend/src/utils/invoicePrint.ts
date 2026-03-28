@@ -37,7 +37,7 @@ function buildInvoiceDocument(input: InvoicePrintInput) {
   doc.setFont("helvetica", "bold");
   doc.setFontSize(25);
   doc.setTextColor(255, 255, 255);
-  doc.text(business?.name ?? "TeknikOS", 48, 62);
+  doc.text(business?.name ?? "Coreveta", 48, 62);
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(11);
@@ -129,7 +129,7 @@ function buildInvoiceDocument(input: InvoicePrintInput) {
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
   doc.setTextColor(107, 114, 128);
-  doc.text("Invoice dibuat dari TeknikOS. Pembayaran invoice dipisahkan dari status operasional job.", 40, 780);
+  doc.text("Invoice dibuat dari Coreveta. Pembayaran invoice dipisahkan dari status operasional job.", 40, 780);
 
   return doc;
 }

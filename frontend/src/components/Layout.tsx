@@ -137,7 +137,7 @@ export function AppShellLayout() {
         <Link to="/" className="brand-mark">
           <div className="brand-mark__icon">T</div>
           <div>
-            <strong>TeknikOS</strong>
+            <strong>Coreveta</strong>
             <span>{business?.name ?? "Bisnis"}</span>
           </div>
         </Link>
@@ -261,7 +261,7 @@ export function AdminShellLayout() {
         <Link to="/" className="brand-mark">
           <div className="brand-mark__icon">T</div>
           <div>
-            <strong>TeknikOS Admin</strong>
+            <strong>Coreveta Admin</strong>
             <span>Pusat kontrol</span>
           </div>
         </Link>
@@ -312,7 +312,7 @@ export function AdminShellLayout() {
               <div className="avatar avatar--small">{initials}</div>
               <div>
                 <strong>{owner?.name ?? "Admin"}</strong>
-                <span>{owner?.email ?? "staff@teknikos.id"}</span>
+                <span>{owner?.email ?? "staff@coreveta.com"}</span>
               </div>
             </div>
           </div>
@@ -342,7 +342,7 @@ export function AuthScaffold({
         <div className="brand-mark brand-mark--hero">
           <div className="brand-mark__icon">T</div>
           <div>
-            <strong>TeknikOS</strong>
+            <strong>Coreveta</strong>
             <span>Field Service Operating System</span>
           </div>
         </div>
@@ -385,7 +385,7 @@ export function MarketingFooter() {
   return (
     <footer className="landing-footer">
       <div>
-        <strong>TeknikOS</strong>
+        <strong>Coreveta</strong>
         <span>Sistem operasi digital untuk bisnis jasa teknik Indonesia.</span>
       </div>
       <div className="landing-footer__links">

@@ -14,7 +14,7 @@ const SALES_WHATSAPP = "6281354444967";
 
 function buildSalesSubscriptionLink(input: { businessName?: string | null; plan?: string | null; type: "upgrade" | "renewal" }) {
   const message = [
-    "Halo sales TeknikOS, saya butuh bantuan subscription.",
+    "Halo sales Coreveta, saya butuh bantuan subscription.",
     `Nama bisnis: ${input.businessName ?? "-"}`,
     `Paket saat ini: ${input.plan ?? "-"}`,
     `Permintaan: ${input.type === "upgrade" ? "Upgrade subscription" : "Perpanjang subscription"}`,
@@ -172,7 +172,7 @@ export default function SettingsPage() {
           <article className="settings-link-card">
             <span className="eyebrow">WhatsApp Rules</span>
             <strong>Rules Penggunaan WhatsApp</strong>
-            <p>Baca aturan singkat agar nomor bisnis lebih aman dan tidak mudah diblokir saat dipakai di TeknikOS.</p>
+            <p>Baca aturan singkat agar nomor bisnis lebih aman dan tidak mudah diblokir saat dipakai di Coreveta.</p>
             <Link className="btn btn--secondary" to="/settings/whatsapp-rules">
               Buka Rules WhatsApp
             </Link>

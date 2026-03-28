@@ -50,14 +50,14 @@ async function main() {
   await ensureStaffUser({
     email: env.ADMIN_EMAIL,
     password: env.ADMIN_PASSWORD,
-    name: "TeknikOS Admin",
+    name: "Coreveta Admin",
     role: "admin",
   });
 
   await ensureStaffUser({
     email: env.MODERATOR_EMAIL,
     password: env.MODERATOR_PASSWORD,
-    name: "TeknikOS Moderator",
+    name: "Coreveta Moderator",
     role: "moderator",
   });
 

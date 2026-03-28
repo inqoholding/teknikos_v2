@@ -46,7 +46,7 @@ const technicianQuerySchema = z.object({
 
 function generateTemporaryPassword() {
   const seed = Math.random().toString(36).slice(2, 8).toUpperCase();
-  return `TeknikOS!${seed}`;
+  return `Coreveta!${seed}`;
 }
 
 function serializeTechnician(technician: typeof technicians.$inferSelect, jobsCompleted: number) {

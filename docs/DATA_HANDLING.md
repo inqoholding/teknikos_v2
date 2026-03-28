@@ -1,4 +1,4 @@
-# TeknikOS Data Handling
+# Coreveta Data Handling
 
 ## Scope
 - Account data: name, email, phone, role, auth/session metadata
@@ -21,4 +21,4 @@
 - No frontend bundle may expose backend secret keys
 
 ## GDPR
-- If TeknikOS is offered to EEA/UK users, access/correction/deletion requests should be processed under the applicable GDPR basis
+- If Coreveta is offered to EEA/UK users, access/correction/deletion requests should be processed under the applicable GDPR basis

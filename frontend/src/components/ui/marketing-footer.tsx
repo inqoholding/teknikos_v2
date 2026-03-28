@@ -72,7 +72,7 @@ export function MarketingFooter({
       ],
     },
   ],
-  copyright = "© 2026 TeknikOS. All rights reserved.",
+  copyright = "© 2026 Coreveta. All rights reserved.",
   bottomLinks = [
     { text: "Privacy", url: PRIVACY_URL, external: true },
     { text: "Terms", url: TERMS_URL, external: true },
@@ -91,7 +91,7 @@ export function MarketingFooter({
                   T
                 </div>
                 <div>
-                  <p className="font-['Space_Grotesk'] text-xl font-semibold tracking-[-0.04em] text-white">TeknikOS</p>
+                  <p className="font-['Space_Grotesk'] text-xl font-semibold tracking-[-0.04em] text-white">Coreveta</p>
                   <p className="text-[11px] uppercase tracking-[0.16em] text-emerald-500/80">SaaS jasa teknik Indonesia</p>
                 </div>
               </div>

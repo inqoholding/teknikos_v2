@@ -26,9 +26,9 @@ export function LandingHeroTemplate({ salesWhatsappLink }: { salesWhatsappLink: 
       <nav className="fixed top-6 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-5xl rounded-full border border-white/10 bg-white/5 backdrop-blur-xl px-6 py-3 flex items-center justify-between shadow-2xl">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-emerald-500 to-green-600 flex items-center justify-center font-bold text-sm">
-            T
+            C
           </div>
-          <span className="font-bold text-lg tracking-tight">TeknikOS</span>
+          <span className="font-bold text-lg tracking-tight">Coreveta</span>
         </div>
         <div className="hidden md:flex items-center gap-8 text-sm font-medium text-zinc-300">
           <a href="#fitur" className="hover:text-white transition">Fitur</a>
@@ -131,7 +131,7 @@ export function LandingHeroTemplate({ salesWhatsappLink }: { salesWhatsappLink: 
                 <div className="w-3 h-3 rounded-full bg-green-500/20 border border-green-500/40"></div>
               </div>
               <div className="mx-auto bg-white/5 rounded-lg px-4 py-1 text-[10px] text-zinc-500 border border-white/5 font-mono">
-                app.teknikos.id/{activeFeature}
+                coreveta.com/{activeFeature}
               </div>
             </div>
             <div className="relative aspect-video overflow-hidden bg-black/50">

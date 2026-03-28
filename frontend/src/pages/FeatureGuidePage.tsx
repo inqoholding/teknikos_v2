@@ -121,7 +121,7 @@ const quickStartSteps = [
 
 const faqItems = [
   {
-    question: "TeknikOS cocok untuk bisnis apa?",
+    question: "Coreveta cocok untuk bisnis apa?",
     answer:
       "Paling cocok untuk jasa teknik seperti servis AC, plumber, listrik, maintenance rutin, dan tim lapangan yang butuh koordinasi job plus penagihan.",
   },
@@ -143,7 +143,7 @@ const faqItems = [
 ];
 
 const supportWhatsappLink =
-  "https://wa.me/6281354444967?text=Halo%20TeknikOS,%20saya%20ingin%20tanya%20fitur%20atau%20minta%20bantuan%20troubleshooting.";
+  "https://wa.me/6281354444967?text=Halo%20Coreveta,%20saya%20ingin%20tanya%20fitur%20atau%20minta%20bantuan%20troubleshooting.";
 
 export default function FeatureGuidePage() {
   return (
@@ -152,7 +152,7 @@ export default function FeatureGuidePage() {
         <div className="brand-mark brand-mark--hero">
           <div className="brand-mark__icon">T</div>
           <div>
-            <strong>TeknikOS</strong>
+            <strong>Coreveta</strong>
             <span>Panduan fitur dan troubleshooting</span>
           </div>
         </div>
@@ -166,8 +166,8 @@ export default function FeatureGuidePage() {
 
       <section className="landing-hero guide-hero">
         <div className="landing-hero__copy">
-          <span className="eyebrow-pill">Panduan Cepat TeknikOS</span>
-          <h1>Halaman publik untuk menjelaskan fitur inti dan menangani masalah yang paling sering muncul di TeknikOS.</h1>
+          <span className="eyebrow-pill">Panduan Cepat Coreveta</span>
+          <h1>Halaman publik untuk menjelaskan fitur inti dan menangani masalah yang paling sering muncul di Coreveta.</h1>
           <p>
             Cocok untuk owner, admin, tim internal, atau calon client yang ingin memahami fungsi
             tiap modul tanpa menebak-nebak, sekaligus punya checklist saat ada error.
@@ -180,7 +180,7 @@ export default function FeatureGuidePage() {
               Buka Troubleshooting
             </a>
             <Link to="/register" className="btn btn--secondary">
-              Coba TeknikOS
+              Coba Coreveta
             </Link>
           </div>
         </div>
@@ -192,7 +192,7 @@ export default function FeatureGuidePage() {
             </div>
             <h3>Satu halaman untuk orientasi dan respon cepat</h3>
             <p>
-              Halaman ini merangkum apa yang dikerjakan TeknikOS, modul yang paling penting, dan
+              Halaman ini merangkum apa yang dikerjakan Coreveta, modul yang paling penting, dan
               langkah pertama yang perlu dilakukan saat terjadi error login, origin, atau 404.
             </p>
             <ul className="guide-bullet-list">
@@ -209,7 +209,7 @@ export default function FeatureGuidePage() {
           <span className="eyebrow">Fitur Utama</span>
           <h2>Modul yang benar-benar dipakai untuk menjalankan operasional</h2>
           <p>
-            TeknikOS dibangun untuk alur jasa teknik sehari-hari: job, teknisi, pelanggan, tagihan,
+            Coreveta dibangun untuk alur jasa teknik sehari-hari: job, teknisi, pelanggan, tagihan,
             sparepart, kontrak, dan kontrol client dari sisi admin.
           </p>
         </div>
@@ -282,7 +282,7 @@ export default function FeatureGuidePage() {
         <div className="guide-section__heading">
           <span className="eyebrow">Alur Pakai</span>
           <h2>Urutan singkat supaya user baru tidak bingung mulai dari mana</h2>
-          <p>Bagian ini cocok untuk owner baru, tim sales, atau tim deploy yang perlu menjelaskan flow TeknikOS secara ringkas.</p>
+          <p>Bagian ini cocok untuk owner baru, tim sales, atau tim deploy yang perlu menjelaskan flow Coreveta secara ringkas.</p>
         </div>
         <div className="guide-grid">
           {quickStartSteps.map((step, index) => (
@@ -341,7 +341,7 @@ export default function FeatureGuidePage() {
         <div className="guide-section__heading">
           <span className="eyebrow">FAQ</span>
           <h2>Pertanyaan yang paling sering muncul sebelum dan sesudah pakai</h2>
-          <p>FAQ ini dibuat untuk membantu calon user, owner, dan tim deploy memahami konteks penggunaan TeknikOS.</p>
+          <p>FAQ ini dibuat untuk membantu calon user, owner, dan tim deploy memahami konteks penggunaan Coreveta.</p>
         </div>
         <div className="guide-grid">
           {faqItems.map((item) => (
@@ -368,7 +368,7 @@ export default function FeatureGuidePage() {
             Tanya via WhatsApp
           </a>
           <Link to="/register" className="cta-inline-link">
-            Buat akun TeknikOS <ArrowRight size={16} />
+            Buat akun Coreveta <ArrowRight size={16} />
           </Link>
         </div>
       </section>
@@ -404,7 +404,7 @@ export default function FeatureGuidePage() {
             Tanya via WhatsApp
           </a>
           <Link to="/register" className="cta-inline-link">
-            Buat akun TeknikOS <ArrowRight size={16} />
+            Buat akun Coreveta <ArrowRight size={16} />
           </Link>
         </div>
       </section>

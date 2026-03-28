@@ -1,6 +1,6 @@
-# AI Agent Coordination Rules (TeknikOS)
+# AI Agent Coordination Rules (Coreveta)
 
-This file defines the shared standards and communication protocols for all AI agents (Codex, Antigravity, etc.) working on the TeknikOS project.
+This file defines the shared standards and communication protocols for all AI agents (Codex, Antigravity, etc.) working on the Coreveta project.
 
 ## 1. Coding & Routing Standards
 - **Express Wildcards**: Always use standard Express wildcard syntax `*` (e.g., `/api/auth/*`) instead of custom or non-standard wildcards like `{*any}`. 
@@ -8,7 +8,7 @@ This file defines the shared standards and communication protocols for all AI ag
 - **RESTful Principles**: Follow standard HTTP methods (GET, POST, PATCH, DELETE) and return appropriate status codes (400, 401, 403, 404, 429, 500).
 
 ## 2. Environment & URL Handling
-- **No Hardcoded IPs**: Do NOT hardcode the VPS IP (`156.67.220.110`) or domain (`app.teknikos.id`) directly in logic. Use `env.BETTER_AUTH_URL` or `env.FRONTEND_URL`.
+- **No Hardcoded IPs**: Do NOT hardcode the VPS IP (`156.67.220.110`) or domain (`app.coreveta.com`) directly in logic. Use `env.BETTER_AUTH_URL` or `env.FRONTEND_URL`.
 - **Dynamic Protocols**: Logic for secure cookies should depend on `env.BETTER_AUTH_URL.startsWith("https://")`.
 - **Trusted Origins**: Use `backend/src/lib/origins.ts` to manage allowed origins. Ensure it handles both IP and Domain access if required.
 

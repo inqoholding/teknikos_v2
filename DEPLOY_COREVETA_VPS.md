@@ -1,4 +1,4 @@
-# Deploy TeknikOS ke VPS Linux
+# Deploy Coreveta ke VPS Linux
 
 Panduan ini ditulis untuk struktur project saat ini:
 
@@ -303,4 +303,4 @@ pm2 restart teknikos-backend
 - naik ke Plan B saat client mulai aktif
 - migrasi ke PostgreSQL saat mulai butuh concurrency lebih besar
 
-Untuk kondisi project TeknikOS saat ini, Plan A + backup harian adalah titik mulai yang paling masuk akal.
+Untuk kondisi project Coreveta saat ini, Plan A + backup harian adalah titik mulai yang paling masuk akal.

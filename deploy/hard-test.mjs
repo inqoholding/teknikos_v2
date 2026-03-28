@@ -116,7 +116,7 @@ async function main() {
       name: `Pelanggan ${qaSuffix}`,
       phone: "081234567890",
       email: `qa-${stamp}@example.com`,
-      address: "Jl. QA TeknikOS No. 1, Makassar",
+      address: "Jl. QA Coreveta No. 1, Makassar",
       units: ["Pompa air 2 unit", "Panel listrik 1 unit"],
     }),
   });
@@ -126,7 +126,7 @@ async function main() {
   const updatedCustomer = await owner.request(`/api/customers/${createdCustomer.data.id}`, {
     method: "PATCH",
     body: JSON.stringify({
-      address: "Jl. QA TeknikOS No. 2, Makassar",
+      address: "Jl. QA Coreveta No. 2, Makassar",
       units: ["Pompa air 3 unit"],
     }),
   });

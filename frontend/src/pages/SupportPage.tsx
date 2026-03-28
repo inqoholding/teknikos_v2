@@ -5,7 +5,7 @@ import { SALES_WHATSAPP_LINK, SITE_NAME, SUPPORT_EMAIL, SUPPORT_URL } from "../l
 export default function SupportPage() {
   useDocumentMeta({
     title: `Support | ${SITE_NAME}`,
-    description: "Kanal dukungan resmi TeknikOS untuk bantuan sales, onboarding, billing, dan kendala operasional.",
+    description: "Kanal dukungan resmi Coreveta untuk bantuan sales, onboarding, billing, dan kendala operasional.",
     path: "/support",
   });
 
@@ -14,7 +14,7 @@ export default function SupportPage() {
       <div className="mx-auto max-w-5xl">
         <div className="rounded-[32px] border border-emerald-500/20 bg-white/5 p-8 shadow-2xl backdrop-blur">
           <p className="text-xs font-semibold uppercase tracking-[0.3em] text-emerald-300/80">Support</p>
-          <h1 className="mt-3 font-['Space_Grotesk'] text-4xl font-semibold text-white">Kanal Bantuan Resmi TeknikOS</h1>
+          <h1 className="mt-3 font-['Space_Grotesk'] text-4xl font-semibold text-white">Kanal Bantuan Resmi Coreveta</h1>
           <p className="mt-4 max-w-3xl text-base leading-8 text-slate-300">
             Gunakan kanal ini untuk onboarding, kendala login, masalah billing, atau pertanyaan operasional harian.
           </p>

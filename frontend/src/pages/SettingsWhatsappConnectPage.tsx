@@ -111,7 +111,7 @@ export default function SettingsWhatsappConnectPage() {
                 ? "Nomor sudah tersambung dan siap dipakai."
                 : whatsappMode === "automation"
                   ? "Lanjutkan sambungkan WAHA lalu scan QR dari ponsel bisnis."
-                  : "Pilih mode Otomasi WAHA jika ingin kirim pesan otomatis dari TeknikOS."}
+                  : "Pilih mode Otomasi WAHA jika ingin kirim pesan otomatis dari Coreveta."}
             </p>
           </div>
 
@@ -139,7 +139,7 @@ export default function SettingsWhatsappConnectPage() {
                   />
                   <div>
                     <strong>WhatsApp Dasar</strong>
-                    <p>TeknikOS hanya menyiapkan tombol chat dan isi pesan. Pengiriman tetap manual oleh owner atau admin.</p>
+                    <p>Coreveta hanya menyiapkan tombol chat dan isi pesan. Pengiriman tetap manual oleh owner atau admin.</p>
                   </div>
                 </label>
 
@@ -153,7 +153,7 @@ export default function SettingsWhatsappConnectPage() {
                   />
                   <div>
                     <strong>Otomasi WAHA</strong>
-                    <p>TeknikOS bisa mengirim pesan langsung dari nomor WhatsApp bisnis yang tersambung ke WAHA.</p>
+                    <p>Coreveta bisa mengirim pesan langsung dari nomor WhatsApp bisnis yang tersambung ke WAHA.</p>
                   </div>
                 </label>
               </div>

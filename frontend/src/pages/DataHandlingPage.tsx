@@ -3,38 +3,45 @@ import { useDocumentMeta } from "../hooks/useDocumentMeta";
 
 export default function DataHandlingPage() {
   useDocumentMeta({
-    title: "Data Handling | TeknikOS",
-    description: "Ringkasan alur data TeknikOS: data yang diproses, retensi, kontrol akses, dan alur dukungan.",
+    title: "Penanganan Data | Coreveta",
+    description: "Informasi teknis mengenai bagaimana Coreveta menangani, menyimpan, dan melindungi data operasional bisnis Anda.",
     path: "/data-handling",
   });
 
   return (
     <LegalPageLayout
       eyebrow="Compliance"
-      title="Data Handling"
-      summary="Halaman ini merangkum jenis data, alur pemrosesan, retensi, dan kontrol keamanan yang diterapkan pada TeknikOS agar tim bisnis dapat meninjau praktik pengelolaan data secara cepat."
+      title="Penanganan Data"
+      summary="Halaman ini memberikan transparansi mengenai klasifikasi data, kontrol akses, dan kebijakan retensi yang diterapkan pada platform Coreveta."
     >
       <section className="space-y-4">
-        <h2 className="text-2xl font-semibold text-white">1. Jenis Data</h2>
-        <p>Data akun: identitas pengguna, role, nomor telepon, email, dan status akses.</p>
-        <p>Data operasional: pelanggan, teknisi, job, kontrak, inventori, invoice, dan dukungan.</p>
-        <p>Data teknis: log error, audit sederhana, session cookie, metadata keamanan, dan counter rate limiting.</p>
+        <h2 className="text-2xl font-semibold text-white">1. Klasifikasi Data</h2>
+        <ul className="list-disc ml-6 space-y-2 text-slate-300">
+          <li><strong>Data Identitas:</strong> Nama pengguna, peran (role), nomor WhatsApp bisnis, dan email administrator.</li>
+          <li><strong>Data Bisnis:</strong> Informasi pelanggan, riwayat servis, inventori sukucadang, kontrak pemeliharaan, dan catatan penagihan.</li>
+          <li><strong>Data Teknis:</strong> Log aktivitas sistem, session cookie untuk autentikasi, metadata keamanan, dan metrik performa aplikasi.</li>
+        </ul>
       </section>
 
       <section className="mt-8 space-y-4">
-        <h2 className="text-2xl font-semibold text-white">2. Kontrol Akses</h2>
-        <p>Akses data dibatasi dengan session auth, role-based access control, ownership checks per business, CSRF protection, dan rate limiting berbasis IP plus identitas permintaan saat tersedia.</p>
+        <h2 className="text-2xl font-semibold text-white">2. Kontrol Keamanan Teknis</h2>
+        <p>Coreveta menerapkan lapisan keamanan berikut untuk menjaga integritas data Anda:</p>
+        <ul className="list-disc ml-6 space-y-2 text-slate-300">
+          <li><strong>Role-Based Access Control (RBAC):</strong> Pembatasan akses fitur berdasarkan peran pengguna (Owner, Admin, Teknisi).</li>
+          <li><strong>Enkripsi:</strong> Semua komunikasi antara browser dan server dilindungi protokol HTTPS/TLS 1.3.</li>
+          <li><strong>Proteksi Sesi:</strong> Penggunaan Secure Cookie dan proteksi terhadap serangan Cross-Site Request Forgery (CSRF).</li>
+          <li><strong>Rate Limiting:</strong> Pembatasan frekuensi permintaan untuk mencegah serangan brute-force dan Denial of Service (DoS).</li>
+        </ul>
       </section>
 
       <section className="mt-8 space-y-4">
-        <h2 className="text-2xl font-semibold text-white">3. Retensi</h2>
-        <p>Data operasional utama disimpan selama workspace aktif atau selama dibutuhkan untuk kewajiban layanan dan administratif.</p>
-        <p>Log bantuan, status subscription, dan catatan keamanan dapat dipertahankan lebih lama bila dibutuhkan untuk investigasi, audit, atau kepatuhan hukum.</p>
+        <h2 className="text-2xl font-semibold text-white">3. Kebijakan Retensi</h2>
+        <p>Data operasional disimpan selama akun organisasi Anda aktif. Jika Anda memutuskan untuk berhenti berlangganan, data akan dipertahankan selama periode tenggang 30 hari sebelum dihapus secara permanen dari server aktif Kami, kecuali diwajibkan lain oleh hukum perpajakan atau regulasi pemerintah Indonesia.</p>
       </section>
 
       <section className="mt-8 space-y-4">
-        <h2 className="text-2xl font-semibold text-white">4. Integrasi Pihak Ketiga</h2>
-        <p>Integrasi WAHA dan infrastruktur pendukung hanya boleh menggunakan API key yang disimpan di server melalui environment variable. Secret tidak boleh disuntikkan ke bundle frontend.</p>
+        <h2 className="text-2xl font-semibold text-white">4. Penanganan Integrasi Pihak Ketiga</h2>
+        <p>Untuk fitur otomasi WhatsApp, Coreveta berintegrasi dengan layanan WAHA. Kredensial API (API Keys) disimpan dengan aman di sisi server menggunakan variabel lingkungan (environment variables) dan tidak pernah diekspos ke sisi klien (browser) untuk mencegah kebocoran akses.</p>
       </section>
     </LegalPageLayout>
   );

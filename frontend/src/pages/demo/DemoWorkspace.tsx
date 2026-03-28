@@ -7,6 +7,7 @@ import {
   LayoutDashboard,
   MessageCircle,
   Package,
+  Route,
   Settings,
   UserCircle,
   Users,
@@ -30,7 +31,7 @@ import {
 } from "../../data/mock";
 
 const waLink =
-  "https://wa.me/6281354444967?text=Halo%20TeknikOS,%20saya%20ingin%20lanjut%20demo%20atau%20berlangganan.";
+  "https://wa.me/6281354444967?text=Halo%20Coreveta,%20saya%20ingin%20lanjut%20demo%20atau%20berlangganan.";
 
 const demoNav = [
   { to: "/demo-owner-dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -150,9 +151,9 @@ export function DemoWorkspaceLayout() {
     <div className="app-shell demo-workspace">
       <aside className="app-shell__sidebar">
         <Link to="/" className="brand-mark">
-          <div className="brand-mark__icon">T</div>
+          <div className="brand-mark__icon">C</div>
           <div>
-            <strong>TeknikOS</strong>
+            <strong>Coreveta</strong>
             <span>{business.name}</span>
           </div>
         </Link>
@@ -217,7 +218,7 @@ export function DemoWorkspaceLayout() {
           <div className="demo-sales-card">
             <div>
               <strong>Butuh dibantu closing atau setup cepat?</strong>
-              <p>Hubungi sales TeknikOS langsung. Nomor ini sengaja selalu tampil di demo agar client tidak bingung cari akses lanjutan.</p>
+              <p>Hubungi sales Coreveta langsung. Nomor ini sengaja selalu tampil di demo agar client tidak bingung cari akses lanjutan.</p>
             </div>
             <a href={waLink} className="btn btn--primary" target="_blank" rel="noreferrer">
               <MessageCircle size={16} />
@@ -868,13 +869,20 @@ export function DemoCustomersPage() {
 export function DemoTechniciansPage() {
   return (
     <div className="page-stack">
-      <SectionCard title="Daftar Teknisi Demo" description="Struktur halaman mengikuti modul teknisi di business app utama.">
+      <SectionCard title="Daftar Teknisi & Absensi Live" description="Pantau status kehadiran tim lapangan secara real-time dengan bukti lokasi GPS dan foto (Mode Demo).">
         <div className="customer-list">
           {technicians.map((technician) => (
             <article key={technician.id} className="customer-card">
               <div className="customer-card__head">
                 <div>
-                  <strong>{technician.name}</strong>
+                  <div className="flex items-center gap-2">
+                    <strong>{technician.name}</strong>
+                    <div style={{ fontSize: '10px', padding: '0px 0px' }}>
+                      <Badge tone={technician.attendanceType === "Harian" ? "success" : "info"}>
+                        {technician.attendanceType}
+                      </Badge>
+                    </div>
+                  </div>
                   <p>{technician.phone}</p>
                 </div>
                 <Badge tone={technician.status === "Aktif" ? "success" : technician.status === "Bertugas" ? "info" : "warning"}>
@@ -882,8 +890,19 @@ export function DemoTechniciansPage() {
                 </Badge>
               </div>
               <div className="customer-card__meta">
+                <span className="flex items-center gap-1">
+                  <Package size={14} className="text-emerald-500" />
+                  Check-in: <strong>{technician.lastCheckIn}</strong>
+                </span>
+                <span className="flex items-center gap-1">
+                  <Route size={14} className="text-emerald-500" />
+                  {technician.attendanceLocationLabel}
+                </span>
+              </div>
+              <div className="customer-card__meta" style={{ marginTop: '4px' }}>
                 <span>Rating {technician.rating}</span>
                 <span>{technician.jobsCompleted} job selesai</span>
+                <span className="text-emerald-400 font-medium">✓ Foto Terlampir</span>
               </div>
               <div className="customer-card__units">
                 {technician.specialties.map((item) => <span key={item}>{item}</span>)}
@@ -1035,7 +1054,7 @@ export function DemoSettingsPage() {
 export function DemoWhatsappRulesPage() {
   return (
     <div className="page-stack">
-      <SectionCard title="Rules WhatsApp" description="Versi demo yang bisa dibuka client untuk memahami aturan penggunaan WhatsApp di TeknikOS.">
+      <SectionCard title="Rules WhatsApp" description="Versi demo yang bisa dibuka client untuk memahami aturan penggunaan WhatsApp di Coreveta.">
         <div className="rules-grid">
           {whatsappRules.map((rule) => (
             <article key={rule.title} className="rule-card">
@@ -1054,7 +1073,7 @@ export function DemoWhatsappRulesPage() {
         </div>
         <div className="demo-sales-inline">
           <strong>Perlu dibantu aktivasi atau konsultasi?</strong>
-          <a href={waLink} target="_blank" rel="noreferrer">Chat sales TeknikOS</a>
+          <a href={waLink} target="_blank" rel="noreferrer">Chat sales Coreveta</a>
         </div>
       </SectionCard>
     </div>
@@ -1145,7 +1164,7 @@ export function DemoWhatsappConnectPage() {
 
           <div className="demo-sales-inline">
             <strong>Perlu bantuan setup WAHA setelah demo?</strong>
-            <a href={waLink} target="_blank" rel="noreferrer">Hubungi sales TeknikOS</a>
+            <a href={waLink} target="_blank" rel="noreferrer">Hubungi sales Coreveta</a>
           </div>
         </div>
       </SectionCard>

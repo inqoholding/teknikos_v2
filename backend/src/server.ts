@@ -125,5 +125,5 @@ app.use((error: Error, _req: express.Request, res: express.Response, _next: expr
 });
 
 app.listen(env.PORT, () => {
-  logger.info(`TeknikOS backend listening on port ${env.PORT}`);
+  logger.info(`Coreveta backend listening on port ${env.PORT}`);
 });

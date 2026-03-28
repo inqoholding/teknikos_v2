@@ -1,10 +1,10 @@
-# TeknikOS App Listing Draft
+# Coreveta App Listing Draft
 
 ## Public URLs
-- Privacy policy URL: https://app.teknikos.id/privacy
-- Terms of service URL: https://app.teknikos.id/terms
-- Data handling URL: https://app.teknikos.id/data-handling
-- Support URL: https://app.teknikos.id/support
+- Privacy policy URL: https://app.coreveta.com/privacy
+- Terms of service URL: https://app.coreveta.com/terms
+- Data handling URL: https://app.coreveta.com/data-handling
+- Support URL: https://app.coreveta.com/support
 
 ## Category
 - Primary category: Business
@@ -15,13 +15,13 @@
 - Rationale: business utility app, no gambling, no adult content, no user-generated public social feed
 
 ## App Title
-- TeknikOS: Field Service & Job Management
+- Coreveta: Field Service & Job Management
 
 ## Subtitle
 - Manage technicians, jobs, invoices, and WhatsApp updates
 
 ## Description Hook
-- TeknikOS helps field service businesses run dispatch, technicians, invoices, contracts, and customer updates from one dashboard.
+- Coreveta helps field service businesses run dispatch, technicians, invoices, contracts, and customer updates from one dashboard.
 - Replace scattered WhatsApp chats and manual paperwork with a cleaner operational workflow.
 
 ## Suggested Full Description Themes
@@ -43,5 +43,5 @@
 - invoice for service business
 
 ## IndexNow
-- Key file planned at: https://app.teknikos.id/f3c90e2a5c6946fca2fd5bc49b0fd3a2.txt
+- Key file planned at: https://app.coreveta.com/f3c90e2a5c6946fca2fd5bc49b0fd3a2.txt
 - Key value: f3c90e2a5c6946fca2fd5bc49b0fd3a2

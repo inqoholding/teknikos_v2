@@ -8,7 +8,7 @@ const SALES_WHATSAPP = "6281354444967";
 
 function buildResetPasswordLink(email?: string) {
   const message = [
-    "Halo sales TeknikOS, saya butuh bantuan reset password.",
+    "Halo sales Coreveta, saya butuh bantuan reset password.",
     `Email akun: ${email?.trim() || "-"}`,
   ].join("\n");
 
@@ -99,7 +99,7 @@ export default function LoginPage() {
   return (
     <AuthScaffold
       eyebrow="Operasional bengkel yang rapi"
-      title="Masuk ke TeknikOS"
+      title="Masuk ke Coreveta"
       subtitle="Sistem operasi bisnis jasa teknik kamu untuk memantau job, teknisi, invoice, dan kontrak."
     >
       <form className="auth-card" onSubmit={handleSubmit}>
@@ -122,7 +122,7 @@ export default function LoginPage() {
           <span>Email</span>
           <input
             type="email"
-            placeholder="owner@teknikos.id"
+            placeholder="owner@coreveta.com"
             value={email}
             onChange={(event) => setEmail(event.target.value)}
           />

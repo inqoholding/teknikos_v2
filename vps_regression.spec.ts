@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('TeknikOS Production Regression - user3', () => {
+test.describe('Coreveta Production Regression - user3', () => {
   const BASE_URL = 'http://156.67.220.110';
 
   test('Module Navigation & Dashboard Audit', async ({ page }) => {

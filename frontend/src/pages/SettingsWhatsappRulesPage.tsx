@@ -7,7 +7,7 @@ export default function SettingsWhatsappRulesPage() {
         <div className="section-card__header">
           <div>
             <h3>Rules WhatsApp</h3>
-            <p>Aturan singkat supaya nomor bisnis lebih aman saat dipakai di TeknikOS.</p>
+            <p>Aturan singkat supaya nomor bisnis lebih aman saat dipakai di Coreveta.</p>
           </div>
         </div>
 
@@ -30,7 +30,7 @@ export default function SettingsWhatsappRulesPage() {
         </div>
 
         <p className="settings-source-note">
-          Ringkasan aturan ini mengacu pada panduan banned dari Fonnte dan disederhanakan untuk user TeknikOS.
+          Ringkasan aturan ini mengacu pada panduan banned dari Fonnte dan disederhanakan untuk user Coreveta.
         </p>
       </section>
     </div>

@@ -178,7 +178,7 @@ export default function OnboardingPage() {
           <div className="section-card__header" style={{ marginTop: "24px" }}>
             <div>
               <h3>Pilih bidang bisnis & paket</h3>
-              <p>Sesuaikan TeknikOS dengan kebutuhan spesifik tim Anda.</p>
+              <p>Sesuaikan Coreveta dengan kebutuhan spesifik tim Anda.</p>
             </div>
           </div>
           <div className="service-grid">

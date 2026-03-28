@@ -29,7 +29,7 @@ export function buildInvoiceMessage(input: {
 }) {
   return [
     `Halo ${input.customerName},`,
-    `Ini info invoice dari ${input.businessName ?? "TeknikOS"}.`,
+    `Ini info invoice dari ${input.businessName ?? "Coreveta"}.`,
     "",
     `Nomor invoice: ${input.invoiceNumber}`,
     `Pekerjaan: ${input.jobLabel ?? "-"}`,
@@ -53,7 +53,7 @@ export function buildJobProgressMessage(input: {
 }) {
   return [
     `Halo ${input.customerName},`,
-    `Berikut update pekerjaan dari ${input.businessName ?? "TeknikOS"}.`,
+    `Berikut update pekerjaan dari ${input.businessName ?? "Coreveta"}.`,
     "",
     `Job: ${input.jobNumber} · ${input.jobTitle}`,
     `Status saat ini: ${input.status}`,
@@ -77,7 +77,7 @@ export function buildTechnicianTaskMessage(input: {
 }) {
   return [
     `Halo ${input.technicianName},`,
-    `Reminder tugas dari ${input.businessName ?? "TeknikOS"}.`,
+    `Reminder tugas dari ${input.businessName ?? "Coreveta"}.`,
     "",
     `Job: ${input.jobNumber} · ${input.jobTitle}`,
     `Pelanggan: ${input.customerName}`,
@@ -98,7 +98,7 @@ export function buildCustomerFollowUpMessage(input: {
 }) {
   return [
     `Halo ${input.customerName},`,
-    `Salam dari ${input.businessName ?? "TeknikOS"}.`,
+    `Salam dari ${input.businessName ?? "Coreveta"}.`,
     "",
     `Kami ingin follow up kebutuhan servis Anda${input.address ? ` di ${input.address}` : ""}.`,
     `Servis terakhir: ${input.lastService ?? "Belum ada riwayat terbaru"}`,

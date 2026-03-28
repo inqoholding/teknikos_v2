@@ -3,7 +3,7 @@
 ╚══════════════════════════════════════════════════════════════════╝
 
 Dokumen ini berisi prompt lengkap untuk membangun integrasi WhatsApp
-menggunakan WAHA (self-hosted WhatsApp HTTP API) ke dalam TeknikOS.
+menggunakan WAHA (self-hosted WhatsApp HTTP API) ke dalam Coreveta.
 
 WAHA Docs: https://waha.devlike.pro
 WAHA GitHub: https://github.com/devlikeapro/waha
@@ -16,16 +16,16 @@ Setiap pemilik bisnis menghubungkan NOMOR WA MEREKA SENDIRI.
 Artinya: 1 bisnis = 1 WAHA session unik.
 
 Flow:
-  Owner scan QR di Settings TeknikOS
+  Owner scan QR di Settings Coreveta
         ↓
-  TeknikOS backend buat WAHA session (nama = businessId)
+  Coreveta backend buat WAHA session (nama = businessId)
         ↓
   Session tersimpan di WAHA server (Docker)
         ↓
   Semua notif dikirim DARI nomor WA milik owner itu
 
 Infrastructure:
-  TeknikOS Backend  ←→  WAHA Docker (port 3001 internal)
+  Coreveta Backend  ←→  WAHA Docker (port 3001 internal)
                               ↕
                     WhatsApp servers (via WA Web protocol)
 
@@ -34,7 +34,7 @@ PROMPT 1 — DOCKER COMPOSE SETUP (Infrastructure)
 ═══════════════════════════════════════════════════════════════════
 
 Create a docker-compose.yml at the project root that runs both
-TeknikOS backend and WAHA together:
+Coreveta backend and WAHA together:
 
 ```yaml
 # docker-compose.yml
@@ -95,7 +95,7 @@ PROMPT 2 — WAHA SERVICE (Backend Library)
 Create file: backend/src/lib/waha.js
 
 This is the core WAHA client that wraps all WAHA API calls.
-TeknikOS uses one WAHA session per business (session name = businessId).
+Coreveta uses one WAHA session per business (session name = businessId).
 
 ```javascript
 // backend/src/lib/waha.js
@@ -167,7 +167,7 @@ export async function stopSession(businessId) {
 }
 
 /**
- * Delete a session permanently (owner disconnects WA from TeknikOS).
+ * Delete a session permanently (owner disconnects WA from Coreveta).
  */
 export async function deleteSession(businessId) {
   return wahaFetch(`/api/sessions/${businessId}`, { method: "DELETE" });
@@ -282,7 +282,7 @@ export function buildJobAssignedMessage({ jobNumber, customerName, address, sche
 *Jadwal:* ${time}
 ${notes ? `*Catatan:* ${notes}` : ""}
 
-Buka aplikasi TeknikOS untuk detail lebih lanjut.`;
+Buka aplikasi Coreveta untuk detail lebih lanjut.`;
 }
 
 /**
@@ -303,7 +303,7 @@ ${statusLabel}
 *Teknisi:* ${technicianName}
 *Pelanggan:* ${customerName}
 
-Lihat detail di dashboard TeknikOS.`;
+Lihat detail di dashboard Coreveta.`;
 }
 
 /**
@@ -377,7 +377,7 @@ Item berikut perlu segera diisi ulang:
 
 ${itemLines}
 
-Kelola stok di dashboard TeknikOS.`;
+Kelola stok di dashboard Coreveta.`;
 }
 
 /**
@@ -398,7 +398,7 @@ Kontrak berikut akan expired dalam 30 hari:
 ${lines}
 
 Segera hubungi pelanggan untuk renewal.
-Kelola kontrak di dashboard TeknikOS.`;
+Kelola kontrak di dashboard Coreveta.`;
 }
 ```
 
@@ -560,7 +560,7 @@ router.post("/send-test", async (req, res) => {
     const result = await sendTextSafe(
       req.business.id,
       phone,
-      `✅ *Koneksi TeknikOS × WhatsApp Berhasil!*\n\nNomor ini sudah terhubung ke TeknikOS.\nBisnis: *${req.business.name}*`
+      `✅ *Koneksi Coreveta × WhatsApp Berhasil!*\n\nNomor ini sudah terhubung ke Coreveta.\nBisnis: *${req.business.name}*`
     );
 
     if (result) {

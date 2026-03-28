@@ -28,7 +28,7 @@ function isDefinedPlanOption<T>(value: T | null | undefined): value is T {
 
 function buildSalesResetPasswordLink(client?: AdminClientSubscription | null) {
   const message = [
-    "Halo sales TeknikOS, saya butuh bantuan reset password client.",
+    "Halo sales Coreveta, saya butuh bantuan reset password client.",
     `Nama bisnis: ${client?.name ?? "-"}`,
     `Owner: ${client?.owner?.name ?? "-"}`,
     `Email: ${client?.owner?.email ?? "-"}`,

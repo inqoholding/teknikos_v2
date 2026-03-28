@@ -324,7 +324,7 @@ export default function DashboardPage() {
         <div>
           <strong>Plan aktif: {stats.business?.plan ?? "Starter"}</strong>
           <p>
-            Bisnis {stats.business?.name ?? "TeknikOS"} saat ini memakai paket {stats.business?.plan ?? "Starter"}.
+            Bisnis {stats.business?.name ?? "Coreveta"} saat ini memakai paket {stats.business?.plan ?? "Starter"}.
           </p>
         </div>
         <Link to="/settings">Kelola Paket →</Link>

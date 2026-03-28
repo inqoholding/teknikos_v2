@@ -1,4 +1,4 @@
-# TeknikOS — Product Requirements Document
+# Coreveta — Product Requirements Document
 **Version:** 2.0 · **Status:** Active Development · **Tanggal:** Maret 2026
 
 ---
@@ -41,13 +41,13 @@ Lebih dari 800.000 usaha jasa teknik aktif di Indonesia masih mengandalkan cara 
 | Tidak ada data historis pelanggan | Tidak bisa upsell, tidak ada reminder servis |
 
 ### 1.4 Solusi
-TeknikOS adalah platform SaaS **field service management** dengan dua interface:
+Coreveta adalah platform SaaS **field service management** dengan dua interface:
 - **Dashboard Owner** (web PWA) — kelola bisnis dari kantor atau rumah
 - **App Teknisi** (Android, fase 2) — terima job, navigasi, catat servis, terima bayar di lapangan
 
 ### 1.5 Competitive Positioning
 
-| | Seekmi/Sejasa | HashMicro | TeknikOS |
+| | Seekmi/Sejasa | HashMicro | Coreveta |
 |---|---|---|---|
 | Model | Marketplace (B2C) | ERP Enterprise | SaaS Field Service (B2B) |
 | Target | End consumer | Perusahaan besar | Pemilik bengkel kecil-menengah |
@@ -173,7 +173,7 @@ TeknikOS adalah platform SaaS **field service management** dengan dua interface:
 ### 4.1 Color Palette
 
 ```css
-/* Primary — Green (TeknikOS brand) */
+/* Primary — Green (Coreveta brand) */
 --green-light:   #E1F5EE;   /* bg tints, badges */
 --green-mid:     #5DCAA5;   /* hover states */
 --green-default: #1D9E75;   /* primary buttons, active nav */
@@ -334,7 +334,7 @@ const GuestRoute = () => {
 **Layout:** AuthLayout (centered card, max-w-md)
 
 **Elements:**
-- Logo + "TeknikOS" wordmark (top center)
+- Logo + "Coreveta" wordmark (top center)
 - Tagline: "Sistem operasi bisnis jasa teknik kamu"
 - Form:
   - Email input (type="email", autocomplete="email")
@@ -392,7 +392,7 @@ const GuestRoute = () => {
 
 **Sidebar (fixed left, w-56):**
 ```
-[Logo] TeknikOS
+[Logo] Coreveta
 [Business name — truncated]
 ───────────────────────
 [LayoutDashboard] Dashboard
@@ -1018,7 +1018,7 @@ interface AuthStore {
 ### 13.1 Setup Paper MCP
 ```bash
 # Install Paper Desktop App dari https://paper.design/
-# Buka Paper, buat project baru "TeknikOS"
+# Buka Paper, buat project baru "Coreveta"
 # Di terminal, tambahkan MCP ke Codex/Claude Code:
 claude mcp add paper --transport http http://127.0.0.1:29979/mcp --scope user
 ```
@@ -1071,7 +1071,7 @@ Prompt 10: Inventory + Invoice pages — pilih masing-masing frame
 ```
 # frontend/.env
 VITE_API_URL=http://localhost:3001
-VITE_APP_NAME=TeknikOS
+VITE_APP_NAME=Coreveta
 VITE_GOOGLE_MAPS_KEY=your-key-here (Fase 2)
 ```
 
@@ -1111,7 +1111,7 @@ npm run dev
 
 ---
 
-*PRD Version 2.0 — TeknikOS · Confidential*  
+*PRD Version 2.0 — Coreveta · Confidential*  
 *Backend: Express + BetterAuth + DrizzleORM + SQLite*  
 *Frontend: Vite + React + TypeScript + TailwindCSS v4*  
 *Design: Paper.design MCP + Codex vibe coding*
