@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useBusinessQuery, useLogoutMutation, useSessionQuery } from "../api/hooks";
+import { BrandLogo } from "./ui/BrandLogo";
 
 const appNav: Array<{ label: string; to: string; feature?: string }> = [
   { label: "Dashboard", to: "/dashboard" },
@@ -135,7 +136,9 @@ export function AppShellLayout() {
     <div className="app-shell">
       <aside className="app-shell__sidebar">
         <Link to="/" className="brand-mark">
-          <div className="brand-mark__icon">C</div>
+          <div className="brand-mark__icon">
+            <BrandLogo size={32} />
+          </div>
           <div>
             <strong>Coreveta</strong>
             <span>{business?.name ?? "Bisnis"}</span>
@@ -259,7 +262,9 @@ export function AdminShellLayout() {
     <div className="app-shell">
       <aside className="app-shell__sidebar">
         <Link to="/" className="brand-mark">
-          <div className="brand-mark__icon">C</div>
+          <div className="brand-mark__icon">
+            <BrandLogo size={32} />
+          </div>
           <div>
             <strong>Coreveta Admin</strong>
             <span>Pusat kontrol</span>
@@ -340,7 +345,9 @@ export function AuthScaffold({
     <div className="auth-page">
       <div className="auth-page__hero">
         <div className="brand-mark brand-mark--hero">
-          <div className="brand-mark__icon">C</div>
+          <div className="brand-mark__icon">
+            <BrandLogo size={32} />
+          </div>
           <div>
             <strong>Coreveta</strong>
             <span>Field Service Operating System</span>
