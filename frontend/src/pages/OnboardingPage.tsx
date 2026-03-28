@@ -94,7 +94,7 @@ export default function OnboardingPage() {
   const [searchParams] = useSearchParams();
   const setupMutation = useSetupBusinessMutation();
   const storedPlan =
-    typeof window !== "undefined" ? window.sessionStorage.getItem("teknikos:selected-plan") : null;
+    typeof window !== "undefined" ? window.sessionStorage.getItem("coreveta:selected-plan") : null;
   const [selectedService, setSelectedService] = useState("Servis AC");
   const [selectedPlan, setSelectedPlan] = useState(searchParams.get("plan") || storedPlan || "Starter");
   const [name, setName] = useState("CV Teknik Makassar");
@@ -121,7 +121,7 @@ export default function OnboardingPage() {
       },
       {
         onSuccess: () => {
-          window.sessionStorage.removeItem("teknikos:selected-plan");
+          window.sessionStorage.removeItem("coreveta:selected-plan");
           const isStarter = selectedPlan.toLowerCase() === "starter";
           navigate(isStarter ? "/dashboard" : "/payment-pending", { replace: true });
         },

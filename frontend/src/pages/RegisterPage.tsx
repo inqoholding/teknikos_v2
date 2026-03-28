@@ -52,7 +52,7 @@ export default function RegisterPage() {
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (password !== confirmPassword) return;
-    window.sessionStorage.setItem("teknikos:selected-plan", selectedPlan);
+    window.sessionStorage.setItem("coreveta:selected-plan", selectedPlan);
 
     await registerMutation.mutateAsync(
       {

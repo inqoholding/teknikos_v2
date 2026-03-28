@@ -33,7 +33,7 @@ export const auth: ReturnType<typeof betterAuth> = betterAuth({
   },
   advanced: {
     useSecureCookies: env.BETTER_AUTH_URL.startsWith("https://"),
-    cookiePrefix: "teknikos",
+    cookiePrefix: "coreveta",
   },
   user: {
     additionalFields: {

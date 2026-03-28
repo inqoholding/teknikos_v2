@@ -68,7 +68,7 @@ export function OnboardingGuard() {
   const hasPendingOnboardingPlan =
     location.pathname === "/onboarding" &&
     typeof window !== "undefined" &&
-    Boolean(window.sessionStorage.getItem("teknikos:selected-plan"));
+    Boolean(window.sessionStorage.getItem("coreveta:selected-plan"));
   const businessQuery = useBusinessQuery(Boolean(sessionQuery.data) && !isStaff && !hasPendingOnboardingPlan);
 
   if (sessionQuery.isLoading || (sessionQuery.data && businessQuery.isLoading)) {

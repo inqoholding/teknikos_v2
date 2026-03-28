@@ -1,7 +1,7 @@
 import axios from "axios";
 import type { ApiErrorPayload } from "./types";
 
-export const CSRF_HEADER_NAME = "x-teknikos-csrf";
+export const CSRF_HEADER_NAME = "x-coreveta-csrf";
 export const CSRF_HEADER_VALUE = "1";
 
 function isLocalDevHostname(hostname: string) {
@@ -82,18 +82,18 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config as
-      | (typeof error.config & { _teknikosRetried?: boolean })
+      | (typeof error.config & { _corevetaRetried?: boolean })
       | undefined;
     const isNetworkError = !error.response;
 
     if (
       isNetworkError &&
       originalRequest &&
-      !originalRequest._teknikosRetried &&
+      !originalRequest._corevetaRetried &&
       typeof window !== "undefined" &&
       !import.meta.env.VITE_API_URL
     ) {
-      originalRequest._teknikosRetried = true;
+      originalRequest._corevetaRetried = true;
       originalRequest.baseURL = resolveDirectBackendUrl();
       return api.request(originalRequest);
     }

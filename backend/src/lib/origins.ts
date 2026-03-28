@@ -58,7 +58,8 @@ function getLocalDevOrigins() {
 
 const TRUSTED_ORIGINS = new Set<string>([
   getFrontendOrigin(),
-  "http://156.67.220.110",
+  "https://coreveta.com",
+  "https://app.coreveta.com",
   ...getLocalDevOrigins(),
 ]);
 

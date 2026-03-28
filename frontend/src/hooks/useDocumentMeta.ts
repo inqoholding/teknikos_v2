@@ -25,7 +25,7 @@ export function useDocumentMeta(options: DocumentMetaOptions = {}) {
     const title = options.title ?? SITE_TITLE;
     const description = options.description ?? SITE_DESCRIPTION;
     const url = `${SITE_URL}${options.path ?? ""}`;
-    const image = options.image ?? `${SITE_URL}/teknikos-dashboard-mockup.png`;
+    const image = options.image ?? `${SITE_URL}/coreveta-og-showcase.png`;
 
     document.title = title;
 

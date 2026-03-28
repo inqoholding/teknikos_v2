@@ -1,7 +1,7 @@
 import type { NextFunction, Request, Response } from "express";
 import { isAllowedOrigin } from "./origins.js";
 
-const CSRF_HEADER_NAME = "x-teknikos-csrf";
+const CSRF_HEADER_NAME = "x-coreveta-csrf";
 const CSRF_HEADER_VALUE = "1";
 const SAFE_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 

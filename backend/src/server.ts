@@ -78,7 +78,7 @@ app.use(express.json({ limit: "1mb" }));
 app.get("/api/health", (_req, res) => {
   res.json({
     ok: true,
-    service: "teknikos-backend",
+    service: "coreveta-backend",
   });
 });
 
