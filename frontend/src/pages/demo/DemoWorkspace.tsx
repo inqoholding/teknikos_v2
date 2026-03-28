@@ -132,11 +132,19 @@ function titleForPath(pathname: string) {
 }
 
 export function DemoWorkspaceLayout() {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const location = useLocation();
   const pathname = location.pathname;
   const heading = titleForPath(pathname);
   const demoState = searchParams.get("state") ?? "read-only";
+  const plan = (searchParams.get("plan") as "Pro" | "Bisnis") ?? "Pro";
+
+  const setPlan = (nextPlan: "Pro" | "Bisnis") => {
+    setSearchParams((prev) => {
+      prev.set("plan", nextPlan);
+      return prev;
+    });
+  };
 
   return (
     <div className="app-shell demo-workspace">
@@ -149,7 +157,7 @@ export function DemoWorkspaceLayout() {
           </div>
         </Link>
         <div className="sidebar-intro">
-          <strong>{business.plan} plan</strong>
+          <strong>{plan} plan</strong>
           <small>{business.subscriptionStatusLabel} · {business.city}</small>
         </div>
         <nav className="app-nav">
@@ -171,12 +179,18 @@ export function DemoWorkspaceLayout() {
       <div className="app-shell__body">
         <header className="app-shell__topbar">
           <div>
-            <span className="page-kicker">{business.plan} plan · {business.subscriptionStatusLabel}</span>
+            <span className="page-kicker">
+              {plan} plan · {business.subscriptionStatusLabel}
+            </span>
             <h1>{heading.title}</h1>
             <p>{heading.subtitle}</p>
           </div>
           <div className="topbar-actions">
-            <div className="status-pill">
+            <div className="segmented segmented--small" style={{ marginRight: "12px" }}>
+              <button className={plan === "Pro" ? "segmented__active" : ""} onClick={() => setPlan("Pro")}>Pro</button>
+              <button className={plan === "Bisnis" ? "segmented__active" : ""} onClick={() => setPlan("Bisnis")}>Bisnis</button>
+            </div>
+            <div className="status-pill hide-mobile">
               <span className="status-pill__dot" />
               Operasional live
             </div>
@@ -224,6 +238,8 @@ export function DemoWorkspaceLayout() {
 }
 
 export function DemoDashboardPage() {
+  const [searchParams] = useSearchParams();
+  const plan = (searchParams.get("plan") as "Pro" | "Bisnis") ?? "Pro";
   const [interactiveJobs, setInteractiveJobs] = useState(() => jobs.slice(0, 3));
   const [selectedRevenueDay, setSelectedRevenueDay] = useState(revenueBars[3]?.label ?? revenueBars[0].label);
   const [autoSendState, setAutoSendState] = useState<"idle" | "customer" | "technician">("idle");
@@ -240,8 +256,8 @@ export function DemoDashboardPage() {
   const interactiveStats = [
     { label: "Job Hari Ini", value: String(interactiveJobs.length + 11), hint: `${urgentCount} urgent, ${readyToBillCount} siap ditagih`, tone: "success" as const },
     { label: "Job Aktif", value: String(activeJobCount), hint: `${pendingDispatchCount} butuh atensi owner`, tone: "warning" as const },
-    { label: "Teknisi Aktif", value: "4", hint: autoSendState === "technician" ? "Brief teknisi baru dikirim" : "1 teknisi standby", tone: "default" as const },
-    { label: "Revenue 7 Hari", value: formatRupiah(paidRevenue), hint: `${selectedRevenue.label} jadi puncak pantauan`, tone: "success" as const },
+    { label: "Teknisi Aktif", value: plan === "Bisnis" ? "12" : "4", hint: autoSendState === "technician" ? "Brief teknisi baru dikirim" : plan === "Bisnis" ? "8 teknisi bertugas" : "1 teknisi standby", tone: "default" as const },
+    { label: "Revenue 7 Hari", value: formatRupiah(paidRevenue * (plan === "Bisnis" ? 2.5 : 1)), hint: `${selectedRevenue.label} jadi puncak pantauan`, tone: "success" as const },
   ];
 
   const interactiveQueueCards = [
@@ -426,8 +442,14 @@ export function DemoDashboardPage() {
               "Kalender jadwal dan deadline job",
               "Job list, kanban, dan detail pekerjaan",
               "CRM pelanggan dan histori unit",
-              "Invoice dan status pembayaran",
-              "Inventori sparepart, kontrak servis, dan setup WAHA",
+              ...(plan === "Bisnis"
+                ? [
+                    "Multi-staff & Technician collaboration",
+                    "Advanced WAHA Automation & Rules",
+                    "Bulk Invoicing & Custom Reminders",
+                    "Inventory priority restock levels",
+                  ]
+                : ["Invoice dan status pembayaran", "Inventori sparepart dasar", "Kontrak servis"]),
             ].map((item) => (
               <div key={item} className="demo-feature-list__item">
                 <span className="demo-feature-list__dot" />
@@ -644,10 +666,14 @@ export function DemoJobsPage() {
 }
 
 export function DemoJobDetailPage() {
+  const [searchParams] = useSearchParams();
+  const plan = (searchParams.get("plan") as "Pro" | "Bisnis") ?? "Pro";
   const { id } = useParams();
   const job = jobs.find((item) => item.id === id) ?? jobs[0];
   const relatedCustomer = customers.find((item) => item.id === job.customerId);
   const relatedInvoice = invoices.find((item) => item.job === job.number);
+
+  const displayedTechnician = plan === "Bisnis" ? "Ardiansyah, Fadli, Rian" : job.technician;
 
   return (
     <div className="page-stack">
@@ -661,8 +687,8 @@ export function DemoJobDetailPage() {
       <div className="cards-grid cards-grid--detail-summary">
         <article className="sub-card">
           <span>Teknisi</span>
-          <strong>{job.technician}</strong>
-          <small>{job.type}</small>
+          <strong>{displayedTechnician}</strong>
+          <small>{plan === "Bisnis" ? "Multi-assignment active" : job.type}</small>
         </article>
         <article className="sub-card">
           <span>Jadwal</span>
@@ -698,7 +724,7 @@ export function DemoJobDetailPage() {
               </label>
               <label className="field">
                 <span>Teknisi</span>
-                <input value={job.technician} readOnly />
+                <input value={displayedTechnician} readOnly />
               </label>
               <label className="field">
                 <span>Deadline tugas</span>
