@@ -1,8 +1,8 @@
 export const SITE_NAME = "Coreveta";
 export const SITE_URL = "https://coreveta.com";
-export const SITE_TITLE = "Coreveta | Software Manajemen Teknisi, Job Service, Invoice & WhatsApp";
+export const SITE_TITLE = "Coreveta | Operational Excellence for Technical Teams";
 export const SITE_DESCRIPTION =
-  "Coreveta membantu bisnis jasa teknik mengelola job, teknisi, inventori, invoice, kontrak, dan update WhatsApp dalam satu dashboard operasional.";
+  "SaaS operasional untuk bisnis jasa teknik: dispatch job, invoice, kontrak, inventori, dan WhatsApp update secara real-time.";
 export const SITE_KEYWORDS = [
   "software manajemen teknisi",
   "aplikasi service AC",
