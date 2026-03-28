@@ -186,6 +186,8 @@ export interface Technician {
   attendanceLongitude?: number | null;
   attendancePhotoUrl?: string | null;
   attendanceNote?: string | null;
+  attendanceType?: "harian" | "job_arrival" | null;
+  attendanceLocationLabel?: string | null;
   attendanceUpdatedAt?: string | null;
 }
 
@@ -215,6 +217,8 @@ export interface TechnicianSelfProfile {
   attendancePhotoUrl: string | null;
   attendanceNote: string | null;
   attendanceJobId: string | null;
+  attendanceType: "harian" | "job_arrival" | null;
+  attendanceLocationLabel: string | null;
   attendanceUpdatedAt: string | null;
 }
 

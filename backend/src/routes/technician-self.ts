@@ -12,6 +12,8 @@ const attendanceSchema = z.object({
   photoUrl: z.string().optional(),
   note: z.string().optional(),
   jobId: z.string().optional(),
+  type: z.enum(["harian", "job_arrival"]).optional(),
+  locationLabel: z.string().optional(),
 }).strict();
 
 const locationSchema = z.object({
@@ -37,6 +39,8 @@ function serializeTechnicianSelf(technician: typeof technicians.$inferSelect) {
     attendancePhotoUrl: technician.attendancePhotoUrl ?? null,
     attendanceNote: technician.attendanceNote ?? null,
     attendanceJobId: technician.attendanceJobId ?? null,
+    attendanceType: technician.attendanceType,
+    attendanceLocationLabel: technician.attendanceLocationLabel ?? null,
     attendanceUpdatedAt: technician.attendanceUpdatedAt ?? null,
   };
 }
@@ -75,7 +79,9 @@ technicianSelfRouter.post("/check-in", async (req, res) => {
       attendanceLongitude: payload.longitude,
       attendancePhotoUrl: payload.photoUrl ?? technician.attendancePhotoUrl,
       attendanceNote: payload.note ?? null,
+      attendanceType: payload.type ?? "harian",
       attendanceJobId: payload.jobId ?? null,
+      attendanceLocationLabel: payload.locationLabel ?? technician.attendanceLocationLabel,
       lastSeenAt: new Date(),
       attendanceUpdatedAt: new Date(),
       updatedAt: new Date(),

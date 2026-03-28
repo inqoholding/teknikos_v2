@@ -59,6 +59,7 @@ export const technicians = pgTable("technicians", {
   attendanceStatus: text("attendance_status").notNull().default("Belum Check-in"),
   attendancePhotoUrl: text("attendance_photo_url"),
   attendanceNote: text("attendance_note"),
+  attendanceType: text("attendance_type").notNull().default("harian"),
   attendanceJobId: text("attendance_job_id"),
   attendanceLocationLabel: text("attendance_location_label"),
   attendanceLatitude: real("attendance_latitude"),

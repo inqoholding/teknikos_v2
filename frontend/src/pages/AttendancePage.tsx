@@ -55,9 +55,16 @@ function OwnerAttendanceMonitoring() {
                   <div className="avatar avatar--small">{tech.name[0]}</div>
                   <div>
                     <strong>{tech.name}</strong>
-                    <Badge tone={tech.attendanceStatus === "Sudah Check-in" ? "success" : "neutral"}>
-                      {tech.attendanceStatus}
-                    </Badge>
+                    <div className="flex gap-2 items-center">
+                      <Badge tone={tech.attendanceStatus === "Sudah Check-in" ? "success" : "neutral"}>
+                        {tech.attendanceStatus}
+                      </Badge>
+                      {tech.attendanceType && (
+                        <Badge tone="info">
+                          {tech.attendanceType === "job_arrival" ? "Lokasi Job" : "Harian"}
+                        </Badge>
+                      )}
+                    </div>
                   </div>
                 </div>
                 {tech.attendanceUpdatedAt && (
@@ -93,7 +100,7 @@ function OwnerAttendanceMonitoring() {
                         rel="noopener noreferrer"
                         className="location-link"
                       >
-                        Lihat di Maps <ExternalLink size={12} />
+                        {tech.attendanceLocationLabel || "Lihat di Maps"} <ExternalLink size={12} />
                       </a>
                     ) : (
                       <span className="text-muted">Lokasi tidak tersedia</span>
@@ -126,6 +133,8 @@ function TechnicianAttendanceView() {
   
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
   const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [locationLabel, setLocationLabel] = useState<string | null>(null);
+  const [attendanceType, setAttendanceType] = useState<"harian" | "job_arrival">("harian");
   const [locating, setLocating] = useState(false);
   const [note, setNote] = useState("");
   const [selectedJobId, setSelectedJobId] = useState("");
@@ -145,9 +154,21 @@ function TechnicianAttendanceView() {
 
     setLocating(true);
     navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        setLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+      async (pos) => {
+        const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        setLocation(coords);
         setLocating(false);
+        
+        // Reverse geocode
+        try {
+          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${coords.lat}&lon=${coords.lng}&zoom=18&addressdetails=1`);
+          const data = await res.json();
+          if (data && data.display_name) {
+            setLocationLabel(data.display_name);
+          }
+        } catch (e) {
+          console.error("Geocoding error", e);
+        }
       },
       (err) => {
         console.error(err);
@@ -187,6 +208,8 @@ function TechnicianAttendanceView() {
         photoUrl,
         note: note.trim() || undefined,
         jobId: selectedJobId || undefined,
+        type: attendanceType,
+        locationLabel: locationLabel || undefined,
       };
 
       if (type === "in") {
@@ -226,9 +249,36 @@ function TechnicianAttendanceView() {
             <div className={`status-orb ${isCheckedIn ? "status-orb--active" : ""}`} />
             <div>
               <strong>{technician.attendanceStatus}</strong>
+              {technician.attendanceType && (
+                <span style={{ marginLeft: "8px" }}>
+                  <Badge tone="info">
+                    {technician.attendanceType === "job_arrival" ? "Mode Lokasi Job" : "Mode Harian"}
+                  </Badge>
+                </span>
+              )}
               <p>{technician.attendanceUpdatedAt ? `Terakhir update: ${new Date(technician.attendanceUpdatedAt).toLocaleString('id-ID')}` : 'Belum ada aktivitas hari ini'}</p>
             </div>
           </div>
+
+          {!isCheckedIn && (
+            <div className="field-group" style={{ marginBottom: "20px" }}>
+              <span className="eyebrow">Tipe Absensi</span>
+              <div className="segmented">
+                <button 
+                  className={attendanceType === "harian" ? "segmented__active" : ""} 
+                  onClick={() => setAttendanceType("harian")}
+                >
+                  Absensi Harian
+                </button>
+                <button 
+                  className={attendanceType === "job_arrival" ? "segmented__active" : ""} 
+                  onClick={() => setAttendanceType("job_arrival")}
+                >
+                  Tiba di Lokasi Job
+                </button>
+              </div>
+            </div>
+          )}
 
           <div className="action-stack">
             <div className="attendance-photo-zone">
@@ -269,7 +319,7 @@ function TechnicianAttendanceView() {
                 <div>
                   <strong>{locating ? "Mencari Lokasi..." : location ? "Lokasi Terkunci" : "Lokasi Tidak Tersedia"}</strong>
                   <p className="text-xs">
-                    {location ? `${location.lat.toFixed(5)}, ${location.lng.toFixed(5)}` : "Harap aktifkan GPS"}
+                    {locationLabel ? locationLabel : location ? `${location.lat.toFixed(5)}, ${location.lng.toFixed(5)}` : "Harap aktifkan GPS"}
                   </p>
                 </div>
               </div>
@@ -279,15 +329,17 @@ function TechnicianAttendanceView() {
             </div>
 
             <div className="field-grid">
-              <label className="field">
-                <span>Pilih Tugas (Opsional)</span>
-                <select value={selectedJobId} onChange={(e) => setSelectedJobId(e.target.value)}>
-                  <option value="">Status Umum / Standby</option>
-                  {(jobsQuery.data || []).map(job => (
-                    <option key={job.id} value={job.id}>{job.number} - {job.title}</option>
-                  ))}
-                </select>
-              </label>
+              {attendanceType === "job_arrival" && (
+                <label className="field">
+                  <span>Pilih Job Tujuan / Lokasi Kerja</span>
+                  <select value={selectedJobId} onChange={(e) => setSelectedJobId(e.target.value)} required>
+                    <option value="">-- Pilih Pesanan Kerja --</option>
+                    {(jobsQuery.data || []).map(job => (
+                      <option key={job.id} value={job.id}>{job.number} - {job.title}</option>
+                    ))}
+                  </select>
+                </label>
+              )}
               <label className="field">
                 <span>Catatan</span>
                 <textarea 
