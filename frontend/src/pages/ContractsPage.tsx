@@ -170,7 +170,7 @@ export default function ContractsPage() {
               </label>
               <label className="field">
                 <span>Jadwal service berikutnya</span>
-                <input type="datetime-local" value={nextServiceAt} onChange={(event) => setNextServiceAt(event.target.value)} required />
+                <input type="datetime-local" value={nextServiceAt} onChange={(event) => setNextServiceAt(event.target.value)} max="9999-12-31T23:59" required />
               </label>
             </div>
             {createContractMutation.error ? <p className="form-error">{getErrorMessage(createContractMutation.error)}</p> : null}

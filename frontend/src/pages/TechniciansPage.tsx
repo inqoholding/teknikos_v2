@@ -403,17 +403,17 @@ export default function TechniciansPage() {
             <div className="field-grid">
               <label className="field">
                 <span>Nama</span>
-                <input value={name} onChange={(event) => setName(event.target.value)} required />
+                <input value={name} onChange={(event) => setName(event.target.value)} onFocus={(e) => e.target.select()} required />
               </label>
               <label className="field">
                 <span>WhatsApp</span>
-                <input value={phone} onChange={(event) => setPhone(event.target.value)} required />
+                <input value={phone} onChange={(event) => setPhone(event.target.value)} onFocus={(e) => e.target.select()} required />
               </label>
             </div>
             <div className="field-grid">
               <label className="field">
                 <span>Spesialisasi</span>
-                <input value={specialties} onChange={(event) => setSpecialties(event.target.value)} required />
+                <input value={specialties} onChange={(event) => setSpecialties(event.target.value)} onFocus={(e) => e.target.select()} required />
               </label>
               <label className="field">
                 <span>Status</span>

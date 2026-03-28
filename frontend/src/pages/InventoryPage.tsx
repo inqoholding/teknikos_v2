@@ -130,11 +130,11 @@ export default function InventoryPage() {
             <div className="field-grid">
               <label className="field">
                 <span>Nama item</span>
-                <input value={name} onChange={(event) => setName(event.target.value)} required />
+                <input value={name} onChange={(event) => setName(event.target.value)} onFocus={(e) => e.target.select()} required />
               </label>
               <label className="field">
                 <span>SKU</span>
-                <input value={sku} onChange={(event) => setSku(event.target.value)} required />
+                <input value={sku} onChange={(event) => setSku(event.target.value)} onFocus={(e) => e.target.select()} required />
               </label>
             </div>
             <div className="field-grid">

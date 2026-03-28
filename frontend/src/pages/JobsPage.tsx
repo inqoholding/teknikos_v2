@@ -206,7 +206,7 @@ export default function JobsPage() {
             <div className="field-grid">
               <label className="field">
                 <span>Judul job</span>
-                <input value={title} onChange={(event) => setTitle(event.target.value)} required />
+                <input value={title} onChange={(event) => setTitle(event.target.value)} onFocus={(e) => e.target.select()} required />
               </label>
               <label className="field">
                 <span>Pelanggan</span>
@@ -256,17 +256,17 @@ export default function JobsPage() {
               </label>
               <label className="field">
                 <span>Jenis pekerjaan</span>
-                <input value={type} onChange={(event) => setType(event.target.value)} required />
+                <input value={type} onChange={(event) => setType(event.target.value)} onFocus={(e) => e.target.select()} required />
               </label>
             </div>
             <div className="field-grid">
               <label className="field">
                 <span>Jadwal</span>
-                <input type="datetime-local" value={scheduleAt} onChange={(event) => setScheduleAt(event.target.value)} required />
+                <input type="datetime-local" value={scheduleAt} onChange={(event) => setScheduleAt(event.target.value)} max="9999-12-31T23:59" required />
               </label>
               <label className="field">
                 <span>Deadline tugas</span>
-                <input type="datetime-local" value={deadlineAt} onChange={(event) => setDeadlineAt(event.target.value)} />
+                <input type="datetime-local" value={deadlineAt} onChange={(event) => setDeadlineAt(event.target.value)} max="9999-12-31T23:59" />
               </label>
             </div>
             <div className="field-grid">
@@ -283,7 +283,7 @@ export default function JobsPage() {
               </label>
               <label className="field">
                 <span>Lokasi</span>
-                <input value={location} onChange={(event) => setLocation(event.target.value)} required />
+                <input value={location} onChange={(event) => setLocation(event.target.value)} onFocus={(e) => e.target.select()} required />
               </label>
             </div>
             <label className="field">

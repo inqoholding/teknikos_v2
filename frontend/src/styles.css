@@ -1809,16 +1809,34 @@ h3,
 .field-like,
 .field input,
 .field textarea,
+.field select,
 .auth-card input,
 .auth-card textarea {
   width: 100%;
-  min-height: 44px;
-  padding: 0 14px;
+  min-height: 48px; /* Kembalikan ke 48px agar lebih nyaman di mobile/touch */
+  padding: 0 16px;
   border-radius: 16px;
   border: 1px solid var(--border-strong);
   background: rgba(255, 255, 255, 0.86);
   color: var(--text-default);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.82);
+  transition: border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.field input:focus,
+.field textarea:focus,
+.field select:focus,
+.auth-card input:focus,
+.auth-card textarea:focus {
+  outline: none;
+  border-color: var(--green-default);
+  background: white;
+  box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.14);
+}
+
+.field input[type="datetime-local"] {
+  padding-right: 8px; /* Beri ruang untuk ikon kalender native browser */
+  font-variant-numeric: tabular-nums;
 }
 
 .field-like {

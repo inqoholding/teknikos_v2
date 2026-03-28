@@ -26,15 +26,7 @@ export default function CustomersPage() {
     deferredSearch.trim() ? { q: deferredSearch.trim() } : undefined,
   );
 
-  if (customersQuery.isLoading) {
-    return <PageLoader title="Memuat pelanggan..." />;
-  }
-
-  if (customersQuery.error || !customersQuery.data) {
-    return <PageError message={getErrorMessage(customersQuery.error)} />;
-  }
-
-  const filteredCustomers = customersQuery.data;
+  const filteredCustomers = customersQuery.data ?? [];
   const contractsCount = filteredCustomers.filter((item) => item.contract !== "Tidak ada").length;
   const billingCount = filteredCustomers.filter((item) => item.health === "Butuh Billing").length;
   const followUpCount = filteredCustomers.filter((item) => item.health === "Perlu Follow Up").length;
@@ -51,6 +43,7 @@ export default function CustomersPage() {
     }
     return filteredCustomers;
   }, [crmFilter, filteredCustomers]);
+
   const activeFilterCopy =
     crmFilter === "contracts"
       ? "Menampilkan pelanggan dengan kontrak aktif atau relasi maintenance berjalan."
@@ -59,6 +52,14 @@ export default function CustomersPage() {
         : crmFilter === "billing"
           ? "Menampilkan pelanggan dengan billing aktif atau piutang yang perlu ditagih."
           : "Menampilkan seluruh pelanggan yang lolos dari pencarian aktif.";
+
+  if (customersQuery.isLoading) {
+    return <PageLoader title="Memuat pelanggan..." />;
+  }
+
+  if (customersQuery.error || !customersQuery.data) {
+    return <PageError message={getErrorMessage(customersQuery.error)} />;
+  }
 
   function buildMapsLink(address: string) {
     return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
