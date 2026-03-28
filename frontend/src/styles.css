@@ -4028,3 +4028,164 @@ h3,
   color: #64748b;
   text-decoration: line-through;
 }
+
+/* Monitoring Attendance UI (UI-UX-PRO) */
+.monitoring-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.monitoring-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.monitoring-stat span {
+  font-size: 0.75rem;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.monitoring-stat strong {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.monitoring-stat small {
+  color: #94a3b8;
+}
+
+.monitoring-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
+  padding-bottom: 2rem;
+}
+
+.monitoring-card {
+  background: white;
+  border-radius: 1rem;
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.monitoring-card--active {
+  border-color: #10b981;
+  box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.1);
+}
+
+.monitoring-card__head {
+  padding: 1rem;
+  border-bottom: 1px solid #f1f5f9;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.monitoring-card__user {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.monitoring-card__user strong {
+  display: block;
+  font-size: 0.9375rem;
+  color: #1e293b;
+}
+
+.monitoring-card__time {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #64748b;
+  background: #f8fafc;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.5rem;
+}
+
+.monitoring-card__content {
+  padding: 1rem;
+}
+
+.monitoring-card__photo {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  background: #f1f5f9;
+  margin-bottom: 1rem;
+}
+
+.monitoring-card__photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.photo-overlay {
+  position: absolute;
+  bottom: 0.5rem;
+  right: 0.5rem;
+  background: rgba(16, 185, 129, 0.9);
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.5rem;
+  font-size: 0.7rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.monitoring-card__photo-placeholder {
+  aspect-ratio: 4 / 3;
+  background: #f8fafc;
+  border: 2px dashed #e2e8f0;
+  border-radius: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #94a3b8;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.monitoring-card__info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.info-row {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+}
+
+.location-link {
+  font-size: 0.875rem;
+  color: #2563eb;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  text-decoration: none;
+}
+
+.location-link:hover {
+  text-decoration: underline;
+}
+
+.note-text {
+  font-size: 0.8125rem;
+  color: #64748b;
+  line-height: 1.4;
+  margin: 0;
+}

@@ -174,6 +174,7 @@ export interface Technician {
   phone: string;
   specialties: string[];
   status: "Aktif" | "Bertugas" | "Standby" | "Tidak Aktif";
+  attendanceStatus?: string | null;
   rating: number;
   jobsCompleted: number;
   latitude?: number | null;
@@ -181,6 +182,11 @@ export interface Technician {
   lastSeenAt?: string | null;
   accountEmail?: string | null;
   accountStatus?: "not_created" | "active" | string;
+  attendanceLatitude?: number | null;
+  attendanceLongitude?: number | null;
+  attendancePhotoUrl?: string | null;
+  attendanceNote?: string | null;
+  attendanceUpdatedAt?: string | null;
 }
 
 export interface TechnicianLivePresence {

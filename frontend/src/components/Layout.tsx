@@ -21,6 +21,7 @@ const appNav: Array<{ label: string; to: string; feature?: string }> = [
   { label: "Pesanan Kerja", to: "/jobs" },
   { label: "Teknisi", to: "/technicians" },
   { label: "Pelanggan", to: "/customers" },
+  { label: "Absensi", to: "/attendance" },
   { label: "Tagihan", to: "/invoices" },
   { label: "Stok Suku Cadang", to: "/inventory", feature: "inventoryEnabled" },
   { label: "Kontrak", to: "/contracts", feature: "contractsEnabled" },

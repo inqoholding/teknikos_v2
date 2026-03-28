@@ -1,16 +1,128 @@
 import { useEffect, useRef, useState } from "react";
 import { getErrorMessage } from "../api/client";
-import { useTechnicianSelfQuery, useTechnicianCheckInMutation, useTechnicianCheckOutMutation, useJobsQuery } from "../api/hooks";
-import { Badge, EmptyAction, SectionCard } from "../components/UI";
+import { useTechnicianSelfQuery, useTechnicianCheckInMutation, useTechnicianCheckOutMutation, useJobsQuery, useSessionQuery, useTechniciansQuery } from "../api/hooks";
+import { Badge, EmptyState, SectionCard } from "../components/UI";
 import { PageError, PageLoader } from "../components/PageState";
-import { Camera, MapPin, CheckCircle2, XCircle, Loader2, Info } from "lucide-react";
+import { Camera, MapPin, CheckCircle2, XCircle, Loader2, Info, Users, Monitor, ExternalLink, CalendarDays } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function AttendancePage() {
+  const sessionQuery = useSessionQuery();
+  const user = sessionQuery.data?.user;
+  const isTechnician = user?.role === "technician";
+
+  if (isTechnician) {
+    return <TechnicianAttendanceView />;
+  }
+
+  return <OwnerAttendanceMonitoring />;
+}
+
+function OwnerAttendanceMonitoring() {
+  const techsQuery = useTechniciansQuery();
+
+  if (techsQuery.isLoading) return <PageLoader title="Memuat data absensi teknisi..." />;
+  if (techsQuery.error) return <PageError message={getErrorMessage(techsQuery.error)} />;
+
+  const techs = techsQuery.data || [];
+  const activeTechs = techs.filter(t => t.attendanceStatus === "Sudah Check-in");
+
+  return (
+    <div className="page-stack">
+      <div className="attendance-monitoring-header">
+        <SectionCard title="Monitoring Kehadiran Live" description="Pantau status, lokasi, dan foto check-in teknisi di lapangan secara real-time.">
+          <div className="monitoring-stats">
+            <div className="monitoring-stat">
+              <span>Teknisi Aktif</span>
+              <strong>{activeTechs.length}</strong>
+              <small>Dari total {techs.length} teknisi</small>
+            </div>
+            <div className="monitoring-stat">
+              <span>Update Terakhir</span>
+              <strong>{new Date().toLocaleTimeString('id-ID')}</strong>
+              <small>Data sinkronisasi otomatis</small>
+            </div>
+          </div>
+        </SectionCard>
+      </div>
+
+      <div className="monitoring-grid">
+        {techs.length > 0 ? (
+          techs.map((tech) => (
+            <div key={tech.id} className={`monitoring-card ${tech.attendanceStatus === "Sudah Check-in" ? "monitoring-card--active" : ""}`}>
+              <div className="monitoring-card__head">
+                <div className="monitoring-card__user">
+                  <div className="avatar avatar--small">{tech.name[0]}</div>
+                  <div>
+                    <strong>{tech.name}</strong>
+                    <Badge tone={tech.attendanceStatus === "Sudah Check-in" ? "success" : "neutral"}>
+                      {tech.attendanceStatus}
+                    </Badge>
+                  </div>
+                </div>
+                {tech.attendanceUpdatedAt && (
+                  <span className="monitoring-card__time">
+                    {new Date(tech.attendanceUpdatedAt).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
+                  </span>
+                )}
+              </div>
+
+              <div className="monitoring-card__content">
+                {tech.attendancePhotoUrl ? (
+                  <div className="monitoring-card__photo">
+                    <img src={tech.attendancePhotoUrl} alt={`Foto ${tech.name}`} />
+                    <div className="photo-overlay">
+                      <CheckCircle2 size={14} />
+                      <span>Verified Photo</span>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="monitoring-card__photo-placeholder">
+                    <Camera size={24} />
+                    <span>Belum ada foto</span>
+                  </div>
+                )}
+
+                <div className="monitoring-card__info">
+                  <div className="info-row">
+                    <MapPin size={14} className="text-muted" />
+                    {tech.attendanceLatitude && tech.attendanceLongitude ? (
+                      <a 
+                        href={`https://www.google.com/maps?q=${tech.attendanceLatitude},${tech.attendanceLongitude}`} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="location-link"
+                      >
+                        Lihat di Maps <ExternalLink size={12} />
+                      </a>
+                    ) : (
+                      <span className="text-muted">Lokasi tidak tersedia</span>
+                    )}
+                  </div>
+                  <div className="info-row">
+                    <Info size={14} className="text-muted" />
+                    <p className="note-text">{tech.attendanceNote || "Tidak ada catatan"}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))
+        ) : (
+          <EmptyState 
+            title="Belum ada data teknisi" 
+            description="Daftarkan teknisi Anda terlebih dahulu untuk memantau kehadiran mereka."
+          />
+        )}
+      </div>
+    </div>
+  );
+}
+
+function TechnicianAttendanceView() {
   const technicianQuery = useTechnicianSelfQuery();
   const checkInMutation = useTechnicianCheckInMutation();
   const checkOutMutation = useTechnicianCheckOutMutation();
-  const jobsQuery = useJobsQuery({ status: "in_progress" }); // Optional: tasks in progress
+  const jobsQuery = useJobsQuery({ status: "in_progress" });
   
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
   const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
@@ -85,7 +197,6 @@ export default function AttendancePage() {
         setFeedback({ type: "success", message: "Check-out berhasil! Hati-hati di jalan." });
       }
 
-      // Reset state
       setPhotoUrl(null);
       setNote("");
       setSelectedJobId("");
@@ -120,7 +231,6 @@ export default function AttendancePage() {
           </div>
 
           <div className="action-stack">
-            {/* Photo Section */}
             <div className="attendance-photo-zone">
               {photoUrl || technician.attendancePhotoUrl ? (
                 <div className="photo-preview-wrap">
@@ -153,7 +263,6 @@ export default function AttendancePage() {
               />
             </div>
 
-            {/* Location Section */}
             <div className={`location-status-card ${location ? "location-status-card--success" : "location-status-card--locating"}`}>
               <div className="flex items-center gap-3">
                 <MapPin className={location ? "text-green-default" : "animate-pulse text-warning"} />
@@ -169,7 +278,6 @@ export default function AttendancePage() {
               </button>
             </div>
 
-            {/* Form Section */}
             <div className="field-grid">
               <label className="field">
                 <span>Pilih Tugas (Opsional)</span>
@@ -226,7 +334,6 @@ export default function AttendancePage() {
           </div>
         </SectionCard>
       </motion.div>
-
     </div>
   );
 }
