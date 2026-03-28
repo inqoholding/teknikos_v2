@@ -1,6 +1,7 @@
 import { ArrowRight, LayoutGrid, CircleDollarSign, Route, Menu, X, CheckCircle2, Kanban, Users, Package, FileSignature } from "lucide-react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { BrandLogo } from "../ui/BrandLogo";
 import { ShimmerButton } from "@/components/ui/shimmer-button";
 import { GlowingEffect } from "@/components/ui/glowing-effect";
 import { motion } from "framer-motion";
@@ -25,9 +26,7 @@ export function LandingHeroTemplate({ salesWhatsappLink }: { salesWhatsappLink: 
 
       <nav className="fixed top-6 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-5xl rounded-full border border-white/10 bg-white/5 backdrop-blur-xl px-6 py-3 flex items-center justify-between shadow-2xl">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-emerald-500 to-green-600 flex items-center justify-center font-bold text-sm">
-            C
-          </div>
+          <BrandLogo size={32} />
           <span className="font-bold text-lg tracking-tight">Coreveta</span>
         </div>
         <div className="hidden md:flex items-center gap-8 text-sm font-medium text-zinc-300">
