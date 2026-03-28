@@ -6,6 +6,14 @@ import { db } from "../db/index.js";
 import { forbidden } from "../lib/errors.js";
 import { getSessionUser, isTechnicianRole, requireCurrentTechnician, requireSession } from "../lib/session.js";
 
+const attendanceSchema = z.object({
+  latitude: z.number().min(-90).max(90),
+  longitude: z.number().min(-180).max(180),
+  photoUrl: z.string().optional(),
+  note: z.string().optional(),
+  jobId: z.string().optional(),
+}).strict();
+
 const locationSchema = z.object({
   latitude: z.number().min(-90).max(90),
   longitude: z.number().min(-180).max(180),
@@ -26,6 +34,9 @@ function serializeTechnicianSelf(technician: typeof technicians.$inferSelect) {
     lastSeenAt: technician.lastSeenAt ?? null,
     attendanceLatitude: technician.attendanceLatitude ?? null,
     attendanceLongitude: technician.attendanceLongitude ?? null,
+    attendancePhotoUrl: technician.attendancePhotoUrl ?? null,
+    attendanceNote: technician.attendanceNote ?? null,
+    attendanceJobId: technician.attendanceJobId ?? null,
     attendanceUpdatedAt: technician.attendanceUpdatedAt ?? null,
   };
 }
@@ -52,7 +63,7 @@ technicianSelfRouter.get("/me", async (_req, res) => {
 
 technicianSelfRouter.post("/check-in", async (req, res) => {
   const technician = await requireCurrentTechnician(res);
-  const payload = locationSchema.parse(req.body);
+  const payload = attendanceSchema.parse(req.body);
   const [updated] = await db
     .update(technicians)
     .set({
@@ -62,6 +73,9 @@ technicianSelfRouter.post("/check-in", async (req, res) => {
       longitude: payload.longitude,
       attendanceLatitude: payload.latitude,
       attendanceLongitude: payload.longitude,
+      attendancePhotoUrl: payload.photoUrl ?? technician.attendancePhotoUrl,
+      attendanceNote: payload.note ?? null,
+      attendanceJobId: payload.jobId ?? null,
       lastSeenAt: new Date(),
       attendanceUpdatedAt: new Date(),
       updatedAt: new Date(),
@@ -74,18 +88,19 @@ technicianSelfRouter.post("/check-in", async (req, res) => {
 
 technicianSelfRouter.post("/check-out", async (req, res) => {
   const technician = await requireCurrentTechnician(res);
-  const payload = locationSchema.partial().parse(req.body);
+  const payload = attendanceSchema.parse(req.body);
   const [updated] = await db
     .update(technicians)
     .set({
       status: "Tidak Aktif",
       attendanceStatus: "Sudah Check-out",
-      latitude: payload.latitude ?? technician.latitude,
-      longitude: payload.longitude ?? technician.longitude,
-      attendanceLatitude: payload.latitude ?? technician.attendanceLatitude ?? technician.latitude,
-      attendanceLongitude: payload.longitude ?? technician.attendanceLongitude ?? technician.longitude,
-      lastSeenAt: new Date(),
+      latitude: payload.latitude,
+      longitude: payload.longitude,
+      attendanceLatitude: payload.latitude,
+      attendanceLongitude: payload.longitude,
+      attendancePhotoUrl: payload.photoUrl ?? technician.attendancePhotoUrl,
       attendanceUpdatedAt: new Date(),
+      lastSeenAt: new Date(),
       updatedAt: new Date(),
     })
     .where(eq(technicians.id, technician.id))

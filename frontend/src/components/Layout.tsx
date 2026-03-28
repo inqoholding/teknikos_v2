@@ -6,6 +6,7 @@ import {
   FileText,
   LayoutDashboard,
   LogOut,
+  MapPin,
   Package,
   Settings,
   ShieldCheck,
@@ -28,6 +29,7 @@ const appNav: Array<{ label: string; to: string; feature?: string }> = [
 
 const technicianNav: Array<{ label: string; to: string; feature?: string }> = [
   { label: "Pesanan Kerja", to: "/jobs" },
+  { label: "Absensi", to: "/attendance" },
   { label: "Pengaturan", to: "/settings" },
 ];
 
@@ -42,6 +44,7 @@ const navIcons = {
   "Stok Suku Cadang": Package,
   Kontrak: FileCheck,
   Pengaturan: Settings,
+  Absensi: MapPin,
 };
 
 const titleMap: Record<string, { title: string; subtitle: string }> = {
@@ -76,6 +79,10 @@ const titleMap: Record<string, { title: string; subtitle: string }> = {
   "/settings": {
     title: "Pengaturan",
     subtitle: "Atur profil bisnis, preferensi invoice, dan notifikasi operasional",
+  },
+  "/attendance": {
+    title: "Absensi Teknisi",
+    subtitle: "Lakukan check-in dan check-out kerja harian dengan verifikasi lokasi & foto",
   },
 };
 

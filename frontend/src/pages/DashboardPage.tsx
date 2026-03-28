@@ -260,7 +260,7 @@ export default function DashboardPage() {
           <div className="dispatch-list">
             {stats.dispatchToday.length > 0 ? (
               stats.dispatchToday.map((job) => (
-                <Link key={job.id} to={`/jobs/${job.id}`} className="dispatch-item">
+                <Link key={job.id} to={`/jobs/${job.id}`} className={`dispatch-item ${job.status === "done" ? "dispatch-item--done" : ""}`}>
                   <div className="dispatch-item__time">
                     <strong>{job.schedule.split("·")[1]?.trim() ?? job.schedule}</strong>
                     <span>{job.number}</span>
@@ -271,8 +271,8 @@ export default function DashboardPage() {
                     <small>{job.technicians.length > 0 ? job.technicians.join(", ") : "Belum ada teknisi"}</small>
                   </div>
                   <div className="dispatch-item__status">
-                    <Badge tone={job.priority === "Urgent" ? "danger" : job.status === "done" ? "success" : job.status === "pending" ? "warning" : "info"}>
-                      {job.priority === "Urgent" ? `Urgent · ${job.status.replaceAll("_", " ")}` : job.status.replaceAll("_", " ")}
+                    <Badge tone={job.status === "done" ? "neutral" : job.priority === "Urgent" ? "danger" : job.status === "pending" ? "warning" : "info"}>
+                      {job.priority === "Urgent" && job.status !== "done" ? `Urgent · ${job.status.replaceAll("_", " ")}` : job.status.replaceAll("_", " ")}
                     </Badge>
                   </div>
                 </Link>
@@ -300,7 +300,7 @@ export default function DashboardPage() {
           title="Deadline Mendekat"
           description="Pantau job yang deadline-nya perlu segera ditindak."
         >
-          <DeadlineList items={calendarItems} emptyLabel="Belum ada deadline aktif untuk job bisnis ini." />
+          <DeadlineList items={calendarItems.filter(item => !["done", "cancelled"].includes(item.status || ""))} emptyLabel="Belum ada deadline aktif untuk job bisnis ini." />
         </SectionCard>
       </div>
 

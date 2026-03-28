@@ -12,6 +12,7 @@ import {
   useTechniciansQuery,
   useUpdateTechnicianAccountMutation,
   useUpdateTechnicianMutation,
+  useDeleteTechnicianMutation,
 } from "../api/hooks";
 import type { TechnicianAccountResult } from "../api/types";
 import { PageError, PageLoader } from "../components/PageState";
@@ -30,6 +31,7 @@ export default function TechniciansPage() {
   const forceLogoutTechnicianMutation = useForceLogoutTechnicianMutation();
   const resetTechnicianPasswordMutation = useResetTechnicianPasswordMutation();
   const updateTechnicianAccountMutation = useUpdateTechnicianAccountMutation();
+  const deleteTechnicianMutation = useDeleteTechnicianMutation();
   const [editingId, setEditingId] = useState("");
   const [selectedTechnicianId, setSelectedTechnicianId] = useState("");
   const updateTechnicianMutation = useUpdateTechnicianMutation(editingId || undefined);
@@ -41,6 +43,7 @@ export default function TechniciansPage() {
   const formRef = useRef<HTMLDivElement | null>(null);
   const accountFeedbackRef = useRef<HTMLDivElement | null>(null);
   const calendarRef = useRef<HTMLDivElement | null>(null);
+  const [expandedAccountId, setExpandedAccountId] = useState("");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [specialties, setSpecialties] = useState("");
@@ -153,6 +156,7 @@ export default function TechniciansPage() {
       const result = await createTechnicianAccountMutation.mutateAsync({
         technicianId,
         email,
+        password: passwordDrafts[technicianId]?.trim() || undefined,
       });
       setLastAccountResult(result);
       scrollToRef(accountFeedbackRef);
@@ -231,6 +235,12 @@ export default function TechniciansPage() {
       }));
     } finally {
       setAccountActionTargetId("");
+    }
+  }
+
+  async function handleDeleteTechnician(id: string) {
+    if (window.confirm("Apakah Anda yakin ingin menghapus teknisi ini? Data history pekerjaan tetap tersimpan di database.")) {
+      await deleteTechnicianMutation.mutateAsync(id);
     }
   }
 
@@ -435,6 +445,8 @@ export default function TechniciansPage() {
 
       <div className="cards-grid">
         {technicians.map((technician) => {
+          const isExpanded = expandedAccountId === technician.id;
+          const initials = technician.name.slice(0, 2).toUpperCase();
           const reminderWhatsappLink = buildWhatsAppLink(
             technician.phone,
             buildTechnicianTaskMessage({
@@ -450,163 +462,150 @@ export default function TechniciansPage() {
           );
 
           return (
-            <SectionCard key={technician.id} title={technician.name} description={technician.specialties.join(", ")}>
-              <div className="tech-card__body">
-                <div className="avatar avatar--large">{technician.name.slice(0, 2).toUpperCase()}</div>
-                <div className="summary-list">
-                  <div><span>Rating</span><strong>{technician.rating} · {technician.jobsCompleted} job</strong></div>
-                  <div><span>Status</span><Badge tone={technician.status === "Aktif" ? "success" : "info"}>{technician.status}</Badge></div>
-                  <div><span>Phone</span><strong>{technician.phone}</strong></div>
-                  <div><span>Login</span><Badge tone={getAccountStatusTone(technician.accountStatus)}>{getAccountStatusLabel(technician.accountStatus)}</Badge></div>
-                  <div><span>Email</span><strong>{technician.accountEmail ?? "Belum diatur"}</strong></div>
+            <div key={technician.id} className={`tech-card ${technician.status === "Tidak Aktif" ? "tech-card--inactive" : ""}`}>
+              <div className="tech-card__header">
+                <div className="tech-card__identity">
+                  <div className="avatar avatar--large">{initials}</div>
+                  <div>
+                    <h3>{technician.name}</h3>
+                    <p>{technician.specialties.join(", ")}</p>
+                  </div>
                 </div>
-                <div className="action-stack">
-                  <label className="field">
-                    <span>Email login teknisi</span>
-                    <input
-                      type="email"
-                      value={accountDrafts[technician.id] ?? ""}
-                      onChange={(event) =>
-                        setAccountDrafts((current) => ({
-                          ...current,
-                          [technician.id]: event.target.value,
-                        }))
-                      }
-                      placeholder="teknisi@bisnisanda.id"
-                    />
-                  </label>
-                  <label className="field">
-                    <span>Password baru teknisi</span>
-                    <input
-                      type="text"
-                      value={passwordDrafts[technician.id] ?? ""}
-                      onChange={(event) =>
-                        setPasswordDrafts((current) => ({
-                          ...current,
-                          [technician.id]: event.target.value,
-                        }))
-                      }
-                      placeholder="Kosongkan untuk password acak saat reset"
-                    />
-                  </label>
-                  {createTechnicianAccountMutation.error && accountActionTargetId === technician.id ? (
-                    <p className="form-error">{getErrorMessage(createTechnicianAccountMutation.error)}</p>
-                  ) : null}
-                  {resetTechnicianPasswordMutation.error && accountActionTargetId === technician.id ? (
-                    <p className="form-error">{getErrorMessage(resetTechnicianPasswordMutation.error)}</p>
-                  ) : null}
-                  {updateTechnicianAccountMutation.error && accountActionTargetId === technician.id ? (
-                    <p className="form-error">{getErrorMessage(updateTechnicianAccountMutation.error)}</p>
-                  ) : null}
-                  {forceLogoutTechnicianMutation.error && accountActionTargetId === technician.id ? (
-                    <p className="form-error">{getErrorMessage(forceLogoutTechnicianMutation.error)}</p>
-                  ) : null}
-                  {disableTechnicianAccountMutation.error && accountActionTargetId === technician.id ? (
-                    <p className="form-error">{getErrorMessage(disableTechnicianAccountMutation.error)}</p>
-                  ) : null}
-                </div>
-                <div className="button-row button-row--left">
-                  <EmptyAction
-                    onClick={() => {
-                      setSelectedTechnicianId(technician.id);
-                      scrollToRef(calendarRef);
-                    }}
-                  >
-                    Buka Kalender
-                  </EmptyAction>
-                  <EmptyAction
-                    onClick={() => {
-                      setEditingId(technician.id);
-                      setShowForm(true);
-                      scrollToRef(formRef);
-                    }}
-                  >
-                    Edit
-                  </EmptyAction>
-                  <EmptyAction
-                    primary
-                    onClick={() => {
-                      window.location.assign(`/jobs?technicianId=${technician.id}`);
-                    }}
-                  >
-                    Lihat Job
-                  </EmptyAction>
-                  {technician.accountStatus !== "not_created" ? (
-                    <>
-                      <EmptyAction
-                        onClick={() => {
-                          void handleUpdateAccount(technician.id);
-                        }}
-                        disabled={
-                          (!accountDrafts[technician.id]?.trim() && !passwordDrafts[technician.id]?.trim()) ||
-                          (updateTechnicianAccountMutation.isPending && accountActionTargetId === technician.id)
-                        }
-                      >
-                        {updateTechnicianAccountMutation.isPending && accountActionTargetId === technician.id
-                          ? "Menyimpan Akun..."
-                          : "Simpan Email / Password"}
-                      </EmptyAction>
-                      <EmptyAction
-                        onClick={() => {
-                          void handleResetPassword(technician.id);
-                        }}
-                        disabled={
-                          (resetTechnicianPasswordMutation.isPending && accountActionTargetId === technician.id) ||
-                          Boolean(passwordDrafts[technician.id]?.trim() && passwordDrafts[technician.id]!.trim().length < 8)
-                        }
-                      >
-                        {resetTechnicianPasswordMutation.isPending && accountActionTargetId === technician.id
-                          ? "Mereset..."
-                          : "Reset Password Acak"}
-                      </EmptyAction>
-                      {technician.accountStatus === "active" ? (
-                        <>
-                          <EmptyAction
-                            onClick={() => {
-                              void handleForceLogout(technician.id);
-                            }}
-                            disabled={forceLogoutTechnicianMutation.isPending && accountActionTargetId === technician.id}
-                          >
-                            {forceLogoutTechnicianMutation.isPending && accountActionTargetId === technician.id
-                              ? "Memutus Sesi..."
-                              : "Paksa Logout"}
-                          </EmptyAction>
-                          <EmptyAction
-                            onClick={() => {
-                              void handleDisableAccount(technician.id);
-                            }}
-                            disabled={disableTechnicianAccountMutation.isPending && accountActionTargetId === technician.id}
-                          >
-                            {disableTechnicianAccountMutation.isPending && accountActionTargetId === technician.id
-                              ? "Menonaktifkan..."
-                              : "Nonaktifkan Akun"}
-                          </EmptyAction>
-                        </>
-                      ) : null}
-                    </>
-                  ) : (
-                    <EmptyAction
-                      onClick={() => {
-                        void handleCreateAccount(technician.id);
-                      }}
-                      disabled={
-                        !accountDrafts[technician.id]?.trim() ||
-                        (createTechnicianAccountMutation.isPending && accountActionTargetId === technician.id)
-                      }
-                    >
-                      {createTechnicianAccountMutation.isPending && accountActionTargetId === technician.id
-                        ? "Membuat Akun..."
-                        : "Buat Akun Login"}
-                    </EmptyAction>
-                  )}
-                  {reminderWhatsappLink ? (
-                    <a className="btn btn--secondary" href={reminderWhatsappLink} target="_blank" rel="noreferrer">
-                      Reminder WA
-                    </a>
-                  ) : null}
+                <div className="tech-card__badge-stack">
+                  <Badge tone={technician.status === "Aktif" ? "success" : technician.status === "Bertugas" ? "info" : "neutral"}>
+                    {technician.status}
+                  </Badge>
+                  <div className="tech-card__rating">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" className="text-warning">
+                      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                    </svg>
+                    <span>{technician.rating} · {technician.jobsCompleted} job</span>
+                  </div>
                 </div>
               </div>
-            </SectionCard>
+
+              <div className="tech-card__content">
+                <div className="summary-list summary-list--compact">
+                  <div><span>WA</span><strong>{technician.phone}</strong></div>
+                  <div><span>Login</span><Badge tone={getAccountStatusTone(technician.accountStatus)}>{getAccountStatusLabel(technician.accountStatus)}</Badge></div>
+                  {technician.accountEmail && <div><span>Email</span><strong>{technician.accountEmail}</strong></div>}
+                </div>
+              </div>
+
+              <div className="tech-card__actions">
+                <div className="button-group">
+                  <button className="btn btn--secondary btn--small" onClick={() => { setSelectedTechnicianId(technician.id); scrollToRef(calendarRef); }}>
+                    Kalender
+                  </button>
+                  <button className="btn btn--secondary btn--small" onClick={() => { setEditingId(technician.id); setShowForm(true); scrollToRef(formRef); }}>
+                    Edit Profile
+                  </button>
+                  <button className="btn btn--primary btn--small" onClick={() => window.location.assign(`/jobs?technicianId=${technician.id}`)}>
+                    Jobs
+                  </button>
+                </div>
+                <div className="button-group">
+                  <button 
+                    className={`btn btn--small ${isExpanded ? "btn--primary-soft" : "btn--secondary-soft"}`} 
+                    onClick={() => setExpandedAccountId(isExpanded ? "" : technician.id)}
+                  >
+                    {isExpanded ? "Tutup Akun" : "Atur Login"}
+                  </button>
+                  {reminderWhatsappLink && (
+                    <a className="btn btn--secondary-soft btn--small" href={reminderWhatsappLink} target="_blank" rel="noreferrer">
+                      WA
+                    </a>
+                  )}
+                  <button 
+                    className="btn btn--danger-soft btn--small" 
+                    onClick={() => handleDeleteTechnician(technician.id)}
+                    disabled={deleteTechnicianMutation.isPending}
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+
+              {isExpanded && (
+                <div className="tech-card__drawer tech-card__drawer--expanded">
+                  <div className="action-stack">
+                    <label className="field">
+                      <span>Email login teknisi</span>
+                      <input
+                        type="email"
+                        value={accountDrafts[technician.id] ?? ""}
+                        onChange={(event) =>
+                          setAccountDrafts((current) => ({
+                            ...current,
+                            [technician.id]: event.target.value,
+                          }))
+                        }
+                        placeholder="teknisi@bisnisanda.id"
+                      />
+                    </label>
+                    <label className="field">
+                      <span>Password login teknisi</span>
+                      <input
+                        type="text"
+                        value={passwordDrafts[technician.id] ?? ""}
+                        onChange={(event) =>
+                          setPasswordDrafts((current) => ({
+                            ...current,
+                            [technician.id]: event.target.value,
+                          }))
+                        }
+                        placeholder={technician.accountStatus === "not_created" ? "Min 8 karakter" : "Kosongkan jika tidak ingin ganti"}
+                      />
+                    </label>
+                    
+                    <div className="button-row button-row--left">
+                      {technician.accountStatus !== "not_created" ? (
+                        <>
+                          <EmptyAction
+                            primary
+                            onClick={() => void handleUpdateAccount(technician.id)}
+                            disabled={
+                              (!accountDrafts[technician.id]?.trim() && !passwordDrafts[technician.id]?.trim()) ||
+                              (updateTechnicianAccountMutation.isPending && accountActionTargetId === technician.id)
+                            }
+                          >
+                            {updateTechnicianAccountMutation.isPending && accountActionTargetId === technician.id
+                              ? "Menyimpan..."
+                              : "Update Akun"}
+                          </EmptyAction>
+                          <EmptyAction
+                            onClick={() => void handleResetPassword(technician.id)}
+                            disabled={resetTechnicianPasswordMutation.isPending && accountActionTargetId === technician.id}
+                          >
+                            Reset Password Acak
+                          </EmptyAction>
+                          <button className="btn btn--danger-soft btn--small" onClick={() => void handleDisableAccount(technician.id)}>
+                            Nonaktifkan
+                          </button>
+                        </>
+                      ) : (
+                        <EmptyAction
+                          primary
+                          onClick={() => void handleCreateAccount(technician.id)}
+                          disabled={
+                            !accountDrafts[technician.id]?.trim() ||
+                            (createTechnicianAccountMutation.isPending && accountActionTargetId === technician.id)
+                          }
+                        >
+                          {createTechnicianAccountMutation.isPending && accountActionTargetId === technician.id
+                            ? "Membuat..."
+                            : "Buat Akun"}
+                        </EmptyAction>
+                      )}
+                    </div>
+
+                    {accountActionTargetId === technician.id && (
+                      <div className="form-helper">Sedang memproses perubahan akun...</div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
           );
         })}
       </div>

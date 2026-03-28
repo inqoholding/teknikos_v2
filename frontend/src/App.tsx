@@ -24,6 +24,7 @@ const SettingsPage = lazy(() => import("./pages/SettingsPage"));
 const SettingsWhatsappConnectPage = lazy(() => import("./pages/SettingsWhatsappConnectPage"));
 const SettingsWhatsappRulesPage = lazy(() => import("./pages/SettingsWhatsappRulesPage"));
 const AdminSubscriptionsPage = lazy(() => import("./pages/AdminSubscriptionsPage"));
+const AttendancePage = lazy(() => import("./pages/AttendancePage"));
 const PendingPaymentPage = lazy(() => import("./pages/PendingPaymentPage"));
 
 const DemoWorkspaceLayout = lazy(() => import("./pages/demo/DemoWorkspace").then(m => ({ default: m.DemoWorkspaceLayout })));
@@ -92,6 +93,7 @@ export default function App() {
               <Route path="/invoices" element={<InvoicesPage />} />
               <Route path="/inventory" element={<InventoryPage />} />
               <Route path="/contracts" element={<ContractsPage />} />
+              <Route path="/attendance" element={<AttendancePage />} />
               <Route path="/settings" element={<SettingsPage />} />
               <Route path="/settings/whatsapp-rules" element={<SettingsWhatsappRulesPage />} />
               <Route path="/settings/whatsapp-connect" element={<SettingsWhatsappConnectPage />} />

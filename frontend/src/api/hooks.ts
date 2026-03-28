@@ -379,6 +379,42 @@ export function useCreateCustomerMutation() {
   });
 }
 
+export function useUpdateCustomerMutation(id?: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (payload: Partial<{
+      name: string;
+      phone: string;
+      email?: string | null;
+      address: string;
+      units: string[];
+    }>) => {
+      const { data } = await api.patch(`/api/customers/${id}`, payload);
+      return data;
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["customers"] });
+      await queryClient.invalidateQueries({ queryKey: ["customers", id] });
+    },
+  });
+}
+
+export function useDeleteCustomerMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { data } = await api.delete(`/api/customers/${id}`);
+      return data;
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["customers"] });
+      await queryClient.invalidateQueries({ queryKey: ["dashboard", "stats"] });
+    },
+  });
+}
+
 export function useCreateTechnicianMutation() {
   const queryClient = useQueryClient();
 
@@ -406,6 +442,21 @@ export function useUpdateTechnicianMutation(id?: string) {
   return useMutation({
     mutationFn: async (payload: Record<string, unknown>) => {
       const { data } = await api.patch(`/api/technicians/${id}`, payload);
+      return data;
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["technicians"] });
+      await queryClient.invalidateQueries({ queryKey: ["dashboard", "stats"] });
+    },
+  });
+}
+
+export function useDeleteTechnicianMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { data } = await api.delete(`/api/technicians/${id}`);
       return data;
     },
     onSuccess: async () => {
@@ -772,7 +823,13 @@ export function useTechnicianCheckInMutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (payload: { latitude: number; longitude: number }) => {
+    mutationFn: async (payload: {
+      latitude: number;
+      longitude: number;
+      photoUrl?: string;
+      note?: string;
+      jobId?: string;
+    }) => {
       const { data } = await api.post<{ data: TechnicianSelfProfile }>("/api/technician/check-in", payload);
       return data.data;
     },
@@ -788,8 +845,14 @@ export function useTechnicianCheckOutMutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (payload?: { latitude?: number; longitude?: number }) => {
-      const { data } = await api.post<{ data: TechnicianSelfProfile }>("/api/technician/check-out", payload ?? {});
+    mutationFn: async (payload: {
+      latitude: number;
+      longitude: number;
+      photoUrl?: string;
+      note?: string;
+      jobId?: string;
+    }) => {
+      const { data } = await api.post<{ data: TechnicianSelfProfile }>("/api/technician/check-out", payload);
       return data.data;
     },
     onSuccess: async () => {

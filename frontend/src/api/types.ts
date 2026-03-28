@@ -206,6 +206,9 @@ export interface TechnicianSelfProfile {
   lastSeenAt: string | null;
   attendanceLatitude: number | null;
   attendanceLongitude: number | null;
+  attendancePhotoUrl: string | null;
+  attendanceNote: string | null;
+  attendanceJobId: string | null;
   attendanceUpdatedAt: string | null;
 }
 

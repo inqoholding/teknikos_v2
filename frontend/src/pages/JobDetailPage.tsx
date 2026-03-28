@@ -92,7 +92,7 @@ export default function JobDetailPage() {
   const createInvoiceMutation = useCreateInvoiceFromJobMutation(id);
   const techniciansQuery = useTechniciansQuery(!isTechnician);
   const customersQuery = useCustomersQuery(undefined, !isTechnician);
-  const inventoryQuery = useInventoryQuery(!isTechnician);
+  const inventoryQuery = useInventoryQuery();
   const businessQuery = useBusinessQuery();
   const sendBusinessWhatsappMutation = useSendBusinessWhatsappMutation();
 
@@ -480,16 +480,21 @@ export default function JobDetailPage() {
                           <option value="sparepart">Sparepart</option>
                         </select>
                       </label>
-                      {item.kind === "sparepart" && !isTechnician && inventoryItems.length > 0 ? (
+                      {inventoryItems.length > 0 ? (
                         <label className="field">
-                          <span>Barang inventori</span>
-                          <select value={item.inventoryId ?? ""} onChange={(event) => handleInventorySelect(item.id, event.target.value)}>
-                            <option value="">Pilih sparepart</option>
-                            {inventoryItems.map((inventoryItem) => (
-                              <option key={inventoryItem.id} value={inventoryItem.id}>
-                                {inventoryItem.name} · stok {inventoryItem.stock}
-                              </option>
-                            ))}
+                          <span>{item.kind === "sparepart" ? "Pilih barang" : "Pilih jasa (opsional)"}</span>
+                          <select 
+                            value={item.inventoryId ?? ""} 
+                            onChange={(event) => handleInventorySelect(item.id, event.target.value)}
+                          >
+                            <option value="">{item.kind === "sparepart" ? "Pilih sparepart" : "Input manual / Pilih master jasa"}</option>
+                            {inventoryItems
+                              .filter((inv) => item.kind === "service" ? inv.category === "Jasa" : inv.category !== "Jasa")
+                              .map((inventoryItem) => (
+                                <option key={inventoryItem.id} value={inventoryItem.id}>
+                                  {inventoryItem.name} · {item.kind === "sparepart" ? `stok ${inventoryItem.stock}` : `Service Master (${inventoryItem.sellPrice})`}
+                                </option>
+                              ))}
                           </select>
                         </label>
                       ) : (
@@ -740,7 +745,7 @@ export default function JobDetailPage() {
                 <input type="datetime-local" value={deadlineAt} onChange={(event) => setDeadlineAt(event.target.value)} />
               </label>
               ) : null}
-              <button className="btn btn--secondary" onClick={() => void handleUpdateStatus()} disabled={updateJobMutation.isPending}>
+               <button className={`btn ${isTechnician ? "btn--primary" : "btn--secondary"}`} onClick={() => void handleUpdateStatus()} disabled={updateJobMutation.isPending}>
                 {updateJobMutation.isPending ? "Menyimpan..." : "Simpan Perubahan"}
               </button>
               {!isTechnician ? (

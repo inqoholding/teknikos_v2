@@ -5,10 +5,6 @@ import {
   useBusinessQuery,
   useCreateBusinessSupportRequestMutation,
   useSessionQuery,
-  useTechnicianCheckInMutation,
-  useTechnicianCheckOutMutation,
-  useTechnicianLocationMutation,
-  useTechnicianSelfQuery,
   useUpdateBusinessMutation,
 } from "../api/hooks";
 import { PageError, PageLoader } from "../components/PageState";
@@ -32,10 +28,6 @@ export default function SettingsPage() {
   const sessionQuery = useSessionQuery();
   const supportRequestMutation = useCreateBusinessSupportRequestMutation();
   const isTechnician = sessionQuery.data?.user.role === "technician";
-  const technicianSelfQuery = useTechnicianSelfQuery(isTechnician);
-  const technicianCheckInMutation = useTechnicianCheckInMutation();
-  const technicianCheckOutMutation = useTechnicianCheckOutMutation();
-  const technicianLocationMutation = useTechnicianLocationMutation();
 
   if (businessQuery.isLoading) {
     return <PageLoader title="Memuat pengaturan..." />;
@@ -49,28 +41,6 @@ export default function SettingsPage() {
   const upgradeLink = buildSalesSubscriptionLink({ businessName: business.name, plan: business.plan, type: "upgrade" });
   const renewalLink = buildSalesSubscriptionLink({ businessName: business.name, plan: business.plan, type: "renewal" });
 
-  async function getCurrentLocation() {
-    if (typeof navigator === "undefined" || !navigator.geolocation) {
-      throw new Error("Browser ini belum mendukung geolocation.");
-    }
-
-    return new Promise<{ latitude: number; longitude: number }>((resolve, reject) => {
-      navigator.geolocation.getCurrentPosition(
-        (position) =>
-          resolve({
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude,
-          }),
-        () => reject(new Error("Izin lokasi ditolak atau lokasi tidak tersedia.")),
-        {
-          enableHighAccuracy: true,
-          timeout: 15000,
-          maximumAge: 30000,
-        },
-      );
-    });
-  }
-
   async function handleSupportRequest(type: "subscription_upgrade" | "subscription_renewal") {
     await supportRequestMutation.mutateAsync({
       type,
@@ -82,21 +52,6 @@ export default function SettingsPage() {
     });
 
     window.open(type === "subscription_upgrade" ? upgradeLink : renewalLink, "_blank", "noopener,noreferrer");
-  }
-
-  async function handleTechnicianCheckIn() {
-    const location = await getCurrentLocation();
-    await technicianCheckInMutation.mutateAsync(location);
-  }
-
-  async function handleTechnicianCheckOut() {
-    const location = await getCurrentLocation().catch(() => undefined);
-    await technicianCheckOutMutation.mutateAsync(location);
-  }
-
-  async function handleTechnicianRefreshLocation() {
-    const location = await getCurrentLocation();
-    await technicianLocationMutation.mutateAsync(location);
   }
 
   const [isEditing, setIsEditing] = useState(false);
@@ -175,7 +130,7 @@ export default function SettingsPage() {
             {!isTechnician && (
               <div className="button-row button-row--left" style={{ marginTop: "16px" }}>
                 <button className="btn btn--secondary" type="button" onClick={() => setIsEditing(true)}>
-                  Edit Profil
+                   Edit Profil
                 </button>
               </div>
             )}
@@ -196,62 +151,6 @@ export default function SettingsPage() {
         </SectionCard>
       ) : null}
 
-      {isTechnician ? (
-        <SectionCard title="Absensi Teknisi" description="Gunakan lokasi perangkat untuk check in, check out, dan pembaruan kehadiran lapangan.">
-          {technicianSelfQuery.isLoading ? (
-            <p className="form-helper">Memuat status absensi teknisi...</p>
-          ) : technicianSelfQuery.error || !technicianSelfQuery.data ? (
-            <p className="form-error">{getErrorMessage(technicianSelfQuery.error)}</p>
-          ) : (
-            <>
-              <div className="summary-list">
-                <div><span>Nama</span><strong>{technicianSelfQuery.data.name}</strong></div>
-                <div><span>Status hadir</span><strong>{technicianSelfQuery.data.status}</strong></div>
-                <div><span>Status absensi</span><strong>{technicianSelfQuery.data.attendanceStatus}</strong></div>
-                <div><span>Update terakhir</span><strong>{technicianSelfQuery.data.lastSeenAt ?? "Belum ada"}</strong></div>
-                <div><span>Koordinat</span><strong>{technicianSelfQuery.data.attendanceLatitude ?? technicianSelfQuery.data.latitude ?? "-"}, {technicianSelfQuery.data.attendanceLongitude ?? technicianSelfQuery.data.longitude ?? "-"}</strong></div>
-              </div>
-              <div className="button-row button-row--left">
-                <button
-                  className="btn btn--primary"
-                  type="button"
-                  onClick={() => void handleTechnicianCheckIn()}
-                  disabled={technicianCheckInMutation.isPending || technicianCheckOutMutation.isPending || technicianLocationMutation.isPending}
-                >
-                  {technicianCheckInMutation.isPending ? "Memproses..." : "Check In"}
-                </button>
-                <button
-                  className="btn btn--secondary"
-                  type="button"
-                  onClick={() => void handleTechnicianRefreshLocation()}
-                  disabled={technicianCheckInMutation.isPending || technicianCheckOutMutation.isPending || technicianLocationMutation.isPending}
-                >
-                  {technicianLocationMutation.isPending ? "Memperbarui..." : "Update Lokasi"}
-                </button>
-                <button
-                  className="btn btn--secondary"
-                  type="button"
-                  onClick={() => void handleTechnicianCheckOut()}
-                  disabled={technicianCheckInMutation.isPending || technicianCheckOutMutation.isPending || technicianLocationMutation.isPending}
-                >
-                  {technicianCheckOutMutation.isPending ? "Memproses..." : "Check Out"}
-                </button>
-              </div>
-              {technicianCheckInMutation.error || technicianCheckOutMutation.error || technicianLocationMutation.error ? (
-                <p className="form-error">
-                  {getErrorMessage(
-                    technicianCheckInMutation.error || technicianCheckOutMutation.error || technicianLocationMutation.error,
-                  )}
-                </p>
-              ) : null}
-              <p className="form-helper">
-                Check in akan menyimpan lokasi dan waktu aktif terakhir. Check out akan menandai teknisi tidak aktif tanpa membuka akses owner.
-              </p>
-            </>
-          )}
-        </SectionCard>
-      ) : null}
-
       {!isTechnician && business.subscriptionAlert ? (
         <SectionCard
           title={business.subscriptionAlert.title}
@@ -269,39 +168,39 @@ export default function SettingsPage() {
       ) : null}
 
       {!isTechnician ? (
-      <div className="cards-grid cards-grid--triple">
-        <article className="settings-link-card">
-          <span className="eyebrow">WhatsApp Rules</span>
-          <strong>Rules Penggunaan WhatsApp</strong>
-          <p>Baca aturan singkat agar nomor bisnis lebih aman dan tidak mudah diblokir saat dipakai di TeknikOS.</p>
-          <Link className="btn btn--secondary" to="/settings/whatsapp-rules">
-            Buka Rules WhatsApp
-          </Link>
-        </article>
+        <div className="cards-grid cards-grid--triple">
+          <article className="settings-link-card">
+            <span className="eyebrow">WhatsApp Rules</span>
+            <strong>Rules Penggunaan WhatsApp</strong>
+            <p>Baca aturan singkat agar nomor bisnis lebih aman dan tidak mudah diblokir saat dipakai di TeknikOS.</p>
+            <Link className="btn btn--secondary" to="/settings/whatsapp-rules">
+              Buka Rules WhatsApp
+            </Link>
+          </article>
 
-        <article className="settings-link-card">
-          <span className="eyebrow">WAHA Connection</span>
-          <strong>Hubungkan ke WAHA</strong>
-          <p>Pilih mode WhatsApp, cek status koneksi, scan QR, dan sambungkan nomor bisnis ke WAHA.</p>
-          <Link className="btn btn--primary" to="/settings/whatsapp-connect">
-            Buka Halaman WAHA
-          </Link>
-        </article>
+          <article className="settings-link-card">
+            <span className="eyebrow">WAHA Connection</span>
+            <strong>Hubungkan ke WAHA</strong>
+            <p>Pilih mode WhatsApp, cek status koneksi, scan QR, dan sambungkan nomor bisnis ke WAHA.</p>
+            <Link className="btn btn--primary" to="/settings/whatsapp-connect">
+              Buka Halaman WAHA
+            </Link>
+          </article>
 
-        <article className="settings-link-card">
-          <span className="eyebrow">Subscription</span>
-          <strong>Upgrade atau Perpanjang</strong>
-          <p>Jika client ingin naik paket atau memperpanjang subscription, langsung hubungi sales dan otomatis masuk ke inbox admin.</p>
-          <div className="button-row button-row--left">
-            <button className="btn btn--primary" type="button" onClick={() => handleSupportRequest("subscription_upgrade")}>
-              Upgrade Paket
-            </button>
-            <button className="btn btn--secondary" type="button" onClick={() => handleSupportRequest("subscription_renewal")}>
-              Perpanjang
-            </button>
-          </div>
-        </article>
-      </div>
+          <article className="settings-link-card">
+            <span className="eyebrow">Subscription</span>
+            <strong>Upgrade atau Perpanjang</strong>
+            <p>Jika client ingin naik paket atau memperpanjang subscription, langsung hubungi sales dan otomatis masuk ke inbox admin.</p>
+            <div className="button-row button-row--left">
+              <button className="btn btn--primary" type="button" onClick={() => handleSupportRequest("subscription_upgrade")}>
+                Upgrade Paket
+              </button>
+              <button className="btn btn--secondary" type="button" onClick={() => handleSupportRequest("subscription_renewal")}>
+                Perpanjang
+              </button>
+            </div>
+          </article>
+        </div>
       ) : null}
     </div>
   );

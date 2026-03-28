@@ -64,6 +64,13 @@ function serializeTechnician(technician: typeof technicians.$inferSelect, jobsCo
     lastSeenAt: technician.lastSeenAt,
     accountEmail: technician.accountEmail,
     accountStatus: technician.accountStatus,
+    attendanceStatus: technician.attendanceStatus,
+    attendancePhotoUrl: technician.attendancePhotoUrl,
+    attendanceNote: technician.attendanceNote,
+    attendanceLocationLabel: technician.attendanceLocationLabel,
+    attendanceLatitude: technician.attendanceLatitude,
+    attendanceLongitude: technician.attendanceLongitude,
+    attendanceUpdatedAt: technician.attendanceUpdatedAt,
   };
 }
 

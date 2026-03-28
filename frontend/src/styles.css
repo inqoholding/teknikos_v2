@@ -3697,3 +3697,334 @@ h3,
 .mb-4 { margin-bottom: 16px; }
 .text-right { text-align: right; }
 .font-bold { font-weight: 700; }
+
+/* Technician Card Enhancements (UI-UX-PRO) */
+.tech-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 24px;
+  border-radius: 28px;
+  background: var(--surface-solid);
+  border: 1px solid var(--border-strong);
+  box-shadow: var(--shadow-soft);
+  transition: transform 240ms ease, box-shadow 240ms ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.tech-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-card);
+}
+
+.tech-card--inactive {
+  opacity: 0.75;
+  filter: grayscale(0.4);
+}
+
+.tech-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.tech-card__identity {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.tech-card__identity h3 {
+  margin: 0;
+  font-size: 1.15rem;
+  letter-spacing: -0.02em;
+}
+
+.tech-card__identity p {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.tech-card__badge-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.tech-card__rating {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.tech-card__content {
+  background: var(--surface-tint);
+  border-radius: 20px;
+  padding: 16px;
+}
+
+.summary-list--compact div {
+  padding: 4px 0;
+  border: 0;
+}
+
+.tech-card__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: auto;
+}
+
+.button-group {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.btn--small {
+  min-height: 36px;
+  padding: 0 12px;
+  font-size: 13px;
+  border-radius: 12px;
+}
+
+.btn--primary-soft {
+  background: var(--green-light);
+  color: var(--green-dark);
+}
+
+.btn--secondary-soft {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.btn--danger-soft {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.tech-card__drawer {
+  margin-top: 12px;
+  padding-top: 20px;
+  border-top: 1px dashed var(--border-strong);
+  animation: slideDown 240ms ease-out;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+
+/* Attendance Page Styles (UI-UX-PRO) */
+.attendance-container {
+  max-width: 500px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.attendance-status-banner {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background: var(--surface-tint);
+  border-radius: 20px;
+  margin-bottom: 24px;
+}
+
+.status-orb {
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  background: #cbd5e1;
+  position: relative;
+}
+
+.status-orb--active {
+  background: #10b981;
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.5);
+}
+
+.status-orb--active::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 999px;
+  border: 2px solid #10b981;
+  animation: statusPulse 2s infinite;
+}
+
+@keyframes statusPulse {
+  0% { transform: scale(1); opacity: 0.5; }
+  100% { transform: scale(1.6); opacity: 0; }
+}
+
+.attendance-photo-zone {
+  aspect-ratio: 4/3;
+  background: var(--surface-tint);
+  border: 2px dashed var(--border-strong);
+  border-radius: 28px;
+  overflow: hidden;
+  position: relative;
+  transition: border-color 240ms ease;
+}
+
+.attendance-photo-zone:hover {
+  border-color: var(--green-default);
+}
+
+.photo-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: transparent;
+  color: var(--text-muted);
+  transition: all 0.2s ease;
+  border: 0;
+  cursor: pointer;
+}
+
+.photo-placeholder:hover {
+  background: rgba(16, 185, 129, 0.05);
+  color: var(--green-default);
+}
+
+.photo-preview-wrap {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.photo-preview-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.photo-verified-badge {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  background: rgba(16, 185, 129, 0.9);
+  backdrop-filter: blur(8px);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  box-shadow: var(--shadow-soft);
+}
+
+.btn-remove-photo {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: rgba(255, 255, 255, 0.9);
+  color: #ef4444;
+  border-radius: 999px;
+  padding: 6px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  border: 0;
+  cursor: pointer;
+  transition: transform 200ms ease;
+}
+
+.btn-remove-photo:hover {
+  transform: scale(1.1);
+}
+
+.location-status-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px;
+  border-radius: 24px;
+  background: var(--surface-tint);
+  border: 1px solid var(--border-strong);
+}
+
+.location-status-card--success {
+  background: rgba(16, 185, 129, 0.05);
+  border-color: rgba(16, 185, 129, 0.2);
+}
+
+.feedback-alert {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.feedback-alert--success {
+  background: #f0fdf4;
+  color: #166534;
+}
+
+.feedback-alert--error {
+  background: #fef2f2;
+  color: #991b1b;
+}
+
+.btn--xl {
+  min-height: 64px;
+  font-size: 16px;
+  letter-spacing: 0.05em;
+  font-weight: 700;
+  border-radius: 24px;
+}
+
+.btn--danger {
+  background: linear-gradient(135deg, #ef4444, #b91c1c);
+  color: white;
+  box-shadow: 0 10px 20px rgba(239, 68, 68, 0.2);
+}
+
+/* Subtle Done State for Dashboard (UI-UX-PRO) */
+.schedule-calendar__day-dot--done {
+  background: #94a3b8; /* slate-400 */
+}
+
+.calendar-agenda-card--done {
+  opacity: 0.65;
+  filter: grayscale(0.5);
+  background: #f8fafc !important;
+  border-style: dashed !important;
+}
+
+.calendar-agenda-card--done strong {
+  text-decoration: line-through;
+  color: #64748b;
+}
+
+.calendar-agenda-card--done p {
+  color: #94a3b8;
+}
+
+.dispatch-item--done {
+  opacity: 0.6;
+  background: #f8fafc;
+  border-left-color: #94a3b8 !important;
+}
+
+.dispatch-item--done strong {
+  color: #64748b;
+  text-decoration: line-through;
+}

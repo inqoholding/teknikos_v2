@@ -1,9 +1,9 @@
 import { FormEvent, useDeferredValue, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { getErrorMessage } from "../api/client";
-import { useBusinessQuery, useCreateCustomerMutation, useCustomersQuery, useSendBusinessWhatsappMutation } from "../api/hooks";
-import { PageError, PageLoader } from "../components/PageState";
 import { Badge, EmptyAction, SectionCard } from "../components/UI";
+import { useBusinessQuery, useCreateCustomerMutation, useUpdateCustomerMutation, useDeleteCustomerMutation, useCustomersQuery, useSendBusinessWhatsappMutation } from "../api/hooks";
+import { PageError, PageLoader } from "../components/PageState";
 import { buildCustomerFollowUpMessage } from "../utils/whatsapp";
 
 export default function CustomersPage() {
@@ -15,8 +15,11 @@ export default function CustomersPage() {
   const [email, setEmail] = useState("");
   const [address, setAddress] = useState("");
   const [units, setUnits] = useState("");
+  const [editingId, setEditingId] = useState("");
   const deferredSearch = useDeferredValue(search);
   const createCustomerMutation = useCreateCustomerMutation();
+  const updateCustomerMutation = useUpdateCustomerMutation(editingId || undefined);
+  const deleteCustomerMutation = useDeleteCustomerMutation();
   const businessQuery = useBusinessQuery();
   const sendBusinessWhatsappMutation = useSendBusinessWhatsappMutation();
   const customersQuery = useCustomersQuery(
@@ -63,22 +66,47 @@ export default function CustomersPage() {
 
   async function handleCreateCustomer(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    await createCustomerMutation.mutateAsync({
+    const payload = {
       name,
       phone,
-      email,
+      email: email || undefined,
       address,
       units: units
         .split("\n")
         .map((item) => item.trim())
         .filter(Boolean),
-    });
+    };
+
+    if (editingId) {
+      await updateCustomerMutation.mutateAsync(payload);
+    } else {
+      await createCustomerMutation.mutateAsync(payload);
+    }
+
     setName("");
     setPhone("");
     setEmail("");
     setAddress("");
     setUnits("");
+    setEditingId("");
     setShowCreate(false);
+  }
+
+  function handleEdit(customer: (typeof filteredCustomers)[number]) {
+    setEditingId(customer.id);
+    setName(customer.name);
+    setPhone(customer.phone);
+    setEmail(customer.email || "");
+    setAddress(customer.address);
+    setUnits(customer.units.join("\n"));
+    setShowCreate(true);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  async function handleDelete(id: string) {
+    if (window.confirm("Apakah Anda yakin ingin menghapus pelanggan ini? Data job dan invoice terkait tetap ada di sistem.")) {
+      await deleteCustomerMutation.mutateAsync(id);
+    }
   }
 
   async function handleSendAutomaticFollowUp(customer: (typeof filteredCustomers)[number]) {
@@ -104,14 +132,24 @@ export default function CustomersPage() {
           onChange={(event) => setSearch(event.target.value)}
         />
         <div className="toolbar__actions">
-          <EmptyAction primary onClick={() => setShowCreate((current) => !current)}>
+          <EmptyAction primary onClick={() => {
+            if (showCreate) {
+              setEditingId("");
+              setName("");
+              setPhone("");
+              setEmail("");
+              setAddress("");
+              setUnits("");
+            }
+            setShowCreate((current) => !current);
+          }}>
             {showCreate ? "Tutup Form" : "Tambah Pelanggan"}
           </EmptyAction>
         </div>
       </div>
 
       {showCreate ? (
-        <SectionCard title="Pelanggan Baru">
+        <SectionCard title={editingId ? "Edit Pelanggan" : "Pelanggan Baru"}>
           <form className="action-stack" onSubmit={handleCreateCustomer}>
             <div className="field-grid">
               <label className="field">
@@ -141,11 +179,23 @@ export default function CustomersPage() {
                 placeholder="Satu unit per baris"
               />
             </label>
-            {createCustomerMutation.error ? <p className="form-error">{getErrorMessage(createCustomerMutation.error)}</p> : null}
+            {createCustomerMutation.error || updateCustomerMutation.error ? (
+              <p className="form-error">
+                {getErrorMessage(createCustomerMutation.error || updateCustomerMutation.error)}
+              </p>
+            ) : null}
             <div className="button-row button-row--left">
-              <EmptyAction onClick={() => setShowCreate(false)}>Batal</EmptyAction>
-              <EmptyAction primary type="submit" disabled={createCustomerMutation.isPending}>
-                {createCustomerMutation.isPending ? "Menyimpan..." : "Simpan Pelanggan"}
+              <EmptyAction onClick={() => {
+                setShowCreate(false);
+                setEditingId("");
+                setName("");
+                setPhone("");
+                setEmail("");
+                setAddress("");
+                setUnits("");
+              }}>Batal</EmptyAction>
+              <EmptyAction primary type="submit" disabled={createCustomerMutation.isPending || updateCustomerMutation.isPending}>
+                {createCustomerMutation.isPending || updateCustomerMutation.isPending ? "Menyimpan..." : editingId ? "Update Pelanggan" : "Simpan Pelanggan"}
               </EmptyAction>
             </div>
           </form>
@@ -273,6 +323,17 @@ export default function CustomersPage() {
                   >
                     {sendBusinessWhatsappMutation.isPending ? "Mengirim..." : "Kirim Pesan Otomatis"}
                   </EmptyAction>
+                  <button type="button" className="btn btn--secondary" onClick={() => handleEdit(customer)}>
+                    Edit
+                  </button>
+                  <button 
+                    type="button" 
+                    className="btn btn--danger-soft" 
+                    onClick={() => handleDelete(customer.id)}
+                    disabled={deleteCustomerMutation.isPending}
+                  >
+                    {deleteCustomerMutation.isPending ? "Menghapus..." : "Hapus"}
+                  </button>
                 </div>
               </article>
             ))}

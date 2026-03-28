@@ -110,7 +110,8 @@ export function ScheduleCalendar({
     const date = new Date(item.scheduleAt);
     return date.getMonth() === currentMonth.getMonth() && date.getFullYear() === currentMonth.getFullYear();
   });
-  const urgentMonthCount = monthItems.filter((item) => item.priority === "Urgent").length;
+  const activeMonthItems = monthItems.filter(item => !["done", "cancelled"].includes(item.status || ""));
+  const urgentMonthCount = activeMonthItems.filter((item) => item.priority === "Urgent").length;
   const upcomingDayKeys = Array.from(itemsByDay.keys())
     .map((key) => ({ key, date: new Date(key) }))
     .filter(({ date }) => date.getMonth() === currentMonth.getMonth() && date.getFullYear() === currentMonth.getFullYear())
@@ -224,12 +225,15 @@ export function ScheduleCalendar({
                 <>
                   <small>{dayItems.length} tugas</small>
                   <div className="schedule-calendar__day-dots">
-                    {dayItems.slice(0, 3).map((item) => (
-                      <span
-                        key={item.id}
-                        className={`schedule-calendar__day-dot ${item.priority === "Urgent" ? "schedule-calendar__day-dot--urgent" : ""}`}
-                      />
-                    ))}
+                    {dayItems.slice(0, 3).map((item) => {
+                      const isDone = item.status === "done";
+                      return (
+                        <span
+                          key={item.id}
+                          className={`schedule-calendar__day-dot ${isDone ? "schedule-calendar__day-dot--done" : item.priority === "Urgent" ? "schedule-calendar__day-dot--urgent" : ""}`}
+                        />
+                      );
+                    })}
                   </div>
                 </>
               ) : (
@@ -251,15 +255,23 @@ export function ScheduleCalendar({
         {selectedItems.length > 0 ? (
           selectedItems.map((item) => {
             const body = (
-              <div className="calendar-agenda-card">
+              <div className={`calendar-agenda-card ${item.status === "done" ? "calendar-agenda-card--done" : ""}`}>
                 <div className="calendar-agenda-card__head">
                   <div>
                     <strong>{item.title}</strong>
                     <p>{item.subtitle ?? "-"}</p>
                   </div>
                   <div className="calendar-agenda-card__meta">
-                    {item.priority ? <Badge tone={item.priority === "Urgent" ? "danger" : "neutral"}>{item.priority}</Badge> : null}
-                    {item.status ? <Badge tone={item.status === "done" ? "success" : item.status === "pending" ? "warning" : "info"}>{item.status.replaceAll("_", " ")}</Badge> : null}
+                    {item.priority ? (
+                      <Badge tone={item.status === "done" ? "neutral" : item.priority === "Urgent" ? "danger" : "neutral"}>
+                        {item.priority}
+                      </Badge>
+                    ) : null}
+                    {item.status ? (
+                      <Badge tone={item.status === "done" ? "neutral" : item.status === "pending" ? "warning" : "info"}>
+                        {item.status.replaceAll("_", " ")}
+                      </Badge>
+                    ) : null}
                   </div>
                 </div>
                 <div className="calendar-agenda-card__row">

@@ -30,14 +30,6 @@ const inventoryParamsSchema = z.object({
 export const inventoryRouter = Router();
 
 inventoryRouter.use(requireSession);
-inventoryRouter.use((_req, res, next) => {
-  try {
-    requireOwnerAccess(res);
-    next();
-  } catch (error) {
-    next(error);
-  }
-});
 
 inventoryRouter.get("/", async (_req, res) => {
   const businessId = requireBusiness(res);
@@ -67,6 +59,7 @@ inventoryRouter.get("/", async (_req, res) => {
 });
 
 inventoryRouter.post("/", async (req, res) => {
+  requireOwnerAccess(res);
   const businessId = requireBusiness(res);
   const business = await getCurrentBusiness(res);
   const payload = inventorySchema.parse(req.body);
@@ -87,6 +80,7 @@ inventoryRouter.post("/", async (req, res) => {
 });
 
 inventoryRouter.patch("/:id", async (req, res) => {
+  requireOwnerAccess(res);
   const businessId = requireBusiness(res);
   const business = await getCurrentBusiness(res);
   const { id } = inventoryParamsSchema.parse(req.params);
@@ -110,6 +104,7 @@ inventoryRouter.patch("/:id", async (req, res) => {
 });
 
 inventoryRouter.patch("/:id/adjust-stock", async (req, res) => {
+  requireOwnerAccess(res);
   const businessId = requireBusiness(res);
   const business = await getCurrentBusiness(res);
   const { id } = inventoryParamsSchema.parse(req.params);
@@ -140,6 +135,7 @@ inventoryRouter.patch("/:id/adjust-stock", async (req, res) => {
 });
 
 inventoryRouter.delete("/:id", async (req, res) => {
+  requireOwnerAccess(res);
   const businessId = requireBusiness(res);
   const business = await getCurrentBusiness(res);
   const { id } = inventoryParamsSchema.parse(req.params);

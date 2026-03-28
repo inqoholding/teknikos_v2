@@ -140,27 +140,44 @@ export default function InventoryPage() {
             <div className="field-grid">
               <label className="field">
                 <span>Kategori</span>
-                <input value={category} onChange={(event) => setCategory(event.target.value)} required />
+                <select value={category} onChange={(event) => setCategory(event.target.value)} required>
+                  <option value="Sparepart">Sparepart</option>
+                  <option value="Jasa">Jasa / Service</option>
+                  <option value="Lainnya">Lainnya</option>
+                </select>
               </label>
-              <label className="field">
-                <span>Stok awal</span>
-                <input type="number" min="0" value={stock} onChange={(event) => setStock(event.target.value)} required />
-              </label>
+              {category !== "Jasa" && (
+                <label className="field">
+                  <span>Stok awal</span>
+                  <input type="number" min="0" value={stock} onChange={(event) => setStock(event.target.value)} required />
+                </label>
+              )}
             </div>
             <div className="field-grid">
-              <label className="field">
-                <span>Min stok</span>
-                <input type="number" min="0" value={minStock} onChange={(event) => setMinStock(event.target.value)} required />
-              </label>
-              <label className="field">
-                <span>Harga beli</span>
-                <input type="number" min="0" value={buyPrice} onChange={(event) => setBuyPrice(event.target.value)} required />
-              </label>
+              {category !== "Jasa" ? (
+                <>
+                  <label className="field">
+                    <span>Min stok</span>
+                    <input type="number" min="0" value={minStock} onChange={(event) => setMinStock(event.target.value)} required />
+                  </label>
+                  <label className="field">
+                    <span>Harga beli</span>
+                    <input type="number" min="0" value={buyPrice} onChange={(event) => setBuyPrice(event.target.value)} required />
+                  </label>
+                </>
+              ) : (
+                <label className="field">
+                  <span>Harga jual</span>
+                  <input type="number" min="0" value={sellPrice} onChange={(event) => setSellPrice(event.target.value)} required />
+                </label>
+              )}
             </div>
-            <label className="field">
-              <span>Harga jual</span>
-              <input type="number" min="0" value={sellPrice} onChange={(event) => setSellPrice(event.target.value)} required />
-            </label>
+            {category !== "Jasa" && (
+              <label className="field">
+                <span>Harga jual</span>
+                <input type="number" min="0" value={sellPrice} onChange={(event) => setSellPrice(event.target.value)} required />
+              </label>
+            )}
             {createInventoryMutation.error ? <p className="form-error">{getErrorMessage(createInventoryMutation.error)}</p> : null}
             <div className="button-row button-row--left">
               <EmptyAction onClick={() => setShowCreate(false)}>Batal</EmptyAction>
@@ -187,9 +204,14 @@ export default function InventoryPage() {
                   </Badge>
                 </div>
                 <div className="inventory-card__meta">
-                  <span>Stok {item.stock}</span>
-                  <span>Min {item.minStock}</span>
-                  <span>Beli {item.buyPrice}</span>
+                  {item.category === "Jasa" ? (
+                    <span className="text-blue-default font-semibold">Service Master</span>
+                  ) : (
+                    <>
+                      <span>Stok {item.stock}</span>
+                      <span>Min {item.minStock}</span>
+                    </>
+                  )}
                   <span>Jual {item.sellPrice}</span>
                 </div>
                 <div className="inventory-card__footer">
@@ -214,14 +236,24 @@ export default function InventoryPage() {
               </select>
               <div className="summary-list">
                 <div><span>Barang</span><strong>{selectedItem?.name ?? "-"}</strong></div>
-                <div><span>Stok aktif</span><strong>{selectedItem?.stock ?? 0}</strong></div>
-                <div><span>Ambang minimum</span><strong>{selectedItem?.minStock ?? 0}</strong></div>
+                {selectedItem?.category !== "Jasa" && (
+                  <>
+                    <div><span>Stok aktif</span><strong>{selectedItem?.stock ?? 0}</strong></div>
+                    <div><span>Ambang minimum</span><strong>{selectedItem?.minStock ?? 0}</strong></div>
+                  </>
+                )}
               </div>
-              <div className="stock-adjust">
-                <button type="button" onClick={() => selectedItem && adjustMutation.mutate({ id: selectedItem.id, delta: -1 })}>-</button>
-                <strong>{selectedItem?.stock ?? 0}</strong>
-                <button type="button" onClick={() => selectedItem && adjustMutation.mutate({ id: selectedItem.id, delta: 1 })}>+</button>
-              </div>
+              {selectedItem?.category !== "Jasa" ? (
+                <div className="stock-adjust">
+                  <button type="button" onClick={() => selectedItem && adjustMutation.mutate({ id: selectedItem.id, delta: -1 })}>-</button>
+                  <strong>{selectedItem?.stock ?? 0}</strong>
+                  <button type="button" onClick={() => selectedItem && adjustMutation.mutate({ id: selectedItem.id, delta: 1 })}>+</button>
+                </div>
+              ) : (
+                <div className="callout callout--info">
+                  <p>Item ini adalah <strong>Jasa</strong>. Stok tidak dikelola secara kuantitas.</p>
+                </div>
+              )}
               {adjustMutation.error ? <p className="form-error">{getErrorMessage(adjustMutation.error)}</p> : null}
             </div>
           </SectionCard>

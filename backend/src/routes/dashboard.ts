@@ -139,7 +139,7 @@ dashboardRouter.get("/stats", async (_req, res) => {
       job.price > 0,
   ).length;
   const unassignedJobsCount = allJobs.filter(
-    (job) => job.status !== "cancelled" && getAssignedTechnicianIds(job).length === 0,
+    (job) => !["done", "cancelled"].includes(job.status) && getAssignedTechnicianIds(job).length === 0,
   ).length;
   const followUpCustomersCount = allCustomers.filter((customer) => {
     const customerContracts = allContracts.filter((contract) => contract.customerId === customer.id);
