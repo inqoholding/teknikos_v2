@@ -38,9 +38,9 @@ function OwnerAttendanceMonitoring() {
               <small>Dari total {techs.length} teknisi</small>
             </div>
             <div className="monitoring-stat">
-              <span>Update Terakhir</span>
-              <strong>{new Date().toLocaleTimeString('id-ID')}</strong>
-              <small>Data sinkronisasi otomatis</small>
+              <span>Sinkronisasi Live</span>
+              <strong>{new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</strong>
+              <small>Status teknisi diperbarui setiap saat</small>
             </div>
           </div>
         </SectionCard>
