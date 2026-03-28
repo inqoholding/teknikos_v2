@@ -575,7 +575,7 @@ export function DemoJobsPage() {
             <button className={view === "list" ? "segmented__active" : ""} onClick={() => setView("list")}>List</button>
             <button className={view === "kanban" ? "segmented__active" : ""} onClick={() => setView("kanban")}>Kanban</button>
           </div>
-          <input className="toolbar__search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Cari job, pelanggan, atau teknisi" />
+          <input className="toolbar__search" value={search} onChange={(event) => setSearch(event.target.value)} onFocus={(e) => e.target.select()} placeholder="Cari job, pelanggan, atau teknisi" />
           <div className="toolbar__actions">
             <button className="btn btn--secondary" disabled>Read-only demo</button>
           </div>
@@ -702,7 +702,7 @@ export function DemoJobDetailPage() {
               </label>
               <label className="field">
                 <span>Deadline tugas</span>
-                <input value="2026-03-24T17:00" readOnly />
+                <input value="2026-03-24T17:00" onFocus={(e) => e.target.select()} readOnly />
               </label>
             </div>
             <div className="button-row button-row--left">
@@ -805,7 +805,7 @@ export function DemoCustomersPage() {
   return (
     <div className="page-stack">
       <div className="toolbar">
-        <input className="toolbar__search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Cari nama, WA, atau alamat" />
+        <input className="toolbar__search" value={search} onChange={(event) => setSearch(event.target.value)} onFocus={(e) => e.target.select()} placeholder="Cari nama, WA, atau alamat" />
       </div>
       <SectionCard title="Database Pelanggan Demo" description="Versi demo ini sekarang juga menunjukkan area tempat aksi WAHA otomatis muncul di app utama.">
         <div className="customer-list">
