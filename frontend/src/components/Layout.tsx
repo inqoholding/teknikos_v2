@@ -135,7 +135,7 @@ export function AppShellLayout() {
     <div className="app-shell">
       <aside className="app-shell__sidebar">
         <Link to="/" className="brand-mark">
-          <div className="brand-mark__icon">T</div>
+          <div className="brand-mark__icon">C</div>
           <div>
             <strong>Coreveta</strong>
             <span>{business?.name ?? "Bisnis"}</span>
@@ -259,7 +259,7 @@ export function AdminShellLayout() {
     <div className="app-shell">
       <aside className="app-shell__sidebar">
         <Link to="/" className="brand-mark">
-          <div className="brand-mark__icon">T</div>
+          <div className="brand-mark__icon">C</div>
           <div>
             <strong>Coreveta Admin</strong>
             <span>Pusat kontrol</span>
@@ -340,7 +340,7 @@ export function AuthScaffold({
     <div className="auth-page">
       <div className="auth-page__hero">
         <div className="brand-mark brand-mark--hero">
-          <div className="brand-mark__icon">T</div>
+          <div className="brand-mark__icon">C</div>
           <div>
             <strong>Coreveta</strong>
             <span>Field Service Operating System</span>

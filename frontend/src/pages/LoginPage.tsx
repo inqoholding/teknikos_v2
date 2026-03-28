@@ -89,7 +89,7 @@ export default function LoginPage() {
   async function handleForgotPassword() {
     await publicSupportRequestMutation.mutateAsync({
       type: "password_help",
-      requesterEmail: email.trim() || "unknown@teknikos.local",
+      requesterEmail: email.trim() || "unknown@coreveta.local",
       message: "User meminta bantuan reset password dari halaman login.",
     });
 
