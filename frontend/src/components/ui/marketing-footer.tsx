@@ -88,7 +88,7 @@ export function MarketingFooter({
             <div>
               <div className="flex items-center gap-3">
                 <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-[#0b5f4e] via-[#169d73] to-[#61d0a8] text-base font-extrabold text-white">
-                  T
+                  C
                 </div>
                 <div>
                   <p className="font-['Space_Grotesk'] text-xl font-semibold tracking-[-0.04em] text-white">Coreveta</p>
