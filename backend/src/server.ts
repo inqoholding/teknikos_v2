@@ -86,7 +86,7 @@ app.use("/api", publicApiRateLimit);
 app.use("/api", publicWriteRateLimit);
 app.use("/api/auth", authRateLimit);
 app.use("/api/auth", requireCsrf);
-app.all("/api/auth/*", toNodeHandler(auth));
+app.all("/api/auth/{*any}", toNodeHandler(auth));
 
 app.use("/api/admin", sensitiveWriteRateLimit);
 app.use("/api", requireCsrf);
