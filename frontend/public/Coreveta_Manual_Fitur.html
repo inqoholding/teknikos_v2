@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manual Penggunaan Fitur Coreveta — Panduan Teknis Lengkap</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --emerald: #1D9E75;
+    --emerald-dark: #0F6E56;
+    --emerald-light: #E1F5EE;
+    --bg: #F9FAFB;
+    --surface: #ffffff;
+    --text: #111827;
+    --muted: #6B7280;
+    --border: #E5E7EB;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+  }
+
+  .sidebar {
+    width: 280px;
+    height: 100vh;
+    position: fixed;
+    left: 0; top: 0;
+    background: white;
+    border-right: 1px solid var(--border);
+    padding: 30px 20px;
+    overflow-y: auto;
+  }
+  .sidebar h1 { font-size: 20px; font-weight: 800; color: var(--emerald); margin-bottom: 30px; letter-spacing: -0.5px; }
+  .nav-group { margin-bottom: 24px; }
+  .nav-title { font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; letter-spacing: 0.5px; }
+  .nav-link { 
+    display: block; padding: 8px 12px; border-radius: 8px; color: var(--text); text-decoration: none; font-size: 13px; font-weight: 500; margin-bottom: 4px;
+    transition: all 0.2s;
+  }
+  .nav-link:hover { background: var(--emerald-light); color: var(--emerald-dark); }
+  .nav-link.active { background: var(--emerald); color: white; }
+
+  .main-content {
+    margin-left: 280px;
+    padding: 60px 80px;
+    max-width: 1200px;
+  }
+
+  section { margin-bottom: 80px; scroll-margin-top: 60px; }
+  h2 { font-size: 32px; font-weight: 800; margin-bottom: 16px; letter-spacing: -1px; color: var(--emerald-dark); }
+  h3 { font-size: 20px; font-weight: 700; margin-top: 40px; margin-bottom: 16px; }
+  p { margin-bottom: 20px; color: #4B5563; }
+
+  .screenshot-container {
+    background: white;
+    padding: 24px;
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    margin: 30px 0;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  }
+  .screenshot-container img { width: 100%; height: auto; border-radius: 8px; border: 1px solid #f0f0f0; }
+  .screenshot-caption { margin-top: 16px; font-size: 13px; font-weight: 600; color: var(--muted); text-align: center; }
+
+  .badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-left: 8px;
+    vertical-align: middle;
+  }
+  .badge-bisnis { background: #DBEAFE; color: #1E40AF; }
+  .badge-pro { background: var(--emerald-light); color: var(--emerald-dark); }
+
+  .feature-steps { margin: 24px 0; }
+  .feature-steps li { margin-bottom: 12px; padding-left: 20px; position: relative; list-style: none; }
+  .feature-steps li::before { 
+    content: ''; width: 6px; height: 6px; background: var(--emerald); border-radius: 50%;
+    position: absolute; left: 0; top: 10px;
+  }
+
+  @media (max-width: 1024px) {
+    .sidebar { display: none; }
+    .main-content { margin-left: 0; padding: 40px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <h1>⚡ Coreveta Manual</h1>
+  
+  <div class="nav-group">
+    <div class="nav-title">Operasional Utama</div>
+    <a href="#dashboard" class="nav-link">Dashboard & Beranda</a>
+    <a href="#jobs" class="nav-link">Manajemen Pesanan Kerja</a>
+    <a href="#tech" class="nav-link">Manajemen Teknisi</a>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-title">Data & CRM</div>
+    <a href="#customers" class="nav-link">Database Pelanggan</a>
+    <a href="#billing" class="nav-link">Billing & Invoicing</a>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-title">Fitur Lanjutan <span class="badge badge-bisnis">Bisnis</span></div>
+    <a href="#inventory" class="nav-link">Stok Suku Cadang</a>
+    <a href="#contracts" class="nav-link">Kontrak Servis Rutin</a>
+  </div>
+</aside>
+
+<main class="main-content">
+  <!-- DASHBOARD -->
+  <section id="dashboard">
+    <h2>Dashboard & Analitik Real-Time</h2>
+    <p>Dashboard adalah pusat kendali Anda. Di sini Anda bisa melihat performa bisnis dalam satu lirikan — mulai dari job aktif hingga pertumbuhan revenue.</p>
+    
+    <div class="screenshot-container">
+      <img src="/real-screenshots/dashboard_overview_1775531026680.png" alt="Real Dashboard Pro">
+      <div class="screenshot-caption">Tampilan Dashboard Real: Metrik Jobs, Teknisi Online, dan Durasi Respon.</div>
+    </div>
+
+    <h3>Fungsi Utama:</h3>
+    <ul class="feature-steps">
+      <li><strong>Banner Plan</strong>: Menampilkan jenis paket Anda (Starter/Pro/Bisnis).</li>
+      <li><strong>Statistik Harian</strong>: Pantau jumlah pesanan selesai dan performa teknisi hari ini.</li>
+      <li><strong>Shortcut Cepat</strong>: Tombol "+ Order Baru" untuk input data pelanggan kilat.</li>
+    </ul>
+  </section>
+
+  <!-- JOBS -->
+  <section id="jobs">
+    <h2>Manajemen Pesanan Kerja (Jobs)</h2>
+    <p>Kelola seluruh lifecycle pekerjaan dari satu tempat. Coreveta menyediakan dua sudut pandang: Daftar (List) untuk detail cepat dan Papan (Kanban) untuk alokasi teknisi.</p>
+
+    <div class="screenshot-container">
+      <img src="/real-screenshots/jobs_kanban_view_1775531091111.png" alt="Real Job Kanban">
+      <div class="screenshot-caption">Papan Kanban: Geser kartu pekerjaan untuk mengubah status atau alokasi teknisi.</div>
+    </div>
+
+    <h3>Cara Membuat Order Baru:</h3>
+    <ul class="feature-steps">
+      <li>Klik tombol <strong>+ Buat Baru</strong> di pojok kanan atas.</li>
+      <li>Pilih pelanggan dari database atau tambah pelanggan baru.</li>
+      <li>Pilih jenis layanan (AC/Listrik/Plumbing).</li>
+      <li>Pilih teknisi yang "Standby" dan atur jadwal kunjungan.</li>
+    </ul>
+
+    <div class="screenshot-container">
+      <img src="/real-screenshots/jobs_list_view_1775531078710.png" alt="Real Job List">
+      <div class="screenshot-caption">Tampilan Daftar: Filter berdasarkan status, prioritas, atau rentang tanggal.</div>
+    </div>
+  </section>
+
+  <!-- TECHNICIANS -->
+  <section id="tech">
+    <h2>Manajemen Teknisi</h2>
+    <p>Pantau siapa yang sedang bertugas, siapa yang standby, dan performa rating mereka dari pelanggan.</p>
+
+    <div class="screenshot-container">
+      <img src="/real-screenshots/technicians_list_1775531105291.png" alt="Real Technician List">
+      <div class="screenshot-caption">Daftar Teknisi: Lihat status 'Standby', 'Bertugas', atau 'Off' secara real-time.</div>
+    </div>
+    
+    <p><span class="badge badge-bisnis">Bisnis Only</span> Pada paket Bisnis, Anda juga dapat melihat <strong>GPS Live Tracking</strong> untuk mengetahui lokasi teknisi di peta secara akurat.</p>
+  </section>
+
+  <!-- CUSTOMERS -->
+  <section id="customers">
+    <h2>Database Pelanggan & Historis Aset</h2>
+    <p>Jangan pernah lupa riwayat perbaikan unit pelanggan. Coreveta menyimpan data historis lengkap per unit (seperti AC atau panel listrik).</p>
+
+    <div class="screenshot-container">
+      <img src="/real-screenshots/customers_list_1775531120014.png" alt="Real Customer List">
+      <div class="screenshot-caption">CRM Dasar: Cari pelanggan berdasarkan nama atau nomor HP dalam sekejap.</div>
+    </div>
+  </section>
+
+  <!-- BILLING -->
+  <section id="billing">
+    <h2>Billing & Professional Invoicing</h2>
+    <p>Tinggalkan kwitansi tulis tangan. Buat invoice PDF profesional dengan logo brand Anda dalam satu klik.</p>
+
+    <div class="screenshot-container">
+      <img src="/real-screenshots/invoices_list_1775531157509.png" alt="Real Invoices">
+      <div class="screenshot-caption">Manajemen Tagihan: Pantau status 'Sent', 'Paid', atau 'Overdue'.</div>
+    </div>
+
+    <h3>Fitur Invoicing:</h3>
+    <ul class="feature-steps">
+      <li><strong>PDF Otomatis</strong>: Generate invoice langsung setelah job selesai.</li>
+      <li><strong>Sent via WhatsApp</strong>: Link invoice bisa dikirim langsung ke chat pelanggan.</li>
+      <li><strong>Rekap Keuangan</strong>: Total pendapatan per bulan otomatis terhitung di dashboard.</li>
+    </ul>
+  </section>
+
+  <!-- INVENTORY -->
+  <section id="inventory">
+    <h2>Stok Suku Cadang <span class="badge badge-bisnis">Fitur Bisnis</span></h2>
+    <p>Kelola inventori material dan sparepart. Stok akan otomatis berkurang saat digunakan dalam pesanan kerja.</p>
+
+    <div class="screenshot-container">
+      <img src="/real-screenshots/inventory_list_1775531174266.png" alt="Real Inventory List">
+      <div class="screenshot-caption">Inventori: Pantau sisa stok dan berikan peringatan saat stok menipis.</div>
+    </div>
+  </section>
+
+  <!-- CONTRACTS -->
+  <section id="contracts">
+    <h2>Kontrak Servis Rutin <span class="badge badge-bisnis">Fitur Bisnis</span></h2>
+    <p>Ubah pelanggan 'sekali panggil' menjadi pendapatan rutin dengan manajemen kontrak perawatan berkala.</p>
+
+    <div class="screenshot-container">
+      <img src="/real-screenshots/contracts_list_1775531399253.png" alt="Real Contracts List">
+      <div class="screenshot-caption">Dashboard Kontrak: Pengingat otomatis untuk jadwal cuci AC triwulanan atau tahunan.</div>
+    </div>
+  </section>
+
+</main>
+
+</body>
+</html>
