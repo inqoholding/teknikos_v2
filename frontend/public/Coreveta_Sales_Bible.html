@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Coreveta — Panduan Sales</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --green:#1D9E75;--green-mid:#5DCAA5;--green-light:#E1F5EE;--green-dark:#0F6E56;--green-deeper:#0A4A3A;
+  --amber:#EF9F27;--amber-light:#FAEEDA;--red:#E53935;--red-light:#FFEBEE;--blue:#1565C0;--blue-light:#E3F2FD;
+  --bg:#F4F3EF;--surface:#FFFFFF;--border:rgba(0,0,0,0.07);--border-mid:rgba(0,0,0,0.12);
+  --text:#1A1A18;--muted:#5A5A56;--hint:#9A9A94;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);line-height:1.6;font-size:15px;}
+
+@media print{
+  .no-print{display:none!important;}
+  body{background:white;font-size:13px;}
+  .main{margin-left:0!important;}
+  .card{box-shadow:none!important;border:1px solid #ddd!important;break-inside:avoid;}
+  section{page-break-inside:avoid;}
+}
+
+/* NAV */
+.sidenav{position:fixed;left:0;top:0;bottom:0;width:228px;background:var(--green-deeper);padding:26px 0;z-index:100;display:flex;flex-direction:column;overflow-y:auto;}
+.sn-logo{padding:0 22px 22px;border-bottom:1px solid rgba(255,255,255,0.08);margin-bottom:14px;}
+.sn-brand{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:600;letter-spacing:0.22em;text-transform:uppercase;color:var(--green-mid);display:block;margin-bottom:3px;}
+.sn-name{font-size:22px;font-weight:900;color:white;letter-spacing:-0.5px;}
+.sn-sub{font-size:11px;color:rgba(255,255,255,0.32);font-weight:500;margin-top:1px;}
+.sn-url{font-size:11px;color:var(--green-mid);font-weight:700;margin-top:8px;text-decoration:none;display:flex;align-items:center;gap:4px;}
+.sn-url:hover{color:white;}
+.ng-label{font-size:9px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:rgba(255,255,255,0.26);padding:0 22px 5px;margin-top:8px;}
+.na{display:flex;align-items:center;gap:10px;padding:9px 22px;font-size:12.5px;font-weight:600;color:rgba(255,255,255,0.48);text-decoration:none;transition:all 0.15s;border-left:2px solid transparent;}
+.na:hover,.na.active{color:white;background:rgba(255,255,255,0.06);border-left-color:var(--green-mid);}
+.na .ni{font-size:13px;width:18px;text-align:center;}
+.sn-spacer{flex:1;}
+.sn-footer{padding:14px;}
+.sn-btn{display:block;width:100%;padding:10px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.11);border-radius:10px;color:rgba(255,255,255,0.62);font-size:12px;font-weight:700;font-family:'Plus Jakarta Sans',sans-serif;cursor:pointer;text-align:center;transition:background 0.15s;margin-bottom:8px;}
+.sn-btn:hover{background:rgba(255,255,255,0.14);color:white;}
+.sn-btn.primary{background:var(--green);border-color:var(--green-dark);color:white;}
+.sn-btn.primary:hover{background:var(--green-dark);}
+
+/* MAIN */
+.main{margin-left:228px;}
+
+/* HERO */
+.hero{background:linear-gradient(135deg,var(--green-deeper) 0%,var(--green-dark) 55%,var(--green) 100%);padding:58px 62px 50px;position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;top:-80px;right:-80px;width:340px;height:340px;border-radius:50%;background:rgba(255,255,255,0.04);}
+.hero-ey{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;letter-spacing:0.25em;text-transform:uppercase;color:var(--green-mid);margin-bottom:11px;display:flex;align-items:center;gap:10px;}
+.hero-ey::before{content:'';width:18px;height:2px;background:var(--green-mid);}
+.hero h1{font-size:38px;font-weight:900;color:white;letter-spacing:-1.5px;line-height:1.1;margin-bottom:13px;}
+.hero h1 em{color:var(--green-mid);font-style:normal;}
+.hero p{font-size:15px;color:rgba(255,255,255,0.56);max-width:480px;line-height:1.78;margin-bottom:22px;}
+.chips{display:flex;flex-wrap:wrap;gap:8px;}
+.chip{background:rgba(255,255,255,0.09);border:1px solid rgba(255,255,255,0.13);color:rgba(255,255,255,0.8);font-size:12px;font-weight:700;padding:5px 13px;border-radius:20px;}
+.chip.g{background:rgba(93,202,165,0.18);border-color:rgba(93,202,165,0.28);color:var(--green-mid);}
+
+/* CONTENT */
+.content{padding:42px 62px;}
+section{margin-bottom:50px;}
+.ey{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:var(--green);margin-bottom:4px;}
+.st{font-size:24px;font-weight:800;letter-spacing:-0.6px;margin-bottom:4px;}
+.sd{font-size:14px;color:var(--muted);font-weight:500;margin-bottom:24px;}
+
+/* CARD */
+.card{background:var(--surface);border-radius:16px;border:1.5px solid var(--border);overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,0.04);margin-bottom:14px;}
+.ch{padding:15px 22px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border);background:#FAFAF8;}
+.ci{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;}
+.ct{font-size:14.5px;font-weight:800;letter-spacing:-0.2px;}
+.cs{font-size:11.5px;color:var(--hint);font-weight:500;margin-top:1px;}
+.cb{padding:20px 22px;}
+
+/* PITCH */
+.pitch{background:var(--green-deeper);border-radius:16px;padding:28px 32px;margin-bottom:14px;position:relative;overflow:hidden;}
+.pitch::after{content:'"';position:absolute;top:-20px;right:22px;font-size:140px;color:rgba(255,255,255,0.04);font-family:Georgia,serif;line-height:1;}
+.pl{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:var(--green-mid);margin-bottom:9px;}
+.pt{font-size:19px;font-weight:700;color:white;line-height:1.55;letter-spacing:-0.3px;position:relative;}
+.pt em{color:var(--green-mid);font-style:normal;}
+
+/* FLOW */
+.flow{display:flex;flex-direction:column;}
+.fi{display:flex;gap:15px;position:relative;}
+.fi:not(:last-child)::before{content:'';position:absolute;left:18px;top:40px;bottom:-2px;width:2px;background:var(--green-light);}
+.fl{flex-shrink:0;display:flex;flex-direction:column;align-items:center;padding-top:9px;}
+.fn{width:36px;height:36px;border-radius:50%;background:var(--green);color:white;font-size:14px;font-weight:800;display:flex;align-items:center;justify-content:center;z-index:1;}
+.fr{padding:9px 0 26px;flex:1;}
+.ftit{font-size:15.5px;font-weight:800;margin-bottom:4px;}
+.fbod{font-size:13.5px;color:var(--muted);font-weight:500;line-height:1.75;}
+.fbod strong{color:var(--text);font-weight:700;}
+.fbox{margin-top:11px;border-radius:12px;padding:13px 15px;font-size:13px;font-weight:500;line-height:1.78;}
+.fbox.g{background:var(--green-light);color:var(--green-dark);border-left:3px solid var(--green);}
+.fbox.a{background:var(--amber-light);color:#7C4A03;border-left:3px solid var(--amber);}
+.fbox.b{background:var(--blue-light);color:var(--blue);border-left:3px solid var(--blue);}
+.fbox strong{font-weight:800;display:block;margin-bottom:2px;}
+
+/* PAIN MAP */
+.pain-row{display:grid;grid-template-columns:1fr 14px 1fr;align-items:start;padding:13px 0;border-bottom:1px solid var(--border);}
+.pain-row:last-child{border-bottom:none;}
+.pain-row:first-child{padding-top:0;}
+.pq{font-size:13px;color:#7F1D1D;font-weight:600;padding-right:12px;line-height:1.6;}
+.pa{font-size:13px;color:var(--green-dark);font-weight:600;padding-left:12px;line-height:1.6;}
+.parr{color:var(--green);font-size:15px;font-weight:900;text-align:center;padding-top:2px;}
+
+/* PERSONA */
+.pg{display:grid;grid-template-columns:repeat(3,1fr);gap:13px;}
+.persona{border-radius:14px;overflow:hidden;border:1.5px solid var(--border);}
+.pt2{padding:15px 17px;display:flex;align-items:center;gap:11px;}
+.pav{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0;}
+.pn{font-size:15px;font-weight:800;}
+.pr{font-size:11px;font-weight:600;margin-top:2px;}
+.pb{padding:13px 17px 15px;background:#FAFAF8;}
+.prow{display:flex;gap:7px;margin-bottom:8px;font-size:12.5px;}
+.prow:last-child{margin-bottom:0;}
+.plbl{font-weight:700;color:var(--muted);width:76px;flex-shrink:0;font-size:11.5px;}
+.pval{color:var(--text);font-weight:500;line-height:1.5;}
+
+/* OBJ */
+.obj{border-radius:12px;overflow:hidden;border:1.5px solid var(--border);margin-bottom:10px;}
+.obj:last-child{margin-bottom:0;}
+.oq{background:var(--red-light);padding:11px 16px;font-size:13.5px;font-weight:700;color:#7F1D1D;display:flex;gap:9px;}
+.oa{padding:13px 16px;font-size:13.5px;line-height:1.8;font-weight:500;background:white;}
+.oa em{font-style:normal;font-weight:800;color:var(--green-dark);}
+
+/* PLAN */
+.plg{display:grid;grid-template-columns:repeat(3,1fr);gap:13px;}
+.plan{border-radius:14px;overflow:hidden;border:2px solid var(--border);}
+.plan.feat{border-color:var(--green);}
+.plan-top{padding:19px 17px 15px;text-align:center;}
+.pb2{font-size:10px;font-weight:800;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:7px;}
+.pp{font-size:29px;font-weight:900;letter-spacing:-1px;margin-bottom:2px;}
+.ppd{font-size:12px;font-weight:500;}
+.plan-body{padding:13px 17px 17px;}
+.pf{font-size:13px;font-weight:500;padding:7px 0;border-bottom:1px solid var(--border);display:flex;gap:8px;line-height:1.5;}
+.pf:last-child{border-bottom:none;}
+.ok{color:var(--green);font-weight:800;}
+.no{color:var(--hint);}
+
+/* COMP TABLE */
+.ctab{width:100%;border-collapse:collapse;font-size:13px;}
+.ctab th{padding:10px 14px;text-align:left;background:var(--bg);font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);border-bottom:2px solid var(--border-mid);}
+.ctab td{padding:12px 14px;border-bottom:1px solid var(--border);vertical-align:top;font-weight:500;line-height:1.5;}
+.ctab tr:last-child td{border-bottom:none;}
+.ctab tr:hover td{background:#FAFAF8;}
+.win{color:var(--green-dark);font-weight:800;}
+.bad{color:var(--red);}
+.mid{color:#7C4A03;font-weight:600;}
+
+/* SCRIPT */
+.scr{background:#F5FDF9;border:1.5px solid var(--green-mid);border-radius:14px;padding:19px 22px;margin-bottom:13px;}
+.scr-l{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:var(--green-dark);margin-bottom:11px;display:flex;align-items:center;gap:8px;}
+.scr-l::after{content:'';flex:1;height:1px;background:var(--green-mid);opacity:0.35;}
+.scr-t{font-size:14px;font-weight:500;line-height:1.9;color:var(--text);}
+.scr-t strong{font-weight:800;color:var(--green-dark);}
+.aside{color:var(--hint);font-size:12px;font-style:italic;display:block;margin:5px 0;}
+
+/* DO DONT */
+.dd{display:grid;grid-template-columns:1fr 1fr;gap:13px;}
+.ddc{border-radius:14px;overflow:hidden;border:1.5px solid var(--border);}
+.ddh{padding:12px 17px;font-size:13px;font-weight:800;}
+.ddi{padding:10px 17px;font-size:13.5px;font-weight:500;display:flex;gap:9px;border-bottom:1px solid var(--border);line-height:1.5;}
+.ddi:last-child{border-bottom:none;}
+
+/* KPI */
+.kg{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:14px;}
+.kc{background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:17px;text-align:center;}
+.kn{font-size:28px;font-weight:900;color:var(--green-dark);letter-spacing:-1px;display:block;margin-bottom:3px;}
+.kl{font-size:12px;color:var(--hint);font-weight:600;}
+
+/* NOTE */
+.note{border-radius:11px;padding:13px 15px;font-size:13.5px;font-weight:500;line-height:1.7;display:flex;gap:11px;margin-top:13px;}
+.note.tip{background:var(--green-light);color:var(--green-dark);border-left:3px solid var(--green);}
+.note.warn{background:var(--amber-light);color:#7C4A03;border-left:3px solid var(--amber);}
+.note.info{background:var(--blue-light);color:var(--blue);border-left:3px solid var(--blue);}
+.note strong{font-weight:800;display:block;margin-bottom:2px;}
+
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:13px;}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:11px;}
+
+@media(max-width:900px){
+  .sidenav{display:none;}
+  .main{margin-left:0;}
+  .hero{padding:34px 22px;}
+  .content{padding:26px 18px;}
+  .hero h1{font-size:24px;}
+  .g2,.g3,.dd,.kg,.pg,.plg{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<!-- SIDENAV -->
+<nav class="sidenav no-print">
+  <div class="sn-logo">
+    <span class="sn-brand">Panduan Sales</span>
+    <div class="sn-name">Coreveta</div>
+    <div class="sn-sub">v2.0 · Rahasia Internal</div>
+    <a href="https://coreveta.com" target="_blank" class="sn-url">🌐 coreveta.com ↗</a>
+  </div>
+  <div class="ng-label">Dasar</div>
+  <a class="na" href="#strategi"><span class="ni">🎁</span>Strategi Utama</a>
+  <a class="na" href="#produk"><span class="ni">📦</span>Produk Coreveta</a>
+  <a class="na" href="#persona"><span class="ni">👤</span>Tipe Customer</a>
+  <a class="na" href="#pain"><span class="ni">💥</span>Masalah → Solusi</a>
+  <div class="ng-label">Jualan</div>
+  <a class="na" href="#harga"><span class="ni">💰</span>Harga & Plan</a>
+  <a class="na" href="#kompetitor"><span class="ni">⚔️</span>vs Kompetitor</a>
+  <a class="na" href="#objeksi"><span class="ni">🛡️</span>Handle Penolakan</a>
+  <div class="ng-label">Referensi</div>
+  <a class="na" href="#skrip"><span class="ni">💬</span>Skrip Siap Pakai</a>
+  <a class="na" href="#dodont"><span class="ni">📋</span>Do & Don't</a>
+  <a class="na" href="#target"><span class="ni">📊</span>Target Harian</a>
+  <div class="sn-spacer"></div>
+  <div class="sn-footer">
+    <button class="sn-btn primary" onclick="window.open('https://coreveta.com','_blank')">🌐 Buka coreveta.com</button>
+    <button class="sn-btn" onclick="window.print()">🖨️ Print / PDF</button>
+  </div>
+</nav>
+
+<div class="main">
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-ey">Coreveta · Panduan Sales</div>
+  <h1>Semua yang kamu butuhkan<br>untuk <em>jualan Coreveta.</em></h1>
+  <p>Panduan ini dibuat khusus untuk kamu — sales baru yang siap terjun. Bahasanya simpel, langsung bisa dipakai hari ini.</p>
+  <div class="chips">
+    <div class="chip g">🎁 Strategi: Web Gratis Dulu</div>
+    <div class="chip">🎯 Bengkel AC & Elektronik</div>
+    <div class="chip">📍 Makassar & sekitarnya</div>
+    <div class="chip">💰 Mulai dari Gratis</div>
+  </div>
+</div>
+
+<div class="content">
+
+<!-- ① STRATEGI -->
+<section id="strategi">
+  <div class="ey">01 · Strategi Utama</div>
+  <div class="st">Cara Kita Jualan: Web Gratis Dulu, Coreveta Belakangan</div>
+  <div class="sd">Ini strategi inti kita. Jangan langsung jualan — kasih nilai dulu, baru tawarkan produk.</div>
+
+  <div class="pitch">
+    <div class="pl">Satu hal yang harus selalu kamu ingat</div>
+    <div class="pt">"Kita buatkan website gratis untuk bengkel mereka — sambil itu, kita gali masalah mereka. <em>Masalah itu yang jadi alasan mereka butuh Coreveta.</em>"</div>
+  </div>
+
+  <div class="card">
+    <div class="ch"><div class="ci" style="background:var(--green-light);">🗺️</div><div><div class="ct">Alur Lengkap — Dari Kenalan Sampai Closing</div><div class="cs">Ikuti urutan ini, jangan loncat-loncat</div></div></div>
+    <div class="cb">
+      <div class="flow">
+
+        <div class="fi">
+          <div class="fl"><div class="fn">1</div></div>
+          <div class="fr">
+            <div class="ftit">📞 Hubungi — Tawarkan Website Gratis</div>
+            <div class="fbod">Telepon atau datangi langsung. Kalimat pertama bukan tentang Coreveta — tapi tentang <strong>hadiah gratis untuk mereka.</strong></div>
+            <div class="fbox g"><strong>Kalimat pembuka:</strong>"Halo Pak/Bu — kami lagi pilih 10 bengkel di Makassar untuk kami buatkan website profesional gratis. Bengkel [nama] masuk kriteria kami. Ada 3 menit untuk saya jelaskan?"</div>
+          </div>
+        </div>
+
+        <div class="fi">
+          <div class="fl"><div class="fn">2</div></div>
+          <div class="fr">
+            <div class="ftit">🔍 Tanya — Gali Masalah Mereka</div>
+            <div class="fbod">Kalau mereka mau dengerin, <strong>jangan langsung cerita Coreveta.</strong> Tanya dulu soal operasional mereka. Dengarkan baik-baik — ini bagian terpenting dari semua langkah.</div>
+            <div class="fbox a"><strong>Pertanyaan wajib ditanya:</strong>"Kalau ada job masuk, diaturnya gimana Pak/Bu — lewat WA atau ada sistemnya?" · "Invoice atau notanya masih tulis tangan?" · "Pelanggan kontrak servis rutin — ada remindernya atau mereka hubungi sendiri?"</div>
+          </div>
+        </div>
+
+        <div class="fi">
+          <div class="fl"><div class="fn">3</div></div>
+          <div class="fr">
+            <div class="ftit">📝 Catat — Simpan Masalah yang Mereka Ceritakan</div>
+            <div class="fbod">Setiap masalah yang mereka sebut = <strong>amunisi saat demo nanti.</strong> Tulis nama bengkel, masalah utamanya, dan nomor WA owner.</div>
+            <div class="fbox b"><strong>Contoh catatan:</strong>"Bengkel Surabaya AC · Masalah: teknisi sering bentrok jadwal, invoice tulis tangan · WA: 08xxx"</div>
+          </div>
+        </div>
+
+        <div class="fi">
+          <div class="fl"><div class="fn">4</div></div>
+          <div class="fr">
+            <div class="ftit">🌐 Buatkan Websitenya — 2–3 Hari</div>
+            <div class="fbod">Proses website/landing page mereka. Begitu selesai, kirim ke WA owner. <strong>Ini momen mereka mulai percaya kamu.</strong></div>
+            <div class="fbox g"><strong>Pesan WA saat kirim hasil:</strong>"Pak/Bu [Nama], website [nama bengkel] sudah jadi 🙏 [link]. Boleh saya minta 10 menit untuk tunjukkan juga sistem yang bisa bantu masalah [sebutkan masalah yang mereka ceritakan] tadi?"</div>
+          </div>
+        </div>
+
+        <div class="fi">
+          <div class="fl"><div class="fn">5</div></div>
+          <div class="fr">
+            <div class="ftit">💻 Demo Coreveta — Pakai Masalah Mereka</div>
+            <div class="fbod">Saat demo, <strong>jangan tunjukkan semua fitur.</strong> Fokus ke 2–3 fitur yang nyambung dengan masalah mereka. Buka <strong>coreveta.com</strong> dan tunjukkan langsung.</div>
+            <div class="fbox g"><strong>Cara buka demo:</strong>"Tadi Bapak/Ibu bilang teknisi sering bentrok — ini fitur yang menyelesaikan itu. [tunjukkan dashboard job]. Dari sini bisa lihat semua job hari ini, siapa yang handle, tanpa WA-WA lagi."</div>
+          </div>
+        </div>
+
+        <div class="fi">
+          <div class="fl"><div class="fn">6</div></div>
+          <div class="fr">
+            <div class="ftit">🤝 Closing — Ajak Mulai dari yang Gratis</div>
+            <div class="fbod">Jangan paksa langsung bayar. Ajak coba gratis dulu — begitu mereka pakai dan ngerasain manfaatnya, <strong>upgrade jauh lebih mudah.</strong></div>
+            <div class="fbox g"><strong>Kalimat closing:</strong>"Bisa mulai gratis dulu Pak/Bu — tidak ada biaya, tidak ada syarat. Nanti kalau sudah cocok, baru upgrade. Mau saya bantu daftarkan sekarang di coreveta.com?"</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="note tip"><div>💡</div><div><strong>Kenapa strategi ini berhasil?</strong> Orang susah menolak sesuatu yang gratis. Begitu mereka percaya kamu (karena websitenya bagus), mereka jauh lebih terbuka untuk dengarkan Coreveta. Ini namanya bangun kepercayaan dulu, jualan belakangan.</div></div>
+</section>
+
+<!-- ② PRODUK -->
+<section id="produk">
+  <div class="ey">02 · Produk Coreveta</div>
+  <div class="st">Coreveta Itu Apa, Sebenarnya?</div>
+  <div class="sd">Hafal penjelasan simpel ini. Kalau ditanya "ini aplikasi apa?", jawaban harus keluar tanpa mikir.</div>
+
+  <div class="pitch">
+    <div class="pl">Penjelasan 1 kalimat</div>
+    <div class="pt">"Coreveta itu seperti <em>WhatsApp + buku nota + Excel</em> — tapi semuanya jadi satu, dan semuanya otomatis. Khusus untuk bengkel servis teknik."</div>
+  </div>
+
+  <div class="g2">
+    <div class="card">
+      <div class="ch"><div class="ci" style="background:#E3F2FD;">📋</div><div><div class="ct">Kelola Job & Teknisi</div><div class="cs">Sudah tersedia sekarang</div></div></div>
+      <div class="cb">
+        <p style="font-size:13.5px;color:var(--muted);font-weight:500;margin-bottom:11px;line-height:1.7;">Semua job masuk ke satu layar. Bisa lihat siapa teknisi yang lagi jalan, job mana yang sudah selesai.</p>
+        <div style="font-size:13px;font-weight:600;line-height:2.1;">✅ Lihat semua job dalam 1 layar<br>✅ Assign job ke teknisi tanpa WA group<br>✅ Status job update real-time<br>✅ Foto sebelum & sesudah servis</div>
+        <div class="note tip"><div>💡</div><div><strong>Cara jelasin:</strong> "Bisa tahu teknisi lagi ngapain sekarang, tanpa harus telepon atau tanya di WA."</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ch"><div class="ci" style="background:var(--green-light);">🧾</div><div><div class="ct">Invoice Otomatis</div><div class="cs">Sudah tersedia sekarang</div></div></div>
+      <div class="cb">
+        <p style="font-size:13.5px;color:var(--muted);font-weight:500;margin-bottom:11px;line-height:1.7;">Begitu teknisi selesai kerja, nota/invoice langsung terbuat sendiri. Kirim ke WA pelanggan 1 klik.</p>
+        <div style="font-size:13px;font-weight:600;line-height:2.1;">✅ Invoice PDF langsung jadi setelah servis<br>✅ Ada logo bengkel, rincian, total biaya<br>✅ Kirim ke WA pelanggan 1 klik<br>✅ Tidak perlu tulis tangan lagi</div>
+        <div class="note tip"><div>💡</div><div><strong>Cara jelasin:</strong> "Nota servis langsung jadi dalam 30 detik — tinggal kirim, tidak perlu tulis atau ketik ulang."</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ch"><div class="ci" style="background:#FEF3C7;">👥</div><div><div class="ct">Data Pelanggan & Reminder</div><div class="cs">Sudah tersedia sekarang</div></div></div>
+      <div class="cb">
+        <p style="font-size:13.5px;color:var(--muted);font-weight:500;margin-bottom:11px;line-height:1.7;">Data pelanggan tersimpan rapi. Ada pengingat otomatis kalau sudah waktunya servis rutin — supaya tidak pindah ke bengkel lain.</p>
+        <div style="font-size:13px;font-weight:600;line-height:2.1;">✅ Database pelanggan lengkap<br>✅ Riwayat servis per unit<br>✅ Reminder kontrak servis otomatis<br>✅ QR code riwayat servis per unit</div>
+        <div class="note tip"><div>💡</div><div><strong>Cara jelasin:</strong> "Pelanggan lama tidak akan kabur — sistem yang otomatis ingatkan mereka waktu servis tiba."</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ch"><div class="ci" style="background:#F3E8FF;">📊</div><div><div class="ct">Laporan & Dashboard</div><div class="cs">Sudah tersedia sekarang</div></div></div>
+      <div class="cb">
+        <p style="font-size:13.5px;color:var(--muted);font-weight:500;margin-bottom:11px;line-height:1.7;">Owner bisa lihat performa bengkel real-time — berapa pendapatan hari ini, teknisi mana paling produktif, job mana belum dibayar.</p>
+        <div style="font-size:13px;font-weight:600;line-height:2.1;">✅ Omzet harian & bulanan langsung kelihatan<br>✅ Performa per teknisi<br>✅ Job yang belum terbayar<br>✅ Alert stok sparepart hampir habis</div>
+        <div class="note tip"><div>💡</div><div><strong>Cara jelasin:</strong> "Tidak perlu rekap manual — buka Coreveta, langsung tahu omzet bulan ini."</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ch"><div class="ci" style="background:var(--amber-light);">🚀</div><div><div class="ct">Fitur yang Segera Hadir (2026)</div><div class="cs">Boleh disebut "segera ada" — jangan janji tanggal pasti</div></div></div>
+    <div class="cb">
+      <div class="g3">
+        <div style="padding:13px;background:var(--bg);border-radius:10px;font-size:13px;"><div style="font-weight:800;margin-bottom:3px;">📍 Pantau Posisi Teknisi</div><div style="color:var(--muted);line-height:1.6;">Lihat lokasi teknisi real-time di peta</div></div>
+        <div style="padding:13px;background:var(--bg);border-radius:10px;font-size:13px;"><div style="font-weight:800;margin-bottom:3px;">💬 Notif WA Otomatis</div><div style="color:var(--muted);line-height:1.6;">Update status job langsung ke pelanggan</div></div>
+        <div style="padding:13px;background:var(--bg);border-radius:10px;font-size:13px;"><div style="font-weight:800;margin-bottom:3px;">📦 Kelola Stok Sparepart</div><div style="color:var(--muted);line-height:1.6;">Stok terhubung langsung ke setiap job</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ③ PERSONA -->
+<section id="persona">
+  <div class="ey">03 · Tipe Customer</div>
+  <div class="st">Siapa yang Akan Kamu Temui</div>
+  <div class="sd">Setiap orang punya motivasi berbeda. Sesuaikan cara ngobrolmu.</div>
+  <div class="pg">
+
+    <div class="persona">
+      <div class="pt2" style="background:var(--green-light);">
+        <div class="pav" style="background:var(--green);color:white;">👨‍🔧</div>
+        <div><div class="pn">Budi — Owner</div><div class="pr" style="color:var(--green-dark);">🎯 Target Utama Kita</div></div>
+      </div>
+      <div class="pb">
+        <div class="prow"><div class="plbl">Profil</div><div class="pval">Pemilik bengkel AC, 35–45 thn, 3–8 teknisi</div></div>
+        <div class="prow"><div class="plbl">Masalah</div><div class="pval" style="color:var(--red);">Teknisi bentrok jadwal, invoice manual, kontrak pelanggan lupa</div></div>
+        <div class="prow"><div class="plbl">Maunya</div><div class="pval">Operasional rapi, omzet naik dari kontrak rutin</div></div>
+        <div class="prow"><div class="plbl">Tech</div><div class="pval">Pakai WA & GoPay — cukup familiar</div></div>
+        <div class="prow"><div class="plbl">Bayar?</div><div class="pval" style="color:var(--green-dark);font-weight:700;">Mau bayar Rp 249K/bln kalau terbukti bantu</div></div>
+        <div class="note tip"><div>🎯</div><div><strong>Hook terbaik:</strong> "Kontrak servis yang kelewat = Rp 2–3 juta hilang per bulan."</div></div>
+      </div>
+    </div>
+
+    <div class="persona">
+      <div class="pt2" style="background:var(--blue-light);">
+        <div class="pav" style="background:var(--blue);color:white;">👷</div>
+        <div><div class="pn">Andi — Teknisi</div><div class="pr" style="color:var(--blue);">Pengguna Lapangan</div></div>
+      </div>
+      <div class="pb">
+        <div class="prow"><div class="plbl">Profil</div><div class="pval">Teknisi lapangan, 22–35 thn, aktif smartphone</div></div>
+        <div class="prow"><div class="plbl">Masalah</div><div class="pval" style="color:var(--red);">Harus scroll WA panjang cari alamat & detail job</div></div>
+        <div class="prow"><div class="plbl">Maunya</div><div class="pval">Instruksi jelas, tidak bolak-balik tanya</div></div>
+        <div class="prow"><div class="plbl">Keputusan</div><div class="pval">❌ Bukan pengambil keputusan</div></div>
+        <div class="note info"><div>💡</div><div><strong>Catatan:</strong> Bukan target cold call. Tapi kalau dia suka Coreveta, dia bisa bantu pengaruhi ownernya.</div></div>
+      </div>
+    </div>
+
+    <div class="persona">
+      <div class="pt2" style="background:var(--amber-light);">
+        <div class="pav" style="background:var(--amber);color:white;">👩‍💼</div>
+        <div><div class="pn">Sinta — Admin</div><div class="pr" style="color:#7C4A03;">Influencer Kuat</div></div>
+      </div>
+      <div class="pb">
+        <div class="prow"><div class="plbl">Profil</div><div class="pval">Admin/ops bengkel, 24–35 thn, pengelola harian</div></div>
+        <div class="prow"><div class="plbl">Masalah</div><div class="pval" style="color:var(--red);">Buat 20 invoice manual/hari + follow up kontrak = melelahkan</div></div>
+        <div class="prow"><div class="plbl">Maunya</div><div class="pval">Otomasi — kurangi kerja berulang yang bikin capek</div></div>
+        <div class="prow"><div class="plbl">Keputusan</div><div class="pval">⚠️ Bukan pembuat keputusan, tapi didengar owner</div></div>
+        <div class="note warn"><div>💡</div><div><strong>Strategi:</strong> Menangkan Sinta = setengah closing. Kalau dia rekomendasikan ke ownernya, peluang naik drastis.</div></div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ④ PAIN MAP -->
+<section id="pain">
+  <div class="ey">04 · Masalah → Solusi</div>
+  <div class="st">Kalau Mereka Bilang Ini, Jawab dengan Ini</div>
+  <div class="sd">Saat customer cerita masalahnya, langsung hubungkan ke fitur Coreveta. Jangan hafal fitur dulu — hafal masalah mereka.</div>
+  <div class="card">
+    <div class="cb" style="padding:0;">
+      <div style="padding:17px 22px;">
+        <div class="pain-row"><div class="pq">💥 "Teknisi sering bentrok jadwal gara-gara atur di WA group"</div><div class="parr">→</div><div class="pa">✅ Job Management — assign dari dashboard, tidak ada overlap lagi</div></div>
+        <div class="pain-row"><div class="pq">💥 "Invoice masih tulis tangan, susah tagih pelanggan"</div><div class="parr">→</div><div class="pa">✅ Invoice Otomatis — PDF langsung jadi setelah job, kirim WA 1 klik</div></div>
+        <div class="pain-row"><div class="pq">💥 "Pelanggan kontrak servis rutin sering lupa, malah pergi ke bengkel lain"</div><div class="parr">→</div><div class="pa">✅ CRM + Reminder — sistem otomatis ingatkan pelanggan sebelum jadwal tiba</div></div>
+        <div class="pain-row"><div class="pq">💥 "Tidak tahu teknisi lagi di mana kalau lagi banyak job"</div><div class="parr">→</div><div class="pa">✅ GPS Tracking (segera hadir) — pantau posisi teknisi real-time</div></div>
+        <div class="pain-row"><div class="pq">💥 "Stok freon habis, baru ketahuan pas sudah di lokasi customer"</div><div class="parr">→</div><div class="pa">✅ Inventori (segera hadir) — alert otomatis kalau stok hampir habis</div></div>
+        <div class="pain-row"><div class="pq">💥 "Tidak tahu omzet bulan ini tanpa hitung manual"</div><div class="parr">→</div><div class="pa">✅ Dashboard Laporan — pendapatan real-time, tidak perlu rekap</div></div>
+        <div class="pain-row"><div class="pq">💥 "Teknisi baru harus tanya ulang riwayat servis pelanggan"</div><div class="parr">→</div><div class="pa">✅ Data Pelanggan — riwayat servis per unit tersimpan permanen</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="note warn"><div>⚠️</div><div><strong>Cara pakai tabel ini:</strong> Saat customer cerita masalahnya, catat. Waktu demo, buka Coreveta dan tunjukkan fitur yang menyelesaikan masalah yang mereka ceritakan tadi. Pakai kata-kata mereka sendiri — bukan kata-kata kamu.</div></div>
+</section>
+
+<!-- ⑤ HARGA -->
+<section id="harga">
+  <div class="ey">05 · Harga & Plan</div>
+  <div class="st">Coreveta Berapa Harganya?</div>
+  <div class="sd">Ada 3 pilihan — mulai dari gratis. Jangan sebut harga duluan sebelum mereka merasakan manfaatnya.</div>
+
+  <div class="plg" style="margin-bottom:14px;">
+    <div class="plan">
+      <div class="plan-top" style="background:#F8F8F6;">
+        <div class="pb2" style="color:var(--hint);">Starter</div>
+        <div class="pp" style="color:var(--text);">Gratis</div>
+        <div class="ppd" style="color:var(--hint);">Selamanya · Untuk coba dulu</div>
+      </div>
+      <div class="plan-body">
+        <div class="pf"><span class="ok">✓</span> 1 akun pengguna</div>
+        <div class="pf"><span class="ok">✓</span> Hingga 30 job per bulan</div>
+        <div class="pf"><span class="ok">✓</span> Kelola job dasar</div>
+        <div class="pf"><span class="ok">✓</span> Invoice manual</div>
+        <div class="pf"><span class="no">✗</span> Data pelanggan & reminder</div>
+        <div class="pf"><span class="no">✗</span> Multi teknisi</div>
+        <div class="pf"><span class="no">✗</span> Dashboard laporan</div>
+      </div>
+    </div>
+
+    <div class="plan feat">
+      <div class="plan-top" style="background:var(--green);">
+        <div class="pb2" style="color:rgba(255,255,255,0.72);">Pro ⭐ Paling Laku</div>
+        <div class="pp" style="color:white;">Rp 249K</div>
+        <div class="ppd" style="color:rgba(255,255,255,0.58);">per bulan</div>
+      </div>
+      <div class="plan-body">
+        <div class="pf"><span class="ok">✓</span> Hingga 8 teknisi</div>
+        <div class="pf"><span class="ok">✓</span> Job tidak terbatas</div>
+        <div class="pf"><span class="ok">✓</span> Invoice PDF otomatis</div>
+        <div class="pf"><span class="ok">✓</span> Data pelanggan + reminder kontrak</div>
+        <div class="pf"><span class="ok">✓</span> Dashboard laporan real-time</div>
+        <div class="pf"><span class="ok">✓</span> Notif WA otomatis (segera)</div>
+        <div class="pf"><span class="ok">✓</span> Support prioritas</div>
+      </div>
+    </div>
+
+    <div class="plan">
+      <div class="plan-top" style="background:#1A1A18;">
+        <div class="pb2" style="color:var(--green-mid);">Bisnis</div>
+        <div class="pp" style="color:white;">Rp 499K</div>
+        <div class="ppd" style="color:rgba(255,255,255,0.38);">per bulan</div>
+      </div>
+      <div class="plan-body">
+        <div class="pf"><span class="ok">✓</span> Teknisi tidak terbatas</div>
+        <div class="pf"><span class="ok">✓</span> Multi-cabang (segera)</div>
+        <div class="pf"><span class="ok">✓</span> GPS pantau teknisi live</div>
+        <div class="pf"><span class="ok">✓</span> Laporan advanced & export</div>
+        <div class="pf"><span class="ok">✓</span> Custom branding aplikasi</div>
+        <div class="pf"><span class="ok">✓</span> Support VIP & onboarding khusus</div>
+        <div class="pf"><span class="ok">✓</span> Semua fitur Pro</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ch"><div class="ci" style="background:var(--amber-light);">💬</div><div><div class="ct">Cara Jawab Kalau Ditanya Harga</div><div class="cs">Jangan sebut angka duluan — tunjukkan nilai dulu</div></div></div>
+    <div class="cb">
+      <div class="flow">
+        <div class="fi">
+          <div class="fl"><div class="fn" style="background:var(--amber);">?</div></div>
+          <div class="fr">
+            <div class="ftit">Customer tanya: "Berapa harganya?"</div>
+            <div class="fbox g">"Tenang Pak/Bu — bisa mulai gratis dulu, tidak ada biaya. Nanti kalau sudah cocok dan mau fitur lengkap, baru upgrade ke Pro di Rp 249 ribu per bulan. Itu kira-kira sama dengan harga 1 kali servis AC — tapi manfaatnya bisa bantu recover jutaan dari kontrak yang selama ini kelewat."</div>
+          </div>
+        </div>
+        <div class="fi">
+          <div class="fl"><div class="fn" style="background:var(--amber);">?</div></div>
+          <div class="fr">
+            <div class="ftit">Customer bilang: "Mahal"</div>
+            <div class="fbox g">"Justru itu yang bagus Pak/Bu — kita mulai dari yang gratis dulu. Tidak ada risiko sama sekali. Kalau sudah pakai dan ngerasain manfaatnya, baru kita ngobrol soal upgrade. Deal?"</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ⑥ KOMPETITOR -->
+<section id="kompetitor">
+  <div class="ey">06 · vs Kompetitor</div>
+  <div class="st">Kenapa Coreveta, Bukan yang Lain?</div>
+  <div class="sd">Jangan jelek-jelekkan kompetitor. Tapi kamu harus tahu bedanya — jawab dengan percaya diri kalau ditanya.</div>
+  <div class="card">
+    <div class="cb" style="padding:0;">
+      <table class="ctab">
+        <thead><tr><th>Dibanding</th><th>Mereka</th><th class="win">Coreveta ✓</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><strong>Seekmi / Sejasa</strong><br><span style="font-size:12px;color:var(--hint);">Marketplace teknisi</span></td>
+            <td class="bad">Bengkel bersaing dengan ratusan bengkel lain. Bayar komisi 15–25% tiap job.</td>
+            <td class="win">Bukan marketplace — sistem untuk operasional bengkel sendiri. Nol komisi.</td>
+          </tr>
+          <tr>
+            <td><strong>HashMicro / ERP</strong><br><span style="font-size:12px;color:var(--hint);">Software perusahaan besar</span></td>
+            <td class="bad">Harga jutaan/bulan, setup berminggu-minggu, terlalu rumit untuk bengkel kecil.</td>
+            <td class="win">Mulai gratis, setup < 10 menit, khusus untuk bengkel kecil-menengah.</td>
+          </tr>
+          <tr>
+            <td><strong>WhatsApp + Excel</strong><br><span style="font-size:12px;color:var(--hint);">Cara lama yang masih umum</span></td>
+            <td class="mid">Gratis, tapi tidak bisa track job otomatis, tidak ada invoice digital, tidak ada laporan real-time.</td>
+            <td class="win">Semua yang WA + Excel bisa lakukan, tapi otomatis, rapi, dan ada laporan langsung.</td>
+          </tr>
+          <tr>
+            <td><strong>Aplikasi generik lain</strong><br><span style="font-size:12px;color:var(--hint);">Bukan khusus servis teknik</span></td>
+            <td class="mid">Fitur terlalu umum — tidak ada job dispatch teknisi, tidak ada kontrak servis rutin.</td>
+            <td class="win">Dibuat khusus untuk bengkel AC, elektronik, plumber — fiturnya pas dan tidak berlebihan.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="note warn"><div>⚠️</div><div><strong>Kalau customer bilang "pakai Seekmi saja":</strong> "Seekmi itu untuk cari pelanggan baru, Pak/Bu — bukan untuk kelola operasional bengkel. Coreveta bantu bengkel yang sudah punya pelanggan supaya operasionalnya lebih rapi. Keduanya sebenarnya bisa jalan bersamaan."</div></div>
+</section>
+
+<!-- ⑦ OBJEKSI -->
+<section id="objeksi">
+  <div class="ey">07 · Handle Penolakan</div>
+  <div class="st">Jawaban untuk Setiap "Tidak"</div>
+  <div class="sd">Penolakan itu normal — bukan berarti gagal. Artinya mereka belum cukup yakin. Tugas kamu: bantu mereka yakin.</div>
+
+  <div class="obj"><div class="oq">❌ "Tidak butuh, sudah ramai sendiri dari WA"</div><div class="oa">"Wah bagus Pak/Bu — artinya bengkelnya sudah dipercaya. Justru, pelanggan setia seperti itu <em>sayang banget kalau sampai kelewat reminder servis rutinnya</em> dan akhirnya pergi ke bengkel lain. Websitenya kita buatkan gratis dulu — tidak ada ruginya sama sekali."</div></div>
+
+  <div class="obj"><div class="oq">❌ "Nanti dulu, lagi sibuk sekarang"</div><div class="oa">"Tidak apa-apa Pak/Bu, saya tidak minta putuskan sekarang. Boleh minta nomor WA-nya? Nanti saya <em>buatkan website bengkelnya gratis</em> dulu — Bapak/Ibu tinggal terima hasilnya. Kalau cocok, baru kita ngobrol lanjut."</div></div>
+
+  <div class="obj"><div class="oq">❌ "Mahal, tidak ada budget untuk aplikasi"</div><div class="oa">"Justru itu — <em>bisa mulai gratis dulu</em> Pak/Bu, tidak ada biaya sama sekali. Nanti kalau mau upgrade ke Pro, Rp 249 ribu itu kira-kira <em>sama dengan harga 1 servis AC</em> — tapi manfaatnya bisa recover jutaan dari kontrak yang selama ini kelewat."</div></div>
+
+  <div class="obj"><div class="oq">❌ "Karyawan saya tidak bisa pakai aplikasi baru"</div><div class="oa">"Justru ini yang kami rancang <em>semudah WhatsApp</em> Pak/Bu — kalau sudah bisa WA, pasti bisa Coreveta. Setup-nya juga cepat, kurang dari 10 menit sudah jalan. Kami bantu onboarding dari awal."</div></div>
+
+  <div class="obj"><div class="oq">❌ "Sudah pakai Excel, sudah cukup"</div><div class="oa">"Excel memang berguna untuk data Pak/Bu — tapi <em>tidak bisa assign job ke teknisi real-time, tidak bisa buat invoice otomatis, dan tidak ada reminder pelanggan.</em> Coreveta bukan pengganti Excel untuk laporan — ini sistem operasional harian. Mau saya tunjukkan bedanya dalam 10 menit?"</div></div>
+
+  <div class="obj"><div class="oq">❌ "Data bengkel saya aman tidak di sistem kamu?"</div><div class="oa">"Pertanyaan bagus Pak/Bu — data Bapak/Ibu <em>tersimpan di server yang aman dan terenkripsi</em>. Tidak bisa diakses bengkel lain, tidak pernah dijual ke pihak manapun. Ini sistem private khusus untuk bengkel Bapak/Ibu saja."</div></div>
+
+  <div class="obj"><div class="oq">❌ "Kirim brosur/WA dulu saja"</div><div class="oa">"Siap Pak/Bu, saya kirimkan sekarang. Sebelum itu — boleh saya tanya: kalau websitenya sudah jadi dan hasilnya bagus, <em>Bapak/Ibu terbuka untuk saya tunjukkan sistemnya 10 menit?</em>"<br><span style="color:var(--hint);font-size:12px;font-style:italic;display:block;margin-top:5px;">[Kalau iya → langsung booking jadwal sebelum tutup telepon]</span></div></div>
+</section>
+
+<!-- ⑧ SKRIP -->
+<section id="skrip">
+  <div class="ey">08 · Skrip Siap Pakai</div>
+  <div class="st">Tinggal Pelajari & Pakai</div>
+  <div class="sd">Jangan hafal kata per kata — pahami maksudnya, lalu bicaralah dengan gaya kamu sendiri.</div>
+
+  <div class="scr">
+    <div class="scr-l">Skrip Opening — 30 Detik Pertama di Telepon</div>
+    <div class="scr-t">
+      "Halo, Pak/Bu — bisa bicara dengan pemiliknya sebentar?<br><br>
+      Saya <strong>[nama kamu]</strong> dari <strong>Coreveta</strong> — maaf ganggu sebentar ya.<br><br>
+      Saya hubungi karena saya lihat <strong>[nama bengkel]</strong> di Google Maps — review-nya bagus, sudah <strong>[X] ulasan</strong>. Keren banget.<br><br>
+      Kami lagi pilih <strong>10 bengkel terpilih</strong> di Makassar untuk kami buatkan <strong>website profesional gratis</strong> — tanpa biaya apapun, tidak ada syarat tersembunyi.<br><br>
+      Ada <strong>3 menit</strong> untuk saya jelaskan singkat?"
+    </div>
+  </div>
+
+  <div class="scr">
+    <div class="scr-l">Pertanyaan Discovery — Gali Masalah Mereka</div>
+    <div class="scr-t">
+      <span class="aside">[Setelah mereka mau dengerin — tanya ini santai, seperti ngobrol biasa]</span>
+      "Boleh tanya singkat Pak/Bu — sekarang kalau ada job masuk, diaturnya gimana? Masih lewat WA atau sudah ada sistemnya?"<br><br>
+      <span class="aside">[Tunggu jawaban — catat di HP atau buku]</span>
+      "Untuk invoice atau nota servisnya — masih tulis tangan atau sudah pakai aplikasi?"<br><br>
+      <span class="aside">[Kalau mereka banyak cerita masalah = sinyal bagus, mereka butuh solusi]</span>
+      "Pelanggan yang servis rutin — ada pengingat otomatisnya atau mereka hubungi sendiri kalau mau servis?"
+    </div>
+  </div>
+
+  <div class="scr">
+    <div class="scr-l">WA Follow Up — Kirim Dalam 5 Menit Setelah Telepon</div>
+    <div class="scr-t">
+      Halo Pak/Bu <strong>[Nama]</strong> 🙏<br><br>
+      Ini <strong>[nama kamu]</strong> dari Coreveta yang tadi telepon.<br><br>
+      Saya sudah catat untuk buatkan <strong>website profesional</strong> untuk <strong>[Nama Bengkel]</strong> ya — estimasi 2–3 hari selesai, nanti saya kabari langsung ke sini.<br><br>
+      Sekalian nanti saya tunjukkan juga <strong>Coreveta</strong> — sistem manajemen khusus bengkel servis yang bisa bantu:<br>
+      ✅ Atur job & teknisi tanpa WA group<br>
+      ✅ Invoice langsung jadi otomatis setelah servis<br>
+      ✅ Pelanggan diingatkan otomatis waktu servis rutin<br>
+      ✅ Laporan pendapatan langsung kelihatan<br><br>
+      Bisa dicoba <strong>gratis dulu</strong> ya Pak/Bu, tidak ada biaya 🙏<br>
+      Cek juga di: <strong>coreveta.com</strong>
+    </div>
+  </div>
+
+  <div class="scr">
+    <div class="scr-l">Pembuka Demo — Saat Tunjukkan Coreveta</div>
+    <div class="scr-t">
+      "Pak/Bu, ini website [nama bengkel]-nya sudah jadi — ini hasilnya [tunjukkan link].<br><br>
+      Nah, sekarang saya mau tunjukkan sesuatu yang bisa bikin operasional bengkel jauh lebih ringan.<br><br>
+      Tadi Bapak/Ibu cerita soal <strong>[sebutkan masalah spesifik yang mereka bilang]</strong> — nah ini yang Coreveta selesaikan. Saya tunjukkan langsung, 10 menit saja.<br><br>
+      [buka coreveta.com atau dashboard]<br><br>
+      Dari sini, Bapak/Ibu bisa lihat semua job hari ini, siapa teknisi yang handle, status pembayarannya — semuanya real-time, dari HP."
+    </div>
+  </div>
+</section>
+
+<!-- ⑨ DO DONT -->
+<section id="dodont">
+  <div class="ey">09 · Do & Don't</div>
+  <div class="st">Aturan yang Tidak Boleh Dilanggar</div>
+  <div class="sd">Ini bukan teori — ini yang membedakan sales yang closing dengan yang tidak.</div>
+  <div class="dd">
+    <div class="ddc">
+      <div class="ddh" style="background:var(--green-light);color:var(--green-dark);">✅ SELALU LAKUKAN</div>
+      <div style="background:var(--surface);">
+        <div class="ddi">✅ Sebut nama bengkel & jumlah review mereka di opening</div>
+        <div class="ddi">✅ Dengarkan lebih banyak dari bicara — 60% dengar, 40% bicara</div>
+        <div class="ddi">✅ Tanya masalah mereka dulu, baru jelasin Coreveta</div>
+        <div class="ddi">✅ Pakai kata-kata mereka saat presentasi — bukan kata-katamu</div>
+        <div class="ddi">✅ Tawarkan gratis dulu — jangan paksa langsung bayar</div>
+        <div class="ddi">✅ Kirim WA dalam 5 menit setelah telepon selesai</div>
+        <div class="ddi">✅ Catat nama, masalah, dan nomor WA setiap prospect</div>
+        <div class="ddi">✅ Tunjukkan coreveta.com saat demo — lebih meyakinkan</div>
+      </div>
+    </div>
+    <div class="ddc">
+      <div class="ddh" style="background:var(--red-light);color:#7F1D1D;">❌ JANGAN LAKUKAN</div>
+      <div style="background:var(--surface);">
+        <div class="ddi">❌ Langsung jualan Coreveta di 30 detik pertama</div>
+        <div class="ddi">❌ Sebut harga sebelum mereka ngerasain manfaatnya</div>
+        <div class="ddi">❌ Presentasi semua fitur sekaligus — bikin pusing</div>
+        <div class="ddi">❌ Jelek-jelekkan kompetitor secara langsung</div>
+        <div class="ddi">❌ Berdebat saat ditolak — akui, redirect, lanjut</div>
+        <div class="ddi">❌ Tanya "mau atau tidak?" — terlalu menekan</div>
+        <div class="ddi">❌ Janji fitur yang belum ada tanpa bilang "segera hadir"</div>
+        <div class="ddi">❌ Tidak follow up setelah website dikirim</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ⑩ TARGET -->
+<section id="target">
+  <div class="ey">10 · Target Harian</div>
+  <div class="st">Ukuran Keberhasilan Kamu Setiap Hari</div>
+  <div class="sd">Konsistensi setiap hari lebih penting dari 1 call yang sempurna. Ini angka yang harus kamu kejar.</div>
+  <div class="kg">
+    <div class="kc"><span class="kn">20</span><div class="kl">Call / Hari</div></div>
+    <div class="kc"><span class="kn">5</span><div class="kl">Nomor WA Berhasil / Hari</div></div>
+    <div class="kc"><span class="kn">2</span><div class="kl">Jadwal Demo / Hari</div></div>
+    <div class="kc"><span class="kn">10%</span><div class="kl">Konversi Call → Demo</div></div>
+    <div class="kc"><span class="kn">30%</span><div class="kl">Konversi Demo → Coba Gratis</div></div>
+    <div class="kc"><span class="kn">50%</span><div class="kl">Konversi Gratis → Berbayar</div></div>
+  </div>
+
+  <div class="card">
+    <div class="ch"><div class="ci" style="background:var(--green-light);">🧠</div><div><div class="ct">Mindset yang Harus Kamu Pegang</div><div class="cs">Baca ini setiap pagi sebelum mulai call</div></div></div>
+    <div class="cb">
+      <div class="flow">
+        <div class="fi">
+          <div class="fl"><div class="fn">💪</div></div>
+          <div class="fr">
+            <div class="ftit">Dari 20 call, rata-rata hanya 2 yang jadi demo. Itu normal.</div>
+            <div class="fbod">Bukan berarti kamu gagal — artinya kamu butuh 18 "tidak" untuk dapat 2 "iya". Teruskan saja, jangan menyerah di call ke-5.</div>
+          </div>
+        </div>
+        <div class="fi">
+          <div class="fl"><div class="fn">🎯</div></div>
+          <div class="fr">
+            <div class="ftit">Tujuan call pertama bukan closing — tapi dapat nomor WA.</div>
+            <div class="fbod">Closing terjadi saat demo, bukan saat telepon pertama. Jangan terlalu menekan di awal — yang penting dapat WA dulu.</div>
+          </div>
+        </div>
+        <div class="fi">
+          <div class="fl"><div class="fn">🌐</div></div>
+          <div class="fr">
+            <div class="ftit">Selalu arahkan ke coreveta.com</div>
+            <div class="fbod">Saat demo atau follow up, buka <strong>coreveta.com</strong> bersama mereka — lebih meyakinkan dari sekadar cerita. Website adalah bukti nyata yang bisa mereka lihat langsung.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="note tip"><div>💡</div><div><strong>Tips dari lapangan:</strong> Mulai dari HOT leads — bengkel yang review Google-nya paling banyak (sudah ada di file Excel analisa lead). Mereka adalah bisnis paling aktif dan paling mungkin butuh sistem seperti Coreveta.</div></div>
+</section>
+
+<div style="text-align:center;color:var(--hint);font-size:12px;padding:8px 0 40px;font-family:'JetBrains Mono',monospace;">
+  Coreveta Sales Bible · v2.0 · 2026 · Rahasia — Hanya untuk Tim Sales Internal<br>
+  <a href="https://coreveta.com" target="_blank" style="color:var(--green);font-weight:700;text-decoration:none;margin-top:6px;display:inline-block;">🌐 coreveta.com</a>
+</div>
+
+</div><!-- end content -->
+</div><!-- end main -->
+
+<script>
+const secs = document.querySelectorAll('section[id]');
+const nas = document.querySelectorAll('.na[href^="#"]');
+window.addEventListener('scroll', () => {
+  let cur = '';
+  secs.forEach(s => { if (window.scrollY >= s.offsetTop - 130) cur = s.id; });
+  nas.forEach(l => l.classList.toggle('active', l.getAttribute('href') === '#' + cur));
+});
+</script>
+</body>
+</html>

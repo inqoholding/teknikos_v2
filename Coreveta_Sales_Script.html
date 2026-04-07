@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Coreveta — Sales Script: Cold Call & Chat</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green: #1D9E75;
+    --green-dark: #0F6E56;
+    --green-light: #E1F5EE;
+    --green-mid: #5DCAA5;
+    --amber: #EF9F27;
+    --amber-light: #FAEEDA;
+    --bg: #F7F6F2;
+    --surface: #ffffff;
+    --text: #1A1A18;
+    --muted: #5A5A56;
+    --border: rgba(0,0,0,0.08);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 13px;
+    line-height: 1.6;
+  }
+  .page {
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 32px 40px;
+  }
+
+  /* HEADER */
+  .header {
+    background: linear-gradient(135deg, var(--green-dark) 0%, var(--green) 60%, var(--green-mid) 100%);
+    border-radius: 16px;
+    padding: 36px 40px;
+    margin-bottom: 28px;
+    color: white;
+  }
+  .header-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .logo-icon {
+    width: 36px; height: 36px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+  }
+  .logo-text {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+  }
+  .header h1 {
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -1px;
+    margin-bottom: 8px;
+  }
+  .header p {
+    font-size: 14px;
+    opacity: 0.85;
+    margin-bottom: 20px;
+  }
+  .strategy-flow {
+    display: flex;
+    gap: 0;
+    background: rgba(255,255,255,0.15);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .flow-step {
+    flex: 1;
+    padding: 12px 10px;
+    text-align: center;
+    border-right: 1px solid rgba(255,255,255,0.2);
+    position: relative;
+  }
+  .flow-step:last-child { border-right: none; }
+  .flow-num {
+    font-size: 10px;
+    font-weight: 700;
+    opacity: 0.7;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .flow-label {
+    font-size: 12px;
+    font-weight: 700;
+    margin-top: 2px;
+  }
+  .flow-sub {
+    font-size: 10px;
+    opacity: 0.75;
+    margin-top: 2px;
+  }
+
+  /* SECTION */
+  .section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+  .section-header {
+    padding: 16px 24px;
+    background: var(--green-light);
+    border-bottom: 1px solid rgba(29,158,117,0.15);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-icon {
+    font-size: 20px;
+  }
+  .section-title {
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--green-dark);
+    letter-spacing: -0.3px;
+  }
+  .section-sub {
+    font-size: 12px;
+    color: var(--green);
+    margin-left: auto;
+    font-weight: 600;
+  }
+  .section-body {
+    padding: 20px 24px;
+  }
+
+  /* SUBSECTION */
+  .subsection {
+    margin-bottom: 20px;
+  }
+  .subsection:last-child { margin-bottom: 0; }
+  .subsection-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 10px;
+    padding-bottom: 6px;
+    border-bottom: 2px solid var(--green-light);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 99px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+  }
+  .badge-green { background: var(--green-light); color: var(--green-dark); }
+  .badge-amber { background: var(--amber-light); color: #7a4a00; }
+  .badge-blue { background: #E6F1FB; color: #0C447C; }
+  .badge-gray { background: #F0F0EE; color: #4a4a46; }
+
+  /* SCRIPT BOX */
+  .script-box {
+    background: #FAFAF8;
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--green);
+    border-radius: 0 10px 10px 0;
+    padding: 14px 16px;
+    margin: 10px 0;
+    font-size: 12.5px;
+    color: var(--text);
+    white-space: pre-wrap;
+    line-height: 1.7;
+  }
+  .script-box.amber {
+    border-left-color: var(--amber);
+    background: #FFFCF8;
+  }
+  .script-box.blue {
+    border-left-color: #185FA5;
+    background: #F8FBFF;
+  }
+
+  /* LABEL */
+  .label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--green);
+    margin-bottom: 4px;
+  }
+  .label.amber { color: #9A6000; }
+
+  /* Q&A CARD */
+  .qa-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 10px;
+  }
+  .qa-card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px;
+  }
+  .qa-q {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--green-dark);
+    margin-bottom: 4px;
+  }
+  .qa-hint {
+    font-size: 11px;
+    color: var(--muted);
+    font-style: italic;
+  }
+
+  /* OBJECTION CARD */
+  .objection-card {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 10px;
+  }
+  .objection-header {
+    background: #FFF4F4;
+    padding: 10px 14px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #991F1F;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .objection-body {
+    padding: 12px 14px;
+    font-size: 12px;
+    color: var(--text);
+    white-space: pre-wrap;
+    line-height: 1.65;
+    background: white;
+  }
+
+  /* TABLE */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    margin-top: 10px;
+  }
+  th {
+    background: var(--green-light);
+    color: var(--green-dark);
+    font-weight: 700;
+    padding: 8px 12px;
+    text-align: left;
+    font-size: 11px;
+    letter-spacing: 0.3px;
+  }
+  td {
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:nth-child(even) td { background: #FAFAF8; }
+
+  /* PAIN-FEATURE MAP */
+  .pain-row { display: flex; gap: 10px; margin-bottom: 8px; align-items: flex-start; }
+  .pain-tag {
+    background: #FFF0F0;
+    color: #991F1F;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 99px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .feature-tag {
+    background: var(--green-light);
+    color: var(--green-dark);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 99px;
+  }
+  .arrow { color: var(--muted); align-self: center; font-size: 14px; }
+
+  /* FOLLOWUP */
+  .followup-card {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 12px;
+    align-items: flex-start;
+  }
+  .day-badge {
+    background: var(--green);
+    color: white;
+    font-size: 11px;
+    font-weight: 800;
+    padding: 6px 12px;
+    border-radius: 99px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .followup-text {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 12px;
+    flex: 1;
+    white-space: pre-wrap;
+    line-height: 1.65;
+  }
+
+  /* PROSPECT TIER */
+  .tier-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 10px; }
+  .tier-card { border-radius: 12px; padding: 14px; border: 1px solid var(--border); }
+  .tier-hot { background: #FFF5F5; border-color: #FFCCCC; }
+  .tier-warm { background: #FFFCF2; border-color: #FFE8A0; }
+  .tier-cold { background: #F5F8FF; border-color: #C8D8F5; }
+  .tier-label { font-size: 14px; font-weight: 800; margin-bottom: 4px; }
+  .tier-desc { font-size: 11px; color: var(--muted); margin-bottom: 8px; }
+  .tier-action { font-size: 11px; font-weight: 600; }
+  .tier-hot .tier-label { color: #CC2222; }
+  .tier-warm .tier-label { color: #A06500; }
+  .tier-cold .tier-label { color: #1A5FA0; }
+
+  /* TIP BOX */
+  .tip-box {
+    background: var(--green-light);
+    border: 1px solid rgba(29,158,117,0.3);
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin: 16px 0;
+    font-size: 12.5px;
+    color: var(--green-dark);
+  }
+  .tip-box strong { font-weight: 700; }
+
+  /* FOOTER */
+  footer {
+    text-align: center;
+    padding: 24px;
+    color: var(--muted);
+    font-size: 11px;
+    border-top: 1px solid var(--border);
+    margin-top: 24px;
+  }
+
+  /* PRINT */
+  @media print {
+    body { background: white; font-size: 11.5px; }
+    .page { padding: 20px 28px; }
+    .section { break-inside: avoid; }
+    .subsection { break-inside: avoid; }
+    .objection-card { break-inside: avoid; }
+    @page { margin: 1.5cm; size: A4; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-logo">
+      <div class="logo-icon">⚡</div>
+      <div class="logo-text">Coreveta</div>
+    </div>
+    <h1>Sales Playbook — Cold Call & Chat</h1>
+    <p>Strategi: Free Landing Page Hook → Discovery → Coreveta Pitch &nbsp;|&nbsp; Maret 2026</p>
+    <div class="strategy-flow">
+      <div class="flow-step">
+        <div class="flow-num">Step 1</div>
+        <div class="flow-label">🎁 Hook</div>
+        <div class="flow-sub">Landing Page Gratis</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">Step 2</div>
+        <div class="flow-label">🤝 Rapport</div>
+        <div class="flow-sub">Kenalan & warmup</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">Step 3</div>
+        <div class="flow-label">🔍 Discovery</div>
+        <div class="flow-sub">Gali pain point</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">Step 4</div>
+        <div class="flow-label">🎯 Pitch</div>
+        <div class="flow-sub">Tawarkan Coreveta</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">Step 5</div>
+        <div class="flow-label">✅ Close</div>
+        <div class="flow-sub">Trial 14 hari gratis</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION A: WHATSAPP -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon">📱</div>
+      <div class="section-title">A — Script WhatsApp / Chat</div>
+      <div class="section-sub">Kirim pukul 09.00–11.30 atau 13.30–16.00</div>
+    </div>
+    <div class="section-body">
+
+      <div class="subsection">
+        <div class="subsection-title">
+          Template WA #1 — Pendekatan Direct <span class="badge badge-green">⭐ Direkomendasikan</span>
+        </div>
+        <div class="script-box">Halo Pak/Bu [Nama], selamat siang 🙏
+
+Saya [Nama Kamu] dari Coreveta.
+
+Kami lagi ada program khusus buat pemilik usaha jasa teknik — kami buatkan *landing page profesional* untuk bengkel/usaha Bapak/Ibu *secara GRATIS*, lengkap dengan info layanan, nomor WA, dan Google Maps.
+
+Biasanya harga landing page seperti ini Rp 500K–2 juta, tapi untuk bulan ini kami gratis-in untuk beberapa usaha terpilih.
+
+Boleh saya tanya dulu, usaha Bapak/Ibu bergerak di bidang apa? AC, plumber, atau listrik? 🔧</div>
+      </div>
+
+      <div class="subsection">
+        <div class="subsection-title">Template WA #2 — Pendekatan Discovery (Jika Ada Referensi)</div>
+        <div class="script-box">Assalamualaikum Pak/Bu [Nama] 🙏
+
+Saya [Nama] dari Coreveta — platform manajemen untuk usaha jasa teknik.
+
+Saya lihat usaha [Nama Bengkel] di [Google Maps/IG/referral], dan kami lagi cari beberapa usaha jasa teknik di daerah [Kota] untuk kami bantu buatkan *website/landing page GRATIS* sebagai portofolio program kami.
+
+Tidak ada biaya, tidak ada kewajiban apapun.
+
+Apakah Bapak/Ibu berminat? Saya bisa ceritakan lebih lanjut 😊</div>
+      </div>
+
+      <div class="subsection">
+        <div class="subsection-title">Respons untuk Setiap Skenario</div>
+        <div class="qa-grid">
+          <div class="qa-card">
+            <div class="qa-q">✅ Jika tertarik ("Mau", "Boleh")</div>
+            <div class="qa-hint">"Makasih Pak/Bu 🙏 Sebelum kami mulai buat, saya perlu tanya beberapa hal dulu biar landing page-nya pas dengan bisnis Bapak/Ibu ya."
+→ lanjut ke discovery</div>
+          </div>
+          <div class="qa-card">
+            <div class="qa-q">🤔 Jika ragu ("Gratis? Ada syaratnya?")</div>
+            <div class="qa-hint">"Syaratnya simple: izinkan kami tampilkan sebagai referensi portofolio dan kasih feedback setelah pakai. Tidak ada kewajiban beli apapun."</div>
+          </div>
+          <div class="qa-card">
+            <div class="qa-q">❌ Jika tidak tertarik ("Sibuk", "Nanti")</div>
+            <div class="qa-hint">"No problem Pak/Bu. Boleh saya tanya satu hal saja — saat ini pakai sistem apa untuk atur job teknisi dan invoice?"
+→ jika masih manual, lanjut discovery</div>
+          </div>
+          <div class="qa-card">
+            <div class="qa-q">🔇 Jika tidak dibalas (2 hari)</div>
+            <div class="qa-hint">"Halo Pak/Bu, maaf ganggu sebentar 🙏 Hanya ingin pastikan pesan saya sampai. Masih ada waktu untuk saya bantu buatkan landing page-nya?"</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- SECTION B: COLD CALL -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon">📞</div>
+      <div class="section-title">B — Script Cold Call</div>
+      <div class="section-sub">Durasi ideal: 8–12 menit</div>
+    </div>
+    <div class="section-body">
+
+      <div class="tip-box">
+        <strong>Persiapan 2 menit sebelum call:</strong> Cari nama pemilik, nama bengkel, jenis layanan, kota, dan perkiraan jumlah teknisi dari Google Maps / Instagram / referral.
+      </div>
+
+      <div class="subsection">
+        <div class="subsection-title">📍 Opening (0:00 – 1:30)</div>
+        <div class="label">Jika yang angkat bukan orangnya:</div>
+        <div class="script-box">"Oh baik, saya [Nama] dari Coreveta. Bisa minta waktu sebentar untuk Pak/Bu [Nama]? Ini soal program gratis untuk bengkel [Nama Bengkel]."</div>
+        <div class="label" style="margin-top:10px">Jika sudah dengan pemiliknya:</div>
+        <div class="script-box">"Halo Pak/Bu [Nama], selamat [pagi/siang]. Saya [Nama] dari Coreveta — platform manajemen usaha jasa teknik.
+
+Sebelum saya lanjut, Bapak/Ibu lagi ada waktu 5–7 menit ngga? Saya mau share sesuatu yang saya yakin bermanfaat untuk usaha [Nama Bengkel]."</div>
+        <div class="label amber" style="margin-top:10px">Jika tidak sempat:</div>
+        <div class="script-box amber">"Ohh oke Pak/Bu, saya hormati waktu Bapak/Ibu. Boleh saya WA saja? Biar bisa dibaca kapanpun Bapak/Ibu sempat. Nomor ini bisa untuk WhatsApp?" → catat & kirim Template WA #1</div>
+      </div>
+
+      <div class="subsection">
+        <div class="subsection-title">📍 Presentasi Hook (1:30 – 3:00)</div>
+        <div class="script-box">"Jadi begini — kami dari Coreveta lagi ada program: buatkan Landing Page profesional untuk usaha jasa teknik secara GRATIS. Website yang tampilin layanan, nomor WA langsung, Google Maps, dan testimoni pelanggan. Nilainya sekitar Rp 1–2 juta kalau dibuat sendiri. Dan ini gratis untuk beberapa usaha terpilih bulan ini.
+
+[Nama Bengkel] saat ini sudah punya website atau belum?"</div>
+        <div class="qa-grid">
+          <div class="qa-card">
+            <div class="qa-q">Jika BELUM punya website</div>
+            <div class="qa-hint">"Nah pas banget! Sebelum kami mulai buatkan, saya perlu kenalan dulu." → lanjut Discovery</div>
+          </div>
+          <div class="qa-card">
+            <div class="qa-q">Jika SUDAH punya website</div>
+            <div class="qa-hint">"Oh keren! Website-nya aktif dipakai pelanggan? Kalau boleh tahu, koordinasi job sama teknisi pakai sistem apa?" → lanjut Discovery</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="subsection">
+        <div class="subsection-title">📍 Bridge ke Pitch (Setelah Discovery)</div>
+        <div class="script-box">"Pak/Bu, dari yang Bapak/Ibu ceritakan tadi — [Pain 1], [Pain 2], sama [Pain 3] — ini sebenarnya masalah yang hampir semua pemilik bengkel rasakan.
+
+Dan Coreveta memang dibuat spesifik untuk ini. Bukan software ERP yang ribet — tapi platform yang dirancang untuk bengkel jasa teknik kayak punya Bapak/Ibu. Setup-nya 10 menit, langsung bisa pakai.
+
+Boleh saya share sebentar soal apa yang bisa kami bantu?"</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- SECTION C: DISCOVERY -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon">🔍</div>
+      <div class="section-title">C — Pertanyaan Discovery</div>
+      <div class="section-sub">Dengarkan 80%, bicara 20%</div>
+    </div>
+    <div class="section-body">
+
+      <div class="tip-box">
+        <strong>Aturan emas:</strong> Biarkan prospek yang <em>cerita sendiri</em> pain point-nya. Tugas kamu hanya mendengarkan, mengkonfirmasi, dan mencatat — bukan langsung jualan. Setiap jawaban adalah amunisi untuk pitch.
+      </div>
+
+      <div class="subsection">
+        <div class="subsection-title">🟢 Icebreaker — Rapport & Klasifikasi</div>
+        <div class="qa-grid">
+          <div class="qa-card">
+            <div class="qa-q">Q1. Lama berdiri</div>
+            <div class="qa-hint">"Udah berapa lama bengkel [Nama] berdiri Pak/Bu?"</div>
+          </div>
+          <div class="qa-card">
+            <div class="qa-q">Q2. Jumlah teknisi</div>
+            <div class="qa-hint">"Sekarang punya berapa teknisi di lapangan?"</div>
+          </div>
+          <div class="qa-card">
+            <div class="qa-q">Q3. Jenis layanan</div>
+            <div class="qa-hint">"Layanannya AC doang atau ada plumber / listrik juga?"</div>
+          </div>
+          <div class="qa-card">
+            <div class="qa-q">Q4. Volume job</div>
+            <div class="qa-hint">"Rata-rata sebulan berapa job yang masuk Pak/Bu?"</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="subsection">
+        <div class="subsection-title">🔴 Operasional — Koordinasi Job & Teknisi</div>
+        <div class="qa-grid">
+          <div class="qa-card">
+            <div class="qa-q">Q5. Alur koordinasi job</div>
+            <div class="qa-hint">"Teknisi-nya dapat info job dari mana sekarang — WA group, telepon, atau sudah ada sistem?"<br><br><em>Jika WA group: "Pasti sering ada kebingungan siapa yang handle job mana ya?"</em></div>
+          </div>
+          <div class="qa-card">
+            <div class="qa-q">Q6. Alur job end-to-end</div>
+            <div class="qa-hint">"Kalau ada job masuk, prosesnya gimana dari awal sampai selesai? Bisa diceritain singkat?"</div>
+          </div>
+          <div class="qa-card">
+            <div class="qa-q">Q7. Double booking</div>
+            <div class="qa-hint">"Pernah kejadian gak, job di-booking dua teknisi sekaligus atau ada job yang kelewat/terlupa?"<br><br><em>Jika pernah: "Berapa kali kira-kira sebulan? Dampaknya ke pelanggan gimana?"</em></div>
+          </div>
+          <div class="qa-card">
+            <div class="qa-q">Q8. Pantau teknisi real-time</div>
+            <div class="qa-hint">"Bapak/Ibu bisa pantau teknisi lagi di mana dan ngerjain apa sekarang ini?"<br><br><em>Jika tidak bisa: "Jadi essentially trust aja ya? Pernah ada masalah soal ini?"</em></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="subsection">
+        <div class="subsection-title">🔴 Invoice & Keuangan</div>
+        <div class="qa-grid">
+          <div class="qa-card">
+            <div class="qa-q">Q9. Cara buat invoice</div>
+            <div class="qa-hint">"Untuk invoice ke pelanggan, sekarang pakai apa — tulis tangan, Excel, atau aplikasi?"<br><br><em>Jika manual: "Prosesnya lama gak? Kadang suka susah ditagih balik?"</em></div>
+          </div>
+          <div class="qa-card">
+            <div class="qa-q">Q10. Laporan keuangan</div>
+            <div class="qa-hint">"Laporan keuangan bulanan ada gak? Bisa tau gak berapa total revenue bulan lalu?"</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="subsection">
+        <div class="subsection-title">🔴 Kontrak & Repeat Business</div>
+        <div class="qa-grid">
+          <div class="qa-card">
+            <div class="qa-q">Q11. Pelanggan rutin</div>
+            <div class="qa-hint">"Ada pelanggan yang servis rutin Pak/Bu? Misalnya AC-nya service 3 bulan sekali?"</div>
+          </div>
+          <div class="qa-card">
+            <div class="qa-q">Q12. Tracking kontrak</div>
+            <div class="qa-hint">"Kalau ada kontrak servis, bisa tau otomatis kapan waktunya follow-up pelanggan?"</div>
+          </div>
+          <div class="qa-card">
+            <div class="qa-q">Q13. Kehilangan pelanggan rutin</div>
+            <div class="qa-hint">"Pernah kehilangan pelanggan rutin karena lupa follow-up atau gak ada reminder?"<br><br><em>Jika pernah: "Kira-kira berapa pelanggan kayak gitu per tahun? Nilai kontraknya berapa?"</em></div>
+          </div>
+          <div class="qa-card">
+            <div class="qa-q">⭐ Q14. Pertanyaan Emas</div>
+            <div class="qa-hint"><strong>"Kalau bisa diselesaikan SATU hal dari operasional sekarang, apa yang paling Bapak/Ibu mau?"</strong><br><br><em>Dengarkan baik-baik. Ini adalah inti pitchmu.</em></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- SECTION D: PITCH -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon">🎯</div>
+      <div class="section-title">D — Pitch Coreveta</div>
+      <div class="section-sub">Hubungkan fitur dengan pain yang MEREKA sebut</div>
+    </div>
+    <div class="section-body">
+
+      <div class="subsection">
+        <div class="subsection-title">Peta Pain Point → Fitur</div>
+        <div class="pain-row"><span class="pain-tag">❌ Job chaos di WA group</span><span class="arrow">→</span><span class="feature-tag">✅ Job Order Board + Notifikasi Teknisi</span></div>
+        <div class="pain-row"><span class="pain-tag">❌ Invoice manual, susah ditagih</span><span class="arrow">→</span><span class="feature-tag">✅ Auto Invoice PDF → kirim via WA</span></div>
+        <div class="pain-row"><span class="pain-tag">❌ Tidak bisa pantau teknisi</span><span class="arrow">→</span><span class="feature-tag">✅ Live Status + GPS Tracking</span></div>
+        <div class="pain-row"><span class="pain-tag">❌ Kontrak rutin sering lupa</span><span class="arrow">→</span><span class="feature-tag">✅ Fitur Kontrak Rutin + Auto Reminder</span></div>
+        <div class="pain-row"><span class="pain-tag">❌ Tidak ada laporan keuangan</span><span class="arrow">→</span><span class="feature-tag">✅ Dashboard Revenue & Analytics</span></div>
+        <div class="pain-row"><span class="pain-tag">❌ Stok sparepart kehabisan</span><span class="arrow">→</span><span class="feature-tag">✅ Inventory Management + Alert</span></div>
+      </div>
+
+      <div class="subsection">
+        <div class="subsection-title">Script Pitch per Pain Point</div>
+
+        <div class="label">Jika pain: Job chaos di WhatsApp</div>
+        <div class="script-box">"Di Coreveta, setiap job punya halaman sendiri — ada nama pelanggan, alamat, dan deskripsi pekerjaan. Teknisi yang ditugaskan langsung dapat notifikasi, dan status bisa diupdate dari pending → jalan → selesai. Jadi gak ada lagi drama 'saya kira si Andi yang handle, ternyata si Budi.' Semua jelas, semua tercatat."</div>
+
+        <div class="label" style="margin-top:10px">Jika pain: Invoice manual</div>
+        <div class="script-box">"Invoice di Coreveta dibuat otomatis dari job yang sudah selesai — satu klik, langsung jadi PDF profesional dengan logo dan detail pekerjaan. Bisa dikirim langsung ke pelanggan via WhatsApp dari sistemnya. Dan status pembayaran terpantau: belum bayar, sudah bayar, telat. Gak ada lagi invoice yang nyasar di tumpukan kertas."</div>
+
+        <div class="label" style="margin-top:10px">Jika pain: Kontrak rutin terlupa</div>
+        <div class="script-box">"Ada fitur kontrak servis rutin. Bapak/Ibu input kapan jadwal service berikutnya — sistem otomatis reminder ke Bapak/Ibu H-7. Rata-rata bengkel yang pakai ini recover Rp 2–3 juta per bulan dari kontrak yang tadinya kelewat."</div>
+      </div>
+
+      <div class="subsection">
+        <div class="subsection-title">Closing ke Trial</div>
+        <div class="script-box">"Nah, untuk landing page-nya memang kami buatkan gratis. Tapi karena Bapak/Ibu tadi cerita soal [pain point utama] — saya ingin tawarin juga akses Coreveta selama 14 hari gratis. Tidak perlu kartu kredit. Tidak ada commitment.
+
+Bapak/Ibu coba dulu, kalau cocok baru lanjut. Kalau tidak cocok, ya sudah — landing page-nya tetap kami kasih. Gimana, mau saya bantu setup?"</div>
+      </div>
+
+      <div class="subsection">
+        <div class="subsection-title">Cara Menyampaikan Harga</div>
+        <table>
+          <tr><th>Plan</th><th>Harga</th><th>Untuk Siapa</th></tr>
+          <tr><td><strong>Starter</strong></td><td>Gratis</td><td>Solo teknisi, baru mulai</td></tr>
+          <tr><td><strong>Pro</strong> ⭐</td><td>~Rp 199K/bulan</td><td>Bengkel 1–10 teknisi</td></tr>
+          <tr><td><strong>Bisnis</strong></td><td>~Rp 499K/bulan</td><td>Multi-cabang, 10+ teknisi</td></tr>
+        </table>
+        <div class="script-box" style="margin-top:10px">"Harganya mulai dari yang gratis untuk coba-coba, sampai Rp 199 ribu per bulan. Kalau dipikir-pikir, itu lebih murah dari 1 kali service AC pelanggan — tapi manfaatnya bisa bikin bisnis Bapak/Ibu rapi dari A sampai Z."</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- SECTION E: OBJECTIONS -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon">🛡️</div>
+      <div class="section-title">E — Handling Keberatan</div>
+      <div class="section-sub">8 objeksi paling umum</div>
+    </div>
+    <div class="section-body">
+      <div class="qa-grid" style="grid-template-columns: 1fr;">
+
+        <div class="objection-card">
+          <div class="objection-header">❌ "Saya gak butuh aplikasi, WA saja cukup"</div>
+          <div class="objection-body">"Iya Pak/Bu, WA memang powerful. Saya gak minta Bapak/Ibu tinggalkan WA sama sekali. Cuma, kalau boleh jujur — waktu pelanggan banyak dan teknisi sudah 4–5 orang, WA group mulai susah dikelola kan? Coreveta itu bukan ganti WA — tapi jadi 'otak'-nya di belakang biar koordinasinya gak chaos. Coba 14 hari, kalau gak ngebantu ya tinggal stop."</div>
+        </div>
+
+        <div class="objection-card">
+          <div class="objection-header">❌ "Ribet ngajarin teknisi pakai aplikasi baru"</div>
+          <div class="objection-body">"Itu kekhawatiran yang sangat valid Pak/Bu. Makanya Coreveta dibuat sesimpel WhatsApp. Teknisi cuma perlu terima notifikasi job dan update status — 3 tombol saja. Serius, 15 menit sudah bisa. Dan kami ada onboarding gratis — saya bantu setup sampai Bapak/Ibu dan tim bisa jalan sendiri."</div>
+        </div>
+
+        <div class="objection-card">
+          <div class="objection-header">❌ "Mahal, gak ada budget"</div>
+          <div class="objection-body">"Boleh saya tanya Pak/Bu — kalau sebulan ada 2–3 job yang terlewat, atau 1 kontrak servis rutin yang kelepas ke kompetitor, kira-kira nilainya berapa? [Tunggu jawaban] Itu jauh lebih besar dari Rp 199 ribu kan? Coreveta itu bukan cost — itu investasi untuk nutup kebocoran yang sudah ada tapi gak kedeteksi. Dan ada plan gratis dulu kalau mau mulai kecil-kecilan."</div>
+        </div>
+
+        <div class="objection-card">
+          <div class="objection-header">❌ "Nanti aja, lagi sibuk"</div>
+          <div class="objection-body">"Justru karena sibuk itulah biasanya butuh sistem — biar Bapak/Ibu gak harus urus satu-satu. Gini aja, saya kirimkan via WA link demo dan video singkat 2 menit — bisa ditonton waktu santai. Kapan kira-kira Bapak/Ibu sempat saya follow up? Besok pagi atau lusa?"</div>
+        </div>
+
+        <div class="objection-card">
+          <div class="objection-header">❌ "Sudah pakai Excel / sistem lain"</div>
+          <div class="objection-body">"Bagus Pak/Bu! Berarti sudah merasakan manfaat punya sistem yang rapi. Boleh tanya, Excel-nya bisa real-time dipantau teknisi di lapangan? Atau masih Bapak/Ibu yang input sendiri setiap hari? [Jika masih manual:] Nah itu yang biasanya jadi bottleneck — semuanya masih bergantung ke Bapak/Ibu. Coreveta otomatisinnya dari ujung ke ujung."</div>
+        </div>
+
+        <div class="objection-card">
+          <div class="objection-header">❌ "Mau pikir-pikir dulu"</div>
+          <div class="objection-body">"No problem Pak/Bu. Supaya gak pikir-pikir dari nol, saya mau kirimkan 3 hal via WA: (1) Video demo 2 menit Coreveta, (2) Cerita singkat bengkel AC di [kota terdekat] yang udah pakai, (3) Link trial gratis 14 hari. Kapan kira-kira Bapak/Ibu sempat saya follow up?"</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION F: FOLLOW UP -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon">📅</div>
+      <div class="section-title">F — Follow-Up Sequence WhatsApp</div>
+      <div class="section-sub">Hari 1 → 3 → 5 → 7</div>
+    </div>
+    <div class="section-body">
+
+      <div class="followup-card">
+        <div class="day-badge">Hari 1</div>
+        <div class="followup-text">Pak/Bu [Nama], ini saya kirimkan yang tadi saya janjikan:
+
+📹 Video demo Coreveta (2 menit): [link]
+🔗 Coba gratis 14 hari (tanpa kartu kredit): [link trial]
+📄 Cerita [Nama Bengkel lain] yang sudah pakai: [screenshot/link]
+
+Kalau ada pertanyaan, langsung tanya saya ya 🙏</div>
+      </div>
+
+      <div class="followup-card">
+        <div class="day-badge">Hari 3</div>
+        <div class="followup-text">Halo Pak/Bu [Nama], selamat pagi 🙏
+
+Gimana, sempat buka video yang kemarin saya kirim?
+
+Kalau ada yang mau ditanyain atau mau saya walk-through langsung systemnya via video call 15 menit, saya siap kapanpun Bapak/Ibu mau.</div>
+      </div>
+
+      <div class="followup-card">
+        <div class="day-badge">Hari 5</div>
+        <div class="followup-text">Pak/Bu [Nama], sharing singkat nih 👇
+
+Rata-rata bengkel yang switching dari WhatsApp ke Coreveta:
+✅ Gak ada lagi double booking setelah minggu pertama
+✅ Invoice dibuat 5x lebih cepat
+✅ Kontrak rutin yang tadinya kelewat mulai ke-reminder otomatis
+
+Saya bisa bantu setup awal semua datanya (teknisi, pelanggan) biar gak perlu input dari nol. Gimana? 😊</div>
+      </div>
+
+      <div class="followup-card">
+        <div class="day-badge">Hari 7</div>
+        <div class="followup-text">Halo Pak/Bu [Nama] 🙏
+
+Saya gak mau ganggu terus — jadi ini mungkin follow up terakhir saya untuk sementara.
+
+Kalau suatu saat bisnis Bapak/Ibu butuh sistem yang bisa bantu atur job, teknisi, invoice, dan kontrak servis — saya tetap ada ya, bisa reach out kapanpun.
+
+Landing page-nya pun saya siap buatkan kapanpun Bapak/Ibu mau.
+
+Sukses terus untuk [Nama Bengkel] 🙏🏻</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- SECTION G: CHEAT SHEET -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon">⚡</div>
+      <div class="section-title">G — Cheat Sheet: Klasifikasi Prospek</div>
+    </div>
+    <div class="section-body">
+      <div class="tier-grid">
+        <div class="tier-card tier-hot">
+          <div class="tier-label">🔥 HOT</div>
+          <div class="tier-desc">3+ teknisi, chaos WA, invoice manual, antusias saat discovery</div>
+          <div class="tier-action" style="color:#CC2222">→ Push trial sekarang juga. Tawari setup gratis.</div>
+        </div>
+        <div class="tier-card tier-warm">
+          <div class="tier-label">🟡 WARM</div>
+          <div class="tier-desc">1–2 teknisi, mau berkembang, ada pain tapi ringan</div>
+          <div class="tier-action" style="color:#A06500">→ Nurture 5–7 hari. Kirim value, jangan pressure.</div>
+        </div>
+        <div class="tier-card tier-cold">
+          <div class="tier-label">🧊 COLD</div>
+          <div class="tier-desc">Solo teknisi, tidak ada pain dirasakan, tidak antusias</div>
+          <div class="tier-action" style="color:#1A5FA0">→ Kasih landing page gratis. Follow up 3 bulan lagi.</div>
+        </div>
+      </div>
+
+      <div class="subsection" style="margin-top:20px">
+        <div class="subsection-title">Kalimat Transisi Kunci</div>
+        <table>
+          <tr><th>Situasi</th><th>Kalimat</th></tr>
+          <tr><td>Gali lebih dalam</td><td><em>"Bisa ceritain lebih detail Pak/Bu? Biasanya kejadiannya gimana?"</em></td></tr>
+          <tr><td>Tunjukkan empati</td><td><em>"Iya, itu memang nyebelin banget ya — dan sebenarnya gak harus begitu terus."</em></td></tr>
+          <tr><td>Bridge ke pitch</td><td><em>"Nah, itu yang pertama kali bikin kami buat Coreveta — hampir semua bengkel merasakan hal yang sama."</em></td></tr>
+          <tr><td>Closing trial</td><td><em>"Coba 14 hari dulu Pak/Bu, gak rugi. Kalau gak cocok ya sudah — landing page-nya tetap kami kasih."</em></td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    Coreveta Sales Playbook &nbsp;·&nbsp; Maret 2026 &nbsp;·&nbsp; Confidential Internal Use
+    <br>Update script sesuai feedback lapangan setiap 2 minggu
+  </footer>
+
+</div>
+</body>
+</html>

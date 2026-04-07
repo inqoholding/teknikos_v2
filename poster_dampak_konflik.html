@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analisis Dampak Konflik Timur Tengah terhadap Indonesia</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,400..900;1,400..900&family=Jost:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --primary: #0F172A;
+            --secondary: #334155;
+            --accent: #E11D48;
+            --bg: #FFFFFF;
+            --surface: #F8FAFC;
+            --text-main: #020617;
+            --text-muted: #475569;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #E2E8F0;
+            font-family: 'Jost', sans-serif;
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            padding: 40px 0;
+        }
+
+        .a4-page {
+            background: var(--bg);
+            width: 210mm;
+            height: 297mm;
+            padding: 20mm;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* The "Dot" mark from user image */
+        .page-mark {
+            position: absolute;
+            top: 10mm;
+            left: 10mm;
+            width: 4px;
+            height: 4px;
+            background: var(--primary);
+            border-radius: 50%;
+        }
+
+        header {
+            margin-bottom: 2rem;
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 1rem;
+        }
+
+        h1 {
+            font-family: 'Bodoni Moda', serif;
+            font-size: 2.5rem;
+            line-height: 1.1;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: -0.02em;
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            color: var(--text-muted);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        .date-badge {
+            margin-top: 1rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--bg);
+            background: var(--primary);
+            display: inline-block;
+            padding: 0.2rem 0.8rem;
+        }
+
+        .impact-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .impact-card {
+            background: var(--surface);
+            padding: 1.5rem;
+            border-left: 4px solid var(--primary);
+            transition: all 0.3s ease;
+        }
+
+        .impact-card h3 {
+            font-family: 'Bodoni Moda', serif;
+            font-size: 1.2rem;
+            margin: 0.5rem 0;
+            color: var(--primary);
+        }
+
+        .impact-card p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        .impact-card i {
+            color: var(--accent);
+        }
+
+        .section-title {
+            font-family: 'Bodoni Moda', serif;
+            font-size: 1.5rem;
+            border-bottom: 1px solid #CBD5E1;
+            margin-bottom: 1.2rem;
+            padding-bottom: 0.3rem;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        content {
+            flex: 1;
+        }
+
+        .analysis-block {
+            margin-bottom: 1.5rem;
+        }
+
+        .analysis-block h4 {
+            font-weight: 700;
+            font-size: 1rem;
+            margin-bottom: 0.4rem;
+            color: var(--secondary);
+        }
+
+        .analysis-block p {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 0.8rem;
+            text-align: justify;
+        }
+
+        .policy-box {
+            background: var(--primary);
+            color: white;
+            padding: 1.5rem;
+            margin-top: auto;
+        }
+
+        .policy-box h3 {
+            font-family: 'Bodoni Moda', serif;
+            margin-bottom: 0.8rem;
+            font-size: 1.3rem;
+        }
+
+        .policy-list {
+            list-style: none;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.8rem;
+        }
+
+        .policy-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+        }
+
+        .policy-item i {
+            font-size: 1rem;
+            color: #38BDF8;
+        }
+
+        footer {
+            margin-top: 1rem;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid #E2E8F0;
+            padding-top: 0.5rem;
+        }
+
+        /* Print optimization */
+        @media print {
+            body { background: none; padding: 0; }
+            .a4-page { box-shadow: none; margin: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="a4-page">
+        <div class="page-mark"></div>
+        
+        <header>
+            <div class="subtitle">Laporan Analisis Strategis</div>
+            <h1>Dampak Konflik <br> Iran - AS - Israel <br> Terhadap Indonesia</h1>
+            <div class="date-badge">Maret 2026 - Update Terkini</div>
+        </header>
+
+        <content>
+            <div class="section-title">
+                <i data-lucide="bar-chart-3"></i> Ringkasan Eskalasi Global
+            </div>
+            
+            <div class="impact-grid">
+                <div class="impact-card">
+                    <i data-lucide="droplet"></i>
+                    <h3>Energi (Minyak)</h3>
+                    <p>Kenaikan harga minyak mentah dunia membebani anggaran subsidi BBM dan menurunkan ruang fiskal APBN.</p>
+                </div>
+                <div class="impact-card">
+                    <i data-lucide="trending-down"></i>
+                    <h3>Kurs Rupiah</h3>
+                    <p>Investor beralih ke 'Safe Haven' (USD/Emas), menyebabkan volatilitas dan tekanan pada nilai tukar Rupiah.</p>
+                </div>
+                <div class="impact-card">
+                    <i data-lucide="shopping-cart"></i>
+                    <h3>Inflasi Pangan</h3>
+                    <p>Biaya logistik kargo meningkat drastis, memicu kenaikan harga komoditas impor dan inflasi domestik.</p>
+                </div>
+            </div>
+
+            <div class="section-title">
+                <i data-lucide="search"></i> Analisis Mendalam
+            </div>
+
+            <div class="analysis-block">
+                <h4>1. Ketahanan Fiskal dan Kerentanan Energi</h4>
+                <p>
+                    Sebagai negara 'Net Importer' minyak, setiap kenaikan harga minyak dunia sebesar USD 1 per barel berpotensi meningkatkan defisit fiskal Indonesia. Selat Hormuz, jalur krusial bagi 20% pasokan minyak dunia, kini berada dalam risiko blokade yang dapat menyebabkan 'Oil Shock' global.
+                </p>
+            </div>
+
+            <div class="analysis-block">
+                <h4>2. Jalur Pasar Keuangan dan Arus Modal</h4>
+                <p>
+                    Sentimen 'Risk-Off' global memicu aliran modal keluar (capital outflow) dari pasar berkembang ke pasar maju. Hal ini menekan Indeks Harga Saham Gabungan (IHSG) dan meningkatkan biaya pinjaman luar negeri melalui kenaikan yield obligasi pemerintah.
+                </p>
+            </div>
+
+            <div class="analysis-block">
+                <h4>3. Rantai Pasok dan Logistik Maritim</h4>
+                <p>
+                    Pengalihan rute kapal dari Laut Merah/Terusan Suez menambah waktu tempuh hingga 15 hari. Bagi Indonesia, hal ini berarti kenaikan biaya 'Freight' untuk gandum, pupuk, dan bahan baku industri yang berasal dari Eropa dan Timur Tengah.
+                </p>
+            </div>
+        </content>
+
+        <div class="policy-box">
+            <h3>Strategi Mitigasi Nasional</h3>
+            <div class="policy-list">
+                <div class="policy-item">
+                    <i data-lucide="check-circle-2"></i>
+                    <span><strong>Diplomasi Aktif:</strong> Mendorong de-eskalasi melalui forum PBB dan OKI untuk menjaga stabilitas kawasan.</span>
+                </div>
+                <div class="policy-item">
+                    <i data-lucide="check-circle-2"></i>
+                    <span><strong>Intervensi BI:</strong> Stabilisasi nilai tukar Rupiah melalui intervensi pasar spot dan DNDF secara terukur.</span>
+                </div>
+                <div class="policy-item">
+                    <i data-lucide="check-circle-2"></i>
+                    <span><strong>Shock Absorber:</strong> Penggunaan dana cadangan APBN untuk menahan lonjakan harga energi di tingkat konsumen.</span>
+                </div>
+                <div class="policy-item">
+                    <i data-lucide="check-circle-2"></i>
+                    <span><strong>Kemandirian Energi:</strong> Percepatan penggunaan energi alternatif untuk mengurangi ketergantungan impor.</span>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <span>Sumber: Kemenkeu, Bank Indonesia, Reuters Intelligence</span>
+            <span>Analisis Strategis 2026 | Dokumen Rahasia Sempurna</span>
+        </footer>
+    </div>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+    </script>
+</body>
+</html>
