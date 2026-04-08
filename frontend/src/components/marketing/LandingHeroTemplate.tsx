@@ -12,11 +12,11 @@ export function LandingHeroTemplate({ salesWhatsappLink }: { salesWhatsappLink: 
   const navigate = useNavigate();
 
   const features = [
-    { id: "dashboard", label: "Dashboard", icon: LayoutGrid, img: "/mockups/dashboard.png?v=2" },
-    { id: "kanban", label: "Job Kanban", icon: Kanban, img: "/mockups/kanban.png?v=2" },
-    { id: "teknisi", label: "Teknisi", icon: Users, img: "/mockups/teknisi.png?v=2" },
-    { id: "inventori", label: "Inventori", icon: Package, img: "/mockups/inventori.png?v=2" },
-    { id: "kontrak", label: "Kontrak B2B", icon: FileSignature, img: "/mockups/kontrak.png?v=2" },
+    { id: "dashboard", label: "Dashboard", icon: LayoutGrid, img: "/real-screenshots/user3_dashboard_1775610591207.png" },
+    { id: "kanban", label: "Job Kanban", icon: Kanban, img: "/real-screenshots/user3_jobs_1775610591207.png" },
+    { id: "teknisi", label: "Teknisi", icon: Users, img: "/real-screenshots/user3_technicians_1775610591207.png" },
+    { id: "inventori", label: "Inventori", icon: Package, img: "/real-screenshots/inventory_list_1775531174266.png" },
+    { id: "kontrak", label: "Kontrak B2B", icon: FileSignature, img: "/real-screenshots/contracts_list_1775531399253.png" },
   ];
 
   return (
