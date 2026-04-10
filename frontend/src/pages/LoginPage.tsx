@@ -1,7 +1,7 @@
 import { FormEvent, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { getErrorMessage, isApiErrorStatus } from "../api/client";
-import { useBusinessQuery, useCreatePublicSupportRequestMutation, useLoginMutation, useSessionQuery } from "../api/hooks";
+import { useBusinessQuery, useCreatePublicSupportRequestMutation, useLoginMutation, useSessionQuery, useLogoutMutation } from "../api/hooks";
 import { AuthScaffold } from "../components/Layout";
 
 const SALES_WHATSAPP = "6281354444967";
@@ -18,6 +18,7 @@ function buildResetPasswordLink(email?: string) {
 export default function LoginPage() {
   const navigate = useNavigate();
   const loginMutation = useLoginMutation();
+  const logoutMutation = useLogoutMutation();
   const publicSupportRequestMutation = useCreatePublicSupportRequestMutation();
   const sessionQuery = useSessionQuery();
   const { data: sessionData, isLoading: isSessionLoading } = sessionQuery;

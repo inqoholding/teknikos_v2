@@ -1,0 +1,6 @@
+#!/usr/bin/expect -f
+set timeout -1
+spawn ssh -o StrictHostKeyChecking=no root@coreveta.com "cd /var/www/teknikos && git pull origin main && npm run build:all && pm2 restart teknikos-backend"
+expect "password:"
+send "RootpasswordPTinqo1109@\r"
+expect eof
