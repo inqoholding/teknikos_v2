@@ -49,12 +49,16 @@ dashboardRouter.get("/stats", async (_req, res) => {
       db.select().from(invoices).where(eq(invoices.businessId, businessId)),
     ]);
 
-  const startOfToday = new Date();
-  startOfToday.setHours(0, 0, 0, 0);
-  const endOfToday = new Date(startOfToday);
-  endOfToday.setDate(endOfToday.getDate() + 1);
-  const currentMonth = new Date().getMonth();
-  const currentYear = new Date().getFullYear();
+  const now = new Date();
+  const parts = new Intl.DateTimeFormat("en-US", { timeZone: "Asia/Makassar", year: "numeric", month: "numeric", day: "numeric" }).formatToParts(now);
+  const witaYear = parseInt(parts.find(p => p.type === "year")!.value);
+  const witaMonth = parseInt(parts.find(p => p.type === "month")!.value) - 1;
+  const witaDay = parseInt(parts.find(p => p.type === "day")!.value);
+
+  const startOfToday = new Date(Date.UTC(witaYear, witaMonth, witaDay) - 8 * 3600 * 1000);
+  const endOfToday = new Date(startOfToday.getTime() + 24 * 3600 * 1000);
+  const startOfMonth = new Date(Date.UTC(witaYear, witaMonth, 1) - 8 * 3600 * 1000);
+  const endOfMonth = new Date(Date.UTC(witaYear, witaMonth + 1, 1) - 8 * 3600 * 1000);
   const customerMap = new Map(allCustomers.map((customer) => [customer.id, customer]));
   const technicianMap = new Map(allTechs.map((technician) => [technician.id, technician]));
   const invoicedJobIds = new Set(allInvoices.filter((invoice) => invoice.jobId).map((invoice) => invoice.jobId));
@@ -86,8 +90,8 @@ dashboardRouter.get("/stats", async (_req, res) => {
     .filter(
       (invoice) =>
         invoice.status === "Paid" &&
-        (invoice.paidAt ?? invoice.createdAt).getMonth() === currentMonth &&
-        (invoice.paidAt ?? invoice.createdAt).getFullYear() === currentYear,
+        (invoice.paidAt ?? invoice.createdAt) >= startOfMonth &&
+        (invoice.paidAt ?? invoice.createdAt) < endOfMonth,
     )
     .reduce((sum, invoice) => sum + invoice.total, 0);
 
@@ -104,11 +108,9 @@ dashboardRouter.get("/stats", async (_req, res) => {
     }));
 
   const revenueBars = Array.from({ length: 7 }).map((_, index) => {
-    const date = new Date();
-    date.setDate(date.getDate() - (6 - index));
-    date.setHours(0, 0, 0, 0);
-    const next = new Date(date);
-    next.setDate(next.getDate() + 1);
+    const offsetDays = 6 - index;
+    const date = new Date(startOfToday.getTime() - offsetDays * 24 * 3600 * 1000);
+    const next = new Date(date.getTime() + 24 * 3600 * 1000);
     const value = allInvoices
       .filter(
         (invoice) =>
@@ -119,7 +121,7 @@ dashboardRouter.get("/stats", async (_req, res) => {
       .reduce((sum, invoice) => sum + invoice.total, 0);
 
     return {
-      label: new Intl.DateTimeFormat("id-ID", { weekday: "short" }).format(date),
+      label: new Intl.DateTimeFormat("id-ID", { weekday: "short", timeZone: "Asia/Makassar" }).format(date),
       value,
       valueLabel: formatRupiahCompact(value),
     };

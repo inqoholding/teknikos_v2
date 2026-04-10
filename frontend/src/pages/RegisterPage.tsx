@@ -16,7 +16,7 @@ export default function RegisterPage() {
   const registerMutation = useRegisterMutation();
   const sessionQuery = useSessionQuery();
   const { data: sessionData, isLoading: isSessionLoading } = sessionQuery;
-  const businessQuery = useBusinessQuery(Boolean(sessionData));
+  const businessQuery = useBusinessQuery(Boolean(sessionData?.user?.businessId));
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");

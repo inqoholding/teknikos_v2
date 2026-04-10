@@ -42,9 +42,7 @@ export default function LoginPage() {
   }, [sessionData, isSessionLoading, navigate]);
 
   async function handleLogout() {
-    await sessionQuery.refetch(); // Ensure we have latest
-    // Use the logout logic from hooks if possible, or just call the API
-    // For now we rely on the session check below to show the banner
+    await logoutMutation.mutateAsync();
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -113,7 +111,9 @@ export default function LoginPage() {
             <p>Anda sudah masuk sebagai <strong>{sessionData.user.email}</strong></p>
             <div className="button-row button-row--left" style={{ marginTop: "12px" }}>
               <Link to="/dashboard" className="btn btn--primary btn--small">Lanjut ke Dashboard</Link>
-              <button type="button" className="btn btn--secondary btn--small" onClick={() => window.location.assign("/api/auth/logout")}>Keluar & Ganti Akun</button>
+              <button type="button" className="btn btn--secondary btn--small" onClick={handleLogout} disabled={logoutMutation.isPending}>
+                {logoutMutation.isPending ? "Keluar..." : "Keluar & Ganti Akun"}
+              </button>
             </div>
           </div>
         ) : null}

@@ -129,7 +129,7 @@ function TechnicianAttendanceView() {
   const technicianQuery = useTechnicianSelfQuery();
   const checkInMutation = useTechnicianCheckInMutation();
   const checkOutMutation = useTechnicianCheckOutMutation();
-  const jobsQuery = useJobsQuery({ status: "in_progress" });
+  const jobsQuery = useJobsQuery({});
   
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
   const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
