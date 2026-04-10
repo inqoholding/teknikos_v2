@@ -64,22 +64,22 @@ const wahaSteps = [
 ];
 
 const deadlineCards = [
-  { title: "JOB-014 · PT Sinar Jaya", meta: "Hari ini · 16:30", tone: "danger" as const },
-  { title: "JOB-011 · Outdoor unit rooftop", meta: "Besok · 11:00", tone: "warning" as const },
-  { title: "Kontrak Klinik Arafah", meta: "26 Mar 2026", tone: "info" as const },
+  { title: "JOB-015 · Bank BCA KCP Pettarani", meta: "Hari ini · 11:00", tone: "danger" as const },
+  { title: "JOB-016 · Troubleshooting Kelistrikan", meta: "Hari ini · 13:00", tone: "warning" as const },
+  { title: "Kontrak Bank BCA (Kuartalan)", meta: "12 Jun 2026", tone: "info" as const },
 ];
 
 const quickBillingPreview = [
-  { label: "Job terkait", value: "JOB-014 · Cuci besar 4 unit cassette" },
-  { label: "Pelanggan", value: "PT Sinar Jaya" },
-  { label: "Estimasi total", value: formatRupiah(450_000) },
+  { label: "Job terkait", value: "JOB-015 · Instalasi CCTV 4 Titik" },
+  { label: "Pelanggan", value: "Bank BCA KCP Pettarani" },
+  { label: "Estimasi total", value: formatRupiah(3_200_000) },
   { label: "Status invoice", value: "Sent" },
 ];
 
 const autoSendPreview = [
   { label: "Status WAHA", value: "Siap dipakai setelah connect" },
-  { label: "Pelanggan", value: "PT Sinar Jaya" },
-  { label: "Teknisi", value: "Ardiansyah, Fadli" },
+  { label: "Pelanggan", value: "Bank BCA KCP Pettarani" },
+  { label: "Teknisi", value: "Fadli" },
 ];
 
 function titleForPath(pathname: string) {
