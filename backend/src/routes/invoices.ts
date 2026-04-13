@@ -12,7 +12,7 @@ import {
 } from "../lib/ownership.js";
 import { getCurrentBusiness, requireBusiness, requireOwnerAccess, requireSession } from "../lib/session.js";
 import { formatDateShort, formatRupiahCompact, invoiceStatus } from "../utils/serializers.js";
-import { entityIdSchema, nullableOptionalTextField } from "../lib/validation.js";
+import { entityIdSchema, nullableDateField, nullableOptionalTextField } from "../lib/validation.js";
 
 const invoiceSchema = z.object({
   customerId: entityIdSchema,
@@ -22,7 +22,7 @@ const invoiceSchema = z.object({
   dueDate: z.coerce.date(),
   paidAmount: z.number().int().min(0).optional(),
   paymentMethod: nullableOptionalTextField("Metode pembayaran", 80),
-  paidAt: z.coerce.date().optional().nullable(),
+  paidAt: nullableDateField,
 }).strict();
 
 const invoiceParamsSchema = z.object({

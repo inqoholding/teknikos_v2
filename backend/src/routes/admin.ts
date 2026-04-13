@@ -18,13 +18,13 @@ import {
 import { requireAdminRole, requireSession, requireStaffRole } from "../lib/session.js";
 import { formatDateShort } from "../utils/serializers.js";
 import { hashPassword } from "better-auth/crypto";
-import { entityIdSchema, nullableOptionalTextField } from "../lib/validation.js";
+import { entityIdSchema, nullableDateField, nullableOptionalTextField } from "../lib/validation.js";
 
 const updateSubscriptionSchema = z.object({
   plan: z.enum(BUSINESS_PLANS).optional(),
   subscriptionStatus: z.enum(SUBSCRIPTION_STATUSES).optional(),
-  trialEndsAt: z.coerce.date().optional().nullable(),
-  currentPeriodEndsAt: z.coerce.date().optional().nullable(),
+  trialEndsAt: nullableDateField,
+  currentPeriodEndsAt: nullableDateField,
   subscriptionNotes: nullableOptionalTextField("Catatan subscription", 500),
 }).strict();
 

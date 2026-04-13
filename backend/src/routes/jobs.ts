@@ -13,7 +13,7 @@ import {
 } from "../lib/ownership.js";
 import { getCurrentBusiness, getSessionUser, isTechnicianRole, requireBusiness, requireOwnerAccess, requireSession } from "../lib/session.js";
 import { formatDateShort, formatRupiahCompact, formatSchedule } from "../utils/serializers.js";
-import { entityIdSchema, nullableOptionalTextField, shortSearchField, textField } from "../lib/validation.js";
+import { entityIdSchema, nullableDateField, nullableOptionalTextField, shortSearchField, textField } from "../lib/validation.js";
 
 const jobItemSchema = z.object({
   inventoryId: entityIdSchema.optional().nullable(),
@@ -47,7 +47,7 @@ const jobSchema = z.object({
   technicianIds: z.array(entityIdSchema).max(10, "Maksimal 10 teknisi per job.").optional(),
   type: textField("Tipe job", 2, 80),
   scheduleAt: z.coerce.date(),
-  deadlineAt: z.coerce.date().optional().nullable(),
+  deadlineAt: nullableDateField,
   price: z.number().int().min(0),
   status: jobStatusSchema.default("pending"),
   priority: z.enum(["Normal", "Urgent"]).default("Normal"),
@@ -611,6 +611,9 @@ jobsRouter.patch("/:id", async (req, res) => {
 
   if (nextItems !== null) {
     await replaceJobItems(businessId, currentJob.id, nextItems);
+  } else if (nextStatus === "cancelled" && currentJob.status !== "cancelled") {
+    // Apabila job dibatalkan, otomatis kembalikan stok part ke inventory dan hapus jobItem
+    await replaceJobItems(businessId, currentJob.id, []);
   }
 
   res.json({ data: updated });
@@ -623,6 +626,12 @@ jobsRouter.delete("/:id", async (req, res) => {
   const { id } = jobParamsSchema.parse(req.params);
   assertSubscriptionWritable(business.subscriptionStatus, business.currentPeriodEndsAt);
   await requireJobForBusiness(id, businessId);
+
+  const previousItems = await db.select().from(jobItems).where(eq(jobItems.jobId, id));
+  if (previousItems.length > 0) {
+    await syncInventoryUsage(businessId, previousItems, []);
+  }
+
   await db.delete(jobs).where(and(eq(jobs.id, id), eq(jobs.businessId, businessId)));
   res.json({ data: { success: true } });
 });

@@ -105,7 +105,7 @@ export default function CustomersPage() {
   }
 
   async function handleDelete(id: string) {
-    if (window.confirm("Apakah Anda yakin ingin menghapus pelanggan ini? Data job dan invoice terkait tetap ada di sistem.")) {
+    if (window.confirm("Apakah Anda yakin ingin menghapus pelanggan ini? Pelanggan yang sudah memiliki riwayat job tidak dapat dihapus.")) {
       await deleteCustomerMutation.mutateAsync(id);
     }
   }

@@ -224,6 +224,12 @@ customersRouter.delete("/:id", async (req, res) => {
   const business = await getCurrentBusiness(res);
   const { id } = customerParamsSchema.parse(req.params);
   assertSubscriptionWritable(business.subscriptionStatus, business.currentPeriodEndsAt);
+
+  const [existingJobs] = await db.select({ id: jobs.id }).from(jobs).where(eq(jobs.customerId, id)).limit(1);
+  if (existingJobs) {
+    throw badRequest("Gagal. Pelanggan ini sudah memiliki data job operasional dan invoice. Menghapus pelanggan akan merusak riwayat akuntansi Anda. Ubah data pelanggan jika ada salah ketik, atau biarkan sebagai arsip.");
+  }
+
   const [deleted] = await db
     .delete(customers)
     .where(and(eq(customers.id, id), eq(customers.businessId, businessId)))

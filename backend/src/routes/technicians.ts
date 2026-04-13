@@ -9,7 +9,7 @@ import { auth } from "../lib/auth.js";
 import { conflict, notFound } from "../lib/errors.js";
 import { assertSubscriptionWritable, assertTechnicianLimit } from "../lib/plans.js";
 import { getCurrentBusiness, requireBusiness, requireOwnerAccess, requireSession } from "../lib/session.js";
-import { emailField, entityIdSchema, optionalTextField, phoneField, shortSearchField, stringArrayField, textField } from "../lib/validation.js";
+import { emailField, entityIdSchema, nullableDateField, optionalTextField, phoneField, shortSearchField, stringArrayField, textField } from "../lib/validation.js";
 
 const technicianSchema = z.object({
   name: textField("Nama teknisi", 2, 120),
@@ -19,7 +19,7 @@ const technicianSchema = z.object({
   rating: z.number().min(0).max(5).default(0),
   latitude: z.number().optional().nullable(),
   longitude: z.number().optional().nullable(),
-  lastSeenAt: z.coerce.date().optional().nullable(),
+  lastSeenAt: nullableDateField,
 }).strict();
 
 const provisionTechnicianAccountSchema = z.object({

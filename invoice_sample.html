@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Invoice - Coreveta</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+  
+  :root {
+    --primary: #4F46E5; /* Indigo 600 */
+    --primary-light: #EEF2FF;
+    --dark: #0F172A; /* Slate 900 */
+    --text-main: #334155; /* Slate 700 */
+    --text-muted: #64748B; /* Slate 500 */
+    --bg-light: #F8FAFC; /* Slate 50 */
+    --border: #E2E8F0; /* Slate 200 */
+    --success: #10B981;
+    --success-bg: #D1FAE5;
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    color: var(--text-main);
+    margin: 0;
+    padding: 40px;
+    background: #e5e7eb;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .invoice-wrapper {
+    max-width: 850px;
+    margin: 0 auto;
+    background: #ffffff;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+
+  .invoice-header {
+    background: var(--dark);
+    color: #ffffff;
+    padding: 60px 50px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+  }
+
+  .invoice-header::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 6px;
+    background: linear-gradient(90deg, var(--primary) 0%, #818CF8 100%);
+  }
+
+  .brand h1 {
+    margin: 0;
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+  }
+
+  .brand p {
+    margin: 4px 0 0 0;
+    font-size: 13px;
+    color: #94A3B8;
+    font-weight: 500;
+  }
+
+  .invoice-title {
+    text-align: right;
+  }
+
+  .invoice-title h2 {
+    margin: 0;
+    font-size: 40px;
+    font-weight: 800;
+    letter-spacing: -1px;
+    color: #ffffff;
+  }
+
+  .invoice-title p {
+    margin: 4px 0 0 0;
+    font-size: 15px;
+    color: #94A3B8;
+    font-weight: 600;
+  }
+
+  .invoice-body {
+    padding: 50px;
+  }
+
+  .info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    margin-bottom: 50px;
+  }
+
+  .info-block h3 {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--text-muted);
+    margin: 0 0 12px 0;
+    font-weight: 700;
+  }
+
+  .info-block p {
+    margin: 0 0 6px 0;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--dark);
+  }
+
+  .info-block strong {
+    font-size: 16px;
+    font-weight: 700;
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  .meta-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    background: var(--bg-light);
+    padding: 24px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+  }
+
+  .meta-item span {
+    display: block;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  .meta-item strong {
+    font-size: 15px;
+    color: var(--dark);
+    font-weight: 600;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin-bottom: 40px;
+  }
+
+  th {
+    background: var(--bg-light);
+    color: var(--text-muted);
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    text-align: left;
+    padding: 16px;
+    border-bottom: 2px solid var(--border);
+  }
+
+  th:first-child { border-top-left-radius: 8px; }
+  th:last-child { border-top-right-radius: 8px; text-align: right; }
+  th.center { text-align: center; }
+  th.right { text-align: right; }
+
+  td {
+    padding: 20px 16px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+
+  td:last-child { text-align: right; font-weight: 600; color: var(--dark); }
+  td.center { text-align: center; }
+  td.right { text-align: right; }
+
+  .item-name {
+    font-weight: 600;
+    color: var(--dark);
+    font-size: 15px;
+    margin-bottom: 4px;
+  }
+
+  .item-desc {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.4;
+  }
+
+  .totals-wrapper {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 50px;
+  }
+
+  .totals-box {
+    width: 340px;
+    background: var(--bg-light);
+    border-radius: 12px;
+    padding: 24px;
+    border: 1px solid var(--border);
+  }
+
+  .total-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 0;
+    font-size: 14px;
+    color: var(--text-main);
+  }
+
+  .total-row:not(:last-child) {
+    border-bottom: 1px dashed var(--border);
+  }
+
+  .total-row.grand {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--primary);
+    border-bottom: none;
+    padding-top: 16px;
+    margin-top: 4px;
+  }
+
+  .invoice-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding-top: 30px;
+    border-top: 1px solid var(--border);
+  }
+
+  .notes {
+    max-width: 60%;
+  }
+
+  .notes h4 {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+    margin: 0 0 8px 0;
+  }
+
+  .notes p {
+    font-size: 13px;
+    line-height: 1.6;
+    margin: 0;
+    color: var(--text-main);
+  }
+
+  .status-badge {
+    background: var(--success-bg);
+    color: #065F46;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 15px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid var(--success);
+  }
+
+  .watermark {
+    text-align: center;
+    padding: 24px;
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 500;
+    background: #F1F5F9;
+  }
+
+  .watermark a {
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 600;
+  }
+
+</style>
+</head>
+<body>
+  <div class="invoice-wrapper">
+    <!-- Header -->
+    <div class="invoice-header">
+      <div class="brand">
+        <h1>BINTANG TEKNIK MAKMUR</h1>
+        <p>Jl. A.P. Pettarani No. 45, Makassar<br>WA: 0812-3456-7890</p>
+      </div>
+      <div class="invoice-title">
+        <h2>INVOICE</h2>
+        <p>#INV-20260410-001</p>
+      </div>
+    </div>
+
+    <!-- Body -->
+    <div class="invoice-body">
+      <div class="info-grid">
+        <div class="info-block">
+          <h3>Ditagihkan Kepada</h3>
+          <strong>Bpk. Hendra Wijaya</strong>
+          <p>Jl. Boulevard Raya Blok B3/15<br>Panakkukang, Makassar</p>
+          <p style="color: var(--text-muted); margin-top: 8px;">0811-2233-4455</p>
+        </div>
+        
+        <div class="meta-grid">
+          <div class="meta-item">
+            <span>Tanggal Terbit</span>
+            <strong>10 April 2026</strong>
+          </div>
+          <div class="meta-item">
+            <span>Jatuh Tempo</span>
+            <strong>10 April 2026</strong>
+          </div>
+          <div class="meta-item">
+            <span>ID Pekerjaan (Job)</span>
+            <strong>JOB-1049-MKS</strong>
+          </div>
+          <div class="meta-item">
+            <span>Ditugaskan Kepada</span>
+            <strong>Andi Susanto</strong>
+          </div>
+        </div>
+      </div>
+
+      <!-- Items Table -->
+      <table>
+        <thead>
+          <tr>
+            <th>Deskripsi Layanan & Barang</th>
+            <th class="center" style="width: 80px;">Qty</th>
+            <th class="right" style="width: 140px;">Harga Satuan</th>
+            <th class="right" style="width: 140px;">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <div class="item-name">Cuci Service AC Split 1 PK</div>
+              <div class="item-desc">Pembersihan mendalam unit indoor (evaporator, filter) dan outdoor (kondensor).</div>
+            </td>
+            <td class="center">2</td>
+            <td class="right">Rp 75.000</td>
+            <td class="right">Rp 150.000</td>
+          </tr>
+          <tr>
+            <td>
+              <div class="item-name">Isi Freon R32 Full</div>
+              <div class="item-desc">Pengisian ulang tekanan freon menyesuaikan standar pabrik.</div>
+            </td>
+            <td class="center">1</td>
+            <td class="right">Rp 175.000</td>
+            <td class="right">Rp 175.000</td>
+          </tr>
+          <tr>
+            <td>
+              <div class="item-name">Ganti Kapasitor Panasonic</div>
+              <div class="item-desc">Penggantian kapasitor fan 1.5uF pada unit outdoor yang sudah lemah nilainya.</div>
+            </td>
+            <td class="center">1</td>
+            <td class="right">Rp 150.000</td>
+            <td class="right">Rp 150.000</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Totals -->
+      <div class="totals-wrapper">
+        <div class="totals-box">
+          <div class="total-row">
+            <span>Subtotal</span>
+            <strong>Rp 475.000</strong>
+          </div>
+          <div class="total-row" style="color: #EF4444;">
+            <span>Diskon (Member)</span>
+            <strong>- Rp 25.000</strong>
+          </div>
+          <div class="total-row grand">
+            <span>Total Tagihan</span>
+            <span>Rp 450.000</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer Notes & Status -->
+      <div class="invoice-footer">
+        <div class="notes">
+          <h4>Syarat & Ketentuan Garansi</h4>
+          <p>
+            1. Garansi sparepart dan kebocoran air berlaku <strong>30 hari</strong> sejak invoice diterbitkan.<br>
+            2. Pembayaran dapat ditransfer ke BCA 1234567890 (a.n Bintang Teknik).<br>
+            3. Jadwal cuci rutin (3 bulan) berikutnya akan diinfokan secara otomatis melalui WhatsApp.
+          </p>
+        </div>
+        <div>
+          <h4 style="margin: 0 0 8px 0; font-size: 11px; text-transform: uppercase; color: var(--text-muted); text-align: right; letter-spacing: 1px;">Status Pembayaran</h4>
+          <div class="status-badge">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            LUNAS (PAID)
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Watermark Bottom -->
+    <div class="watermark">
+      Dibuat dan dikirim secara otomatis oleh sistem operasional <a href="#">Coreveta.com</a>
+    </div>
+  </div>
+</body>
+</html>

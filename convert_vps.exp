@@ -1,0 +1,28 @@
+#!/usr/bin/expect -f
+set timeout -1
+set password "RootpasswordPTinqo1109@"
+set target_ip "coreveta.com"
+set local_webp "/Users/nsrr/.gemini/antigravity/brain/28ae2638-e6cd-42ca-bf9f-b47097ce1b8a/coreveta_dashboard_features_recording_1775785126901.webp"
+set remote_webp "/root/coreveta_dashboard_features_recording.webp"
+set remote_mp4 "/root/coreveta_dashboard_features_recording.mp4"
+set local_mp4 "/Users/nsrr/.gemini/antigravity/brain/28ae2638-e6cd-42ca-bf9f-b47097ce1b8a/coreveta_dashboard_features_recording.mp4"
+
+spawn scp -o StrictHostKeyChecking=no $local_webp root@$target_ip:$remote_webp
+expect "password:"
+send "$password\r"
+expect eof
+
+spawn ssh -o StrictHostKeyChecking=no root@$target_ip "apt-get update -qq && apt-get install -yqq ffmpeg && ffmpeg -y -i $remote_webp -c:v libx264 -pix_fmt yuv420p $remote_mp4"
+expect "password:"
+send "$password\r"
+expect eof
+
+spawn scp -o StrictHostKeyChecking=no root@$target_ip:$remote_mp4 $local_mp4
+expect "password:"
+send "$password\r"
+expect eof
+
+spawn ssh -o StrictHostKeyChecking=no root@$target_ip "rm -f $remote_webp $remote_mp4"
+expect "password:"
+send "$password\r"
+expect eof

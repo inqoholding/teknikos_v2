@@ -18,6 +18,11 @@ export function nullableOptionalTextField(label: string, max: number) {
   return z.string().trim().max(max, `${label} maksimal ${max} karakter.`).optional().nullable();
 }
 
+export const nullableDateField = z.preprocess(
+  (val) => (val === null || val === undefined || val === "" ? null : new Date(val as any)),
+  z.date().nullable().optional()
+);
+
 export const emailField = z
   .string()
   .trim()
