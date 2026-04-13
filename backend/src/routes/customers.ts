@@ -3,7 +3,7 @@ import { and, desc, eq, like, or } from "drizzle-orm";
 import { z } from "zod";
 import { contracts, customers, invoices, jobs } from "../db/app-schema.js";
 import { db } from "../db/index.js";
-import { notFound } from "../lib/errors.js";
+import { badRequest, notFound } from "../lib/errors.js";
 import { assertSubscriptionWritable } from "../lib/plans.js";
 import { getCurrentBusiness, requireBusiness, requireOwnerAccess, requireSession } from "../lib/session.js";
 import { contractStatus, formatDateShort, formatRupiahCompact, formatSchedule, invoiceStatus } from "../utils/serializers.js";
