@@ -122,7 +122,9 @@ async function nextJobNumber(businessId: string) {
 }
 
 async function nextInvoiceNumber() {
-  return `INV-${new Date().getFullYear()}-${String(Date.now()).slice(-4)}`;
+  const year = new Date().getFullYear();
+  const randomSuffix = Math.random().toString(36).substring(2, 7).toUpperCase();
+  return `INV-${year}-${randomSuffix}`;
 }
 
 async function validateJobRelations(input: {
