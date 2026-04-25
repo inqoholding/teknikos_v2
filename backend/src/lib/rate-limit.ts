@@ -99,3 +99,23 @@ export function createRateLimitMiddleware(options: RateLimitOptions) {
     }
   };
 }
+
+export const publicApiRateLimit = createRateLimitMiddleware({
+  id: "public-api",
+  windowMs: 5 * 60 * 1000,
+  max: 300,
+});
+
+export const publicWriteRateLimit = createRateLimitMiddleware({
+  id: "public-write",
+  windowMs: 5 * 60 * 1000,
+  max: 90,
+  methods: ["POST", "PATCH", "PUT", "DELETE"],
+});
+
+export const sensitiveWriteRateLimit = createRateLimitMiddleware({
+  id: "sensitive-write",
+  windowMs: 5 * 60 * 1000,
+  max: 120,
+  methods: ["POST", "PATCH", "PUT", "DELETE"],
+});

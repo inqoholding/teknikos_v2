@@ -208,9 +208,13 @@ export function AppShellLayout() {
             ) : null}
           </div>
           <div className="topbar-actions">
-            <div className="status-pill">
+            <div className="status-pill status-pill--success">
               <span className="status-pill__dot" />
               Operasional live
+            </div>
+            <div className="status-pill status-pill--info" title="Aplikasi mendukung sinkronisasi offline jika sinyal buruk">
+              <span className="status-pill__dot" />
+              Offline mode ready
             </div>
             <button className="icon-button">
               <Bell size={18} />
@@ -230,10 +234,24 @@ export function AppShellLayout() {
           <Outlet />
         </main>
         <div className="mobile-nav">
-          <NavLink to={isTechnician ? "/jobs" : "/dashboard"}>Home</NavLink>
-          <NavLink to="/jobs">Jobs</NavLink>
-          {!isTechnician ? <NavLink to="/customers">CRM</NavLink> : null}
-          <NavLink to="/settings">Menu</NavLink>
+          <NavLink to={isTechnician ? "/jobs" : "/dashboard"} className={({ isActive }) => isActive ? "active" : ""}>
+            <LayoutDashboard size={20} />
+            <span>Home</span>
+          </NavLink>
+          <NavLink to="/jobs" className={({ isActive }) => isActive ? "active" : ""}>
+            <ClipboardList size={20} />
+            <span>Jobs</span>
+          </NavLink>
+          {!isTechnician ? (
+            <NavLink to="/customers" className={({ isActive }) => isActive ? "active" : ""}>
+              <UserCircle size={20} />
+              <span>CRM</span>
+            </NavLink>
+          ) : null}
+          <NavLink to="/settings" className={({ isActive }) => isActive ? "active" : ""}>
+            <Settings size={20} />
+            <span>Menu</span>
+          </NavLink>
         </div>
       </div>
     </div>

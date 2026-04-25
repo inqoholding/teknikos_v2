@@ -14,6 +14,7 @@ import {
 import { PageError, PageLoader } from "../components/PageState";
 import { DeadlineList, ScheduleCalendar } from "../components/ScheduleCalendar";
 import { Badge, DonutSummary, EmptyAction, MiniBarChart, SectionCard, StatCard, EmptyState } from "../components/UI";
+import { BriefcaseBusiness } from "lucide-react";
 import { formatRupiah } from "../utils/currency";
 import { buildJobProgressMessage, buildTechnicianTaskMessage } from "../utils/whatsapp";
 
@@ -35,7 +36,8 @@ const jobStatusLabels: Record<string, string> = {
 };
 
 export default function DashboardPage() {
-  const dashboardQuery = useDashboardStatsQuery();
+  const [revenueRange, setRevenueRange] = useState(7);
+  const dashboardQuery = useDashboardStatsQuery(revenueRange);
   const businessQuery = useBusinessQuery();
   const supportRequestMutation = useCreateBusinessSupportRequestMutation();
   const customersQuery = useCustomersQuery();
@@ -221,6 +223,10 @@ export default function DashboardPage() {
 
   return (
     <div className="page-stack">
+      <div className="dashboard-section-header">
+        <span className="eyebrow">Ringkasan Performa</span>
+        <h2>Insight & Operasional Live</h2>
+      </div>
       <div className="stats-grid">
         {dashboardStats.map((item) => (
           <StatCard
@@ -235,10 +241,14 @@ export default function DashboardPage() {
         ))}
       </div>
 
+      <div className="dashboard-section-header">
+        <span className="eyebrow">Manajemen Harian</span>
+        <h2>Pusat Kendali & Penugasan</h2>
+      </div>
       <div className="dashboard-grid">
         <SectionCard
           title="Pusat Kendali"
-          description="Pola yang umum di aplikasi field service besar: owner langsung melihat antrian penugasan, penagihan, dan follow-up dari satu layar."
+          description="Pantau antrian penugasan, penagihan, dan tindak lanjut pelanggan dalam satu tampilan terpadu."
           className="ops-card"
         >
           <div className="ops-grid">
@@ -255,7 +265,7 @@ export default function DashboardPage() {
 
         <SectionCard
           title="Penugasan Hari Ini"
-          description="Ringkas, cepat dibaca, dan fokus ke siapa berangkat ke mana. Ini mengikuti pola dispatch board yang umum di industri jasa teknisi."
+          description="Daftar jadwal kerja harian untuk teknisi lapangan. Pantau status berangkat, pengerjaan, hingga selesai."
         >
           <div className="dispatch-list">
             {stats.dispatchToday.length > 0 ? (
@@ -288,6 +298,10 @@ export default function DashboardPage() {
         </SectionCard>
       </div>
 
+      <div className="dashboard-section-header">
+        <span className="eyebrow">Intelligence</span>
+        <h2>Kalender & Deadline Aktif</h2>
+      </div>
       <div className="dashboard-grid">
         <SectionCard
           title="Kalender Jadwal & Deadline"
@@ -304,10 +318,20 @@ export default function DashboardPage() {
         </SectionCard>
       </div>
 
+      <div className="dashboard-section-header">
+        <span className="eyebrow">Analytics</span>
+        <h2>Pemasukan & Status Tugas</h2>
+      </div>
       <div className="dashboard-grid">
         <SectionCard
-          title="Revenue 7 Hari"
-          description="Puncak pemasukan muncul saat jadwal maintenance area kantor."
+          title={`Revenue ${revenueRange} Hari`}
+          description={`Grafik pemasukan lunas dalam kurun waktu ${revenueRange} hari terakhir.`}
+          action={
+            <div className="segmented segmented--small">
+              <button className={revenueRange === 7 ? "segmented__active" : ""} onClick={() => setRevenueRange(7)}>7D</button>
+              <button className={revenueRange === 30 ? "segmented__active" : ""} onClick={() => setRevenueRange(30)}>30D</button>
+            </div>
+          }
         >
           <MiniBarChart items={stats.revenueBars} />
         </SectionCard>
@@ -321,13 +345,16 @@ export default function DashboardPage() {
       </div>
 
       <div className="callout callout--success">
-        <div>
-          <strong>Plan aktif: {stats.business?.plan ?? "Starter"}</strong>
+        <div className="callout__icon">
+          <BriefcaseBusiness size={20} />
+        </div>
+        <div className="callout__body">
+          <strong>Workspace Aktif: {business?.name || "Coreveta"} ({business?.plan || "Starter"})</strong>
           <p>
-            Bisnis {stats.business?.name ?? "Coreveta"} saat ini memakai paket {stats.business?.plan ?? "Starter"}.
+            Sistem operasional sedang berjalan dalam mode {business?.plan || "Starter"}. Seluruh fitur utama dashboard sudah tersinkronisasi.
           </p>
         </div>
-        <Link to="/settings">Kelola Paket →</Link>
+        <Link to="/settings" className="btn btn--secondary btn--small">Kelola Akun →</Link>
       </div>
 
       {business?.subscriptionAlert ? (
@@ -347,6 +374,10 @@ export default function DashboardPage() {
         </div>
       ) : null}
 
+      <div className="dashboard-section-header">
+        <span className="eyebrow">Aksi Cepat</span>
+        <h2>Alat Operasi & Panduan</h2>
+      </div>
       <div className="cards-grid cards-grid--triple">
         <SectionCard
           title="Kirim Pesan WhatsApp"
@@ -420,7 +451,7 @@ export default function DashboardPage() {
 
         <SectionCard
           title="Tagihan Cepat"
-          description="Alur ringkas yang lebih logis: pilih pelanggan atau tugas, isi biaya jasa, tambah komponen suku cadang, lalu kirim tagihan."
+          description="Buat invoice langsung dari paket kerja atau pelanggan tertentu. Tambahkan biaya jasa dan suku cadang secara instan."
         >
           <form className="action-stack" onSubmit={handleQuickInvoice}>
             <div className="field-grid">
@@ -512,7 +543,7 @@ export default function DashboardPage() {
           </form>
         </SectionCard>
 
-        <SectionCard title="Playbook Operasional" description="Pattern yang paling sering dipakai aplikasi sejenis untuk menjaga dispatch, CRM, dan billing tetap rapi.">
+        <SectionCard title="Panduan Operasional" description="Gunakan alur kerja berikut untuk menjaga manajemen tugas, CRM, dan penagihan tetap terorganisir.">
           <div className="stack-list">
             <div className="stack-list__item">
               <strong>1. Penugasan dulu, penagihan belakangan</strong>

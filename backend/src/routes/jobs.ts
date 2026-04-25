@@ -560,6 +560,11 @@ jobsRouter.patch("/:id", async (req, res) => {
 
   if (safePayload.status) {
     requireValidTransition(currentJob.status, safePayload.status);
+    
+    // Technical Mitigation: Mandatory After Photo for Completion
+    if (safePayload.status === "done" && !safePayload.afterPhotoUrl && !currentJob.afterPhotoUrl) {
+      throw badRequest("Foto bukti pengerjaan (foto sesudah) wajib diunggah sebelum job diselesaikan.");
+    }
   }
 
   validateDeadlineWindow(nextScheduleAt, nextDeadlineAt);

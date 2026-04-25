@@ -3,7 +3,7 @@
 This file defines the shared standards and communication protocols for all AI agents (Codex, Antigravity, etc.) working on the Coreveta project.
 
 ## 1. Coding & Routing Standards
-- **Express Wildcards**: Always use standard Express wildcard syntax `*` (e.g., `/api/auth/*`) instead of custom or non-standard wildcards like `{*any}`. 
+- **Express Wildcards**: Since we use **Express 5.1.0**, use the named parameter syntax `{*any}` (e.g., `/api/auth/{*any}`) for catch-all routes. Standard Express 4 syntax `*` is NOT supported.
 - **Validation**: Use **Zod** for all input validation.schemas should be centralized in `backend/src/lib/validation.ts` or close to the route they protect.
 - **RESTful Principles**: Follow standard HTTP methods (GET, POST, PATCH, DELETE) and return appropriate status codes (400, 401, 403, 404, 429, 500).
 

@@ -97,11 +97,11 @@ export default function OnboardingPage() {
     typeof window !== "undefined" ? window.sessionStorage.getItem("coreveta:selected-plan") : null;
   const [selectedService, setSelectedService] = useState("Servis AC");
   const [selectedPlan, setSelectedPlan] = useState(searchParams.get("plan") || storedPlan || "Starter");
-  const [name, setName] = useState("CV Teknik Makassar");
-  const [phone, setPhone] = useState("0812 1234 5678");
-  const [email, setEmail] = useState("halo@teknikmakassar.id");
-  const [address, setAddress] = useState("Jl. Urip Sumoharjo No. 55, Makassar");
-  const city = useMemo(() => address.split(",").slice(-1)[0]?.trim() || "Makassar", [address]);
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
+  const [address, setAddress] = useState("");
+  const [city, setCity] = useState("");
 
   useEffect(() => {
     const nextPlan = searchParams.get("plan") || storedPlan || "Starter";
@@ -160,20 +160,26 @@ export default function OnboardingPage() {
           <div className="field-grid">
             <label className="field">
               <span>Nama bisnis</span>
-              <input type="text" value={name} onChange={(event) => setName(event.target.value)} />
+              <input type="text" value={name} onChange={(event) => setName(event.target.value)} placeholder="Contoh: CV Teknik Maju Jaya" required />
             </label>
             <label className="field">
               <span>Nomor WA bisnis</span>
-              <input type="text" value={phone} onChange={(event) => setPhone(event.target.value)} />
+              <input type="text" value={phone} onChange={(event) => setPhone(event.target.value)} placeholder="0812xxxx" required />
+            </label>
+          </div>
+          <div className="field-grid">
+            <label className="field">
+              <span>Email bisnis</span>
+              <input type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="owner@bisnis.com" />
+            </label>
+            <label className="field">
+              <span>Kota</span>
+              <input type="text" value={city} onChange={(event) => setCity(event.target.value)} placeholder="Contoh: Jakarta" required />
             </label>
           </div>
           <label className="field">
-            <span>Email bisnis</span>
-            <input type="email" value={email} onChange={(event) => setEmail(event.target.value)} />
-          </label>
-          <label className="field">
             <span>Alamat lengkap</span>
-            <textarea value={address} onChange={(event) => setAddress(event.target.value)} />
+            <textarea value={address} onChange={(event) => setAddress(event.target.value)} placeholder="Jl. Raya No. 123..." required />
           </label>
           <div className="section-card__header" style={{ marginTop: "24px" }}>
             <div>

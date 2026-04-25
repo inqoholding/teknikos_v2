@@ -193,7 +193,7 @@ export default function SettingsPage() {
             <p>Jika client ingin naik paket atau memperpanjang subscription, langsung hubungi sales dan otomatis masuk ke inbox admin.</p>
             <div className="button-row button-row--left">
               <button className="btn btn--primary" type="button" onClick={() => handleSupportRequest("subscription_upgrade")}>
-                Upgrade Paket
+                Upgrade (Tersedia Paket Tahunan)
               </button>
               <button className="btn btn--secondary" type="button" onClick={() => handleSupportRequest("subscription_renewal")}>
                 Perpanjang

@@ -111,7 +111,7 @@ export function MiniBarChart({
   return (
     <MotionConfig transition={{ type: "spring", stiffness: 320, damping: 28 }} reducedMotion="user">
       <div className={`bar-chart-wrap ${className}`.trim()}>
-        <div className="bar-chart">
+        <div className="bar-chart" style={{ alignItems: "flex-end", height: "240px", gap: items.length > 10 ? "4px" : "12px" }}>
           {items.map((item) => {
             const isPeak = peakItem?.label === item.label;
             const isSelected = selectedItem?.label === item.label;
@@ -127,11 +127,13 @@ export function MiniBarChart({
                 whileHover={{ y: -2 }}
                 whileTap={{ scale: 0.98 }}
                 aria-label={`${item.label} ${item.valueLabel ?? item.value}`}
+                style={{ flex: 1, minWidth: 0 }}
               >
                 {isSelected ? (
                   <motion.div
                     layoutId="bar-chart-tooltip"
                     className="bar-chart__tooltip"
+                    style={{ zIndex: 10 }}
                     initial={{ opacity: 0, y: 4, scale: 0.95 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 4, scale: 0.95 }}
@@ -140,20 +142,32 @@ export function MiniBarChart({
                     <span>{item.valueLabel ?? item.value}</span>
                   </motion.div>
                 ) : null}
-                <small>{item.valueLabel ?? item.value}</small>
+                
+                {items.length <= 15 ? <small>{item.valueLabel ?? item.value}</small> : null}
+                
                 <motion.div
                   className={`bar-chart__bar ${isPeak ? "bar-chart__bar--peak" : ""} ${isSelected ? "bar-chart__bar--selected" : ""} ${!hasRevenue ? "bar-chart__bar--empty" : ""}`}
                   animate={{ 
-                    height: `${Math.max((item.value / maxValue) * 100, 14)}%`,
-                    background: isSelected ? "var(--green-dark)" : isPeak ? "var(--green-default)" : "var(--green-mid)"
+                    height: `${Math.max((item.value / maxValue) * 100, 10)}%`,
+                    background: isSelected ? "var(--green-dark)" : isPeak ? "var(--green-default)" : "rgba(16, 185, 129, 0.24)",
+                    borderRadius: "12px 12px 6px 6px"
                   }}
+                  whileHover={{ background: isSelected ? "var(--green-dark)" : "rgba(16, 185, 129, 0.45)" }}
                 />
-                <span style={{ opacity: isSelected ? 1 : 0.7, fontWeight: isSelected ? 700 : 400 }}>{item.label}</span>
+                <span style={{ 
+                  opacity: (isSelected || items.length <= 10) ? 1 : 0.6, 
+                  fontSize: items.length > 10 ? "10px" : "12px",
+                  fontWeight: isSelected ? 800 : 500,
+                  transform: items.length > 15 ? "rotate(-45deg) translateY(4px)" : "none",
+                  whiteSpace: "nowrap"
+                }}>
+                  {item.label}
+                </span>
               </motion.button>
             );
           })}
         </div>
-        <div className="bar-chart-summary">
+        <div className="bar-chart-summary" style={{ marginTop: items.length > 15 ? "24px" : "12px" }}>
           <div className="bar-chart-summary__card glass-card">
             <span>Total 7 hari</span>
             <strong>{hasRevenue ? formatRupiah(totalValue) : "Belum ada pemasukan"}</strong>
@@ -180,7 +194,7 @@ export function DonutSummary({
 }: {
   items: Array<{ label: string; value: number; color?: string }>;
 }) {
-  const palette = ["var(--amber-default)", "#2b7bbb", "#4b87cb", "var(--green-default)", "#beb9ac", "#d86464"];
+  const palette = ["#f59e0b", "#3b82f6", "#6366f1", "#10b981", "#94a3b8", "#ef4444"];
   const total = items.reduce((sum, item) => sum + item.value, 0) || 1;
   const gradient = items
     .map((item, index) => {

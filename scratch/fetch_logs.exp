@@ -1,0 +1,15 @@
+#!/usr/bin/expect -f
+set timeout 20
+set password "RootpasswordPTinqo1109@"
+set target_ip "coreveta.com"
+spawn ssh -o StrictHostKeyChecking=no root@$target_ip
+expect "password:"
+send "$password\r"
+expect "root@teknik:~# "
+send "pm2 logs teknikos-backend --lines 50 --err --no-daemon\r"
+# Wait a bit for logs to appear
+sleep 5
+send "\x03"
+expect "root@teknik:~# "
+send "exit\r"
+expect eof

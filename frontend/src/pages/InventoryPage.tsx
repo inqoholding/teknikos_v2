@@ -133,7 +133,12 @@ export default function InventoryPage() {
                 <input value={name} onChange={(event) => setName(event.target.value)} onFocus={(e) => e.target.select()} required />
               </label>
               <label className="field">
-                <span>SKU</span>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span>SKU</span>
+                  <button type="button" className="text-blue-default text-xs font-semibold" onClick={() => alert("Fitur Barcode Scanner (Mitigasi Kebocoran Data) akan terbuka pada rilis Q3.")}>
+                    Scan Barcode
+                  </button>
+                </div>
                 <input value={sku} onChange={(event) => setSku(event.target.value)} onFocus={(e) => e.target.select()} required />
               </label>
             </div>

@@ -20,9 +20,11 @@ const businessSupportRequestSchema = z.object({
   message: optionalTextField("Pesan", 500),
 }).strict();
 
+import { sensitiveWriteRateLimit } from "../lib/rate-limit.js";
+
 export const supportRouter = Router();
 
-supportRouter.post("/public", async (req, res) => {
+supportRouter.post("/public", sensitiveWriteRateLimit, async (req, res) => {
   const payload = publicSupportRequestSchema.parse(req.body);
   const now = new Date();
 

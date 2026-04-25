@@ -40,8 +40,8 @@ async function getBusiness() {
   return data.data;
 }
 
-async function getDashboardStats() {
-  const { data } = await api.get<{ data: DashboardStatPayload }>("/api/dashboard/stats");
+async function getDashboardStats(range = 7) {
+  const { data } = await api.get<{ data: DashboardStatPayload }>("/api/dashboard/stats", { params: { range } });
   return data.data;
 }
 
@@ -140,10 +140,10 @@ export function useBusinessQuery(enabled = true) {
   });
 }
 
-export function useDashboardStatsQuery(enabled = true) {
+export function useDashboardStatsQuery(range = 7, enabled = true) {
   return useQuery({
-    queryKey: ["dashboard", "stats"],
-    queryFn: getDashboardStats,
+    queryKey: ["dashboard", "stats", range],
+    queryFn: () => getDashboardStats(range),
     enabled,
   });
 }

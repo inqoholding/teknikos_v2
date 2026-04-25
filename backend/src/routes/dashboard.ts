@@ -107,8 +107,9 @@ dashboardRouter.get("/stats", async (_req, res) => {
       price: formatRupiahCompact(job.price),
     }));
 
-  const revenueBars = Array.from({ length: 7 }).map((_, index) => {
-    const offsetDays = 6 - index;
+  const range = parseInt(_req.query.range as string) || 7;
+  const revenueBars = Array.from({ length: range }).map((_, index) => {
+    const offsetDays = (range - 1) - index;
     const date = new Date(startOfToday.getTime() - offsetDays * 24 * 3600 * 1000);
     const next = new Date(date.getTime() + 24 * 3600 * 1000);
     const value = allInvoices
@@ -121,7 +122,9 @@ dashboardRouter.get("/stats", async (_req, res) => {
       .reduce((sum, invoice) => sum + invoice.total, 0);
 
     return {
-      label: new Intl.DateTimeFormat("id-ID", { weekday: "short", timeZone: "Asia/Makassar" }).format(date),
+      label: range > 10 
+        ? new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "short", timeZone: "Asia/Makassar" }).format(date)
+        : new Intl.DateTimeFormat("id-ID", { weekday: "short", timeZone: "Asia/Makassar" }).format(date),
       value,
       valueLabel: formatRupiahCompact(value),
     };

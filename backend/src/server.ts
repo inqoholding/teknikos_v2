@@ -10,24 +10,18 @@ import { requireCsrf } from "./lib/csrf.js";
 import { env } from "./lib/env.js";
 import { auth } from "./lib/auth.js";
 import { isAllowedOrigin } from "./lib/origins.js";
-import { createRateLimitMiddleware } from "./lib/rate-limit.js";
+import { db } from "./db/index.js";
+import { sql } from "drizzle-orm";
+import {
+  publicApiRateLimit,
+  publicWriteRateLimit,
+  sensitiveWriteRateLimit,
+  createRateLimitMiddleware
+} from "./lib/rate-limit.js";
 import { apiRouter } from "./routes/index.js";
 
 const app = express();
 app.set("trust proxy", 1);
-
-const publicApiRateLimit = createRateLimitMiddleware({
-  id: "public-api",
-  windowMs: 5 * 60 * 1000,
-  max: 300,
-});
-
-const publicWriteRateLimit = createRateLimitMiddleware({
-  id: "public-write",
-  windowMs: 5 * 60 * 1000,
-  max: 90,
-  methods: ["POST", "PATCH", "PUT", "DELETE"],
-});
 
 const authRateLimit = createRateLimitMiddleware({
   id: "auth",
@@ -51,12 +45,6 @@ const authRateLimit = createRateLimitMiddleware({
     return `${ip}:${req.path}:${email}`;
   },
 });
-const sensitiveWriteRateLimit = createRateLimitMiddleware({
-  id: "sensitive-write",
-  windowMs: 5 * 60 * 1000,
-  max: 120,
-  methods: ["POST", "PATCH", "PUT", "DELETE"],
-});
 
 app.use(
   cors({
@@ -75,10 +63,20 @@ app.use(helmet());
 app.use(compression());
 app.use(express.json({ limit: "1mb" }));
 
-app.get("/api/health", (_req, res) => {
+app.get("/api/health", async (_req, res) => {
+  let dbStatus = "down";
+  try {
+    await db.select({ val: sql`1` });
+    dbStatus = "up";
+  } catch (err: any) {
+    logger.error("DB Health check failed:", err.message);
+  }
+
   res.json({
-    ok: true,
+    ok: dbStatus === "up",
     service: "coreveta-backend",
+    database: dbStatus,
+    timestamp: new Date().toISOString(),
   });
 });
 
@@ -86,7 +84,7 @@ app.use("/api", publicApiRateLimit);
 app.use("/api", publicWriteRateLimit);
 app.use("/api/auth", authRateLimit);
 app.use("/api/auth", requireCsrf);
-app.all("/api/auth/*", toNodeHandler(auth));
+app.all("/api/auth/{*any}", toNodeHandler(auth));
 
 app.use("/api/admin", sensitiveWriteRateLimit);
 app.use("/api", requireCsrf);
@@ -96,7 +94,6 @@ app.use((error: Error, _req: express.Request, res: express.Response, _next: expr
   const typedError = error as Partial<AppError>;
   const isValidationError = error instanceof ZodError;
   
-  // Postgres (pg) error codes: https://www.postgresql.org/docs/current/errcodes-appendix.html
   const pgError = (error as any).code;
   const isForeignKeyError = pgError === "23503" || (error.name === "SqliteError" && error.message.includes("FOREIGN KEY"));
   const isUniqueError = pgError === "23505" || (error.name === "SqliteError" && error.message.includes("UNIQUE"));
@@ -105,7 +102,6 @@ app.use((error: Error, _req: express.Request, res: express.Response, _next: expr
     typedError.statusCode ??
     (isValidationError ? 400 : isForeignKeyError ? 400 : isUniqueError ? 409 : 500);
 
-  // Log error for production monitoring
   console.error(`[SERVER_ERROR] ${statusCode}:`, error);
 
   res.status(statusCode).json({

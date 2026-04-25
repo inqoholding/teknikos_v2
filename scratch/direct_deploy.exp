@@ -1,0 +1,25 @@
+#!/usr/bin/expect -f
+set timeout 120
+set password "RootpasswordPTinqo1109@"
+set target_ip "coreveta.com"
+
+spawn scp -o StrictHostKeyChecking=no backend/src/server.ts root@$target_ip:/var/www/teknikos/backend/src/
+expect "password:"
+send "$password\r"
+expect eof
+
+spawn scp -o StrictHostKeyChecking=no backend/src/routes/jobs.ts root@$target_ip:/var/www/teknikos/backend/src/routes/
+expect "password:"
+send "$password\r"
+expect eof
+
+spawn scp -o StrictHostKeyChecking=no frontend/public/Coreveta_Chat_Script.html frontend/public/Coreveta_Sales_Bible.html frontend/public/Coreveta_Sales_Script.html root@$target_ip:/var/www/teknikos/frontend/public/
+expect "password:"
+send "$password\r"
+expect eof
+
+# Re-run build and restart
+spawn ssh -o StrictHostKeyChecking=no root@$target_ip "cd /var/www/teknikos && npm run build:all && pm2 restart teknikos-backend"
+expect "password:"
+send "$password\r"
+expect eof
