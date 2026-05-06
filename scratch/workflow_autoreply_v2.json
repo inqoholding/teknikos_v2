@@ -1,0 +1,71 @@
+{
+  "id": "1",
+  "name": "Coreveta AI Auto-Reply",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "waha-whatsapp",
+        "options": {}
+      },
+      "id": "trigger",
+      "name": "WAHA Webhook",
+      "type": "n8nio.nodes.webhook",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "model": "gemini-1.5-flash",
+        "prompt": "={{ $json.body.payload.body }}",
+        "systemInstruction": "Kamu adalah Senior Sales Coreveta. Tugasmu merespons chat WhatsApp sesuai Sales Bible Coreveta. STRATEGI: 1. Jika belum punya web: Tawarkan web GRATIS. 2. Jika sudah punya web: Puji webnya, tawarkan sistem dapur (Coreveta) untuk atur teknisi & invoice. ATURAN: - Gunakan Bahasa Indonesia yang ramah & persuasif. - Jangan sebut harga di awal. - Fokus pada solusi masalah teknisi bentrok & nota manual."
+      },
+      "id": "ai",
+      "name": "Gemini AI",
+      "type": "n8nio.nodes.googleAiChat",
+      "typeVersion": 1,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "amount": "={{ Math.floor(Math.random() * 10) + 5 }}",
+        "unit": "seconds"
+      },
+      "id": "delay",
+      "name": "Anti-Ban Delay",
+      "type": "n8nio.nodes.wait",
+      "typeVersion": 1,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:3000/api/sendText",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "X-Api-Key", "value": "662e525f5e144bcde6cc2f0f6d36f3c9f62941a66b61b818" }
+          ]
+        },
+        "bodyParameters": {
+          "parameters": [
+            { "name": "chatId", "value": "={{ $node[\"trigger\"].json.body.payload.from }}" },
+            { "name": "text", "value": "={{ $json.text }}" }
+          ]
+        }
+      },
+      "id": "sender",
+      "name": "Send WhatsApp",
+      "type": "n8nio.nodes.httpRequest",
+      "typeVersion": 4.1,
+      "position": [850, 300]
+    }
+  ],
+  "connections": {
+    "trigger": { "main": [ [ { "node": "ai", "type": "main", "index": 0 } ] ] },
+    "ai": { "main": [ [ { "node": "delay", "type": "main", "index": 0 } ] ] },
+    "delay": { "main": [ [ { "node": "sender", "type": "main", "index": 0 } ] ] }
+  },
+  "active": true,
+  "settings": {}
+}

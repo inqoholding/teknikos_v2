@@ -55,6 +55,8 @@ const jobSchema = z.object({
   location: textField("Lokasi", 4, 240),
   beforePhotoUrl: photoValueSchema.optional().nullable(),
   afterPhotoUrl: photoValueSchema.optional().nullable(),
+  completedLatitude: z.number().optional().nullable(),
+  completedLongitude: z.number().optional().nullable(),
   cancelReason: nullableOptionalTextField("Alasan pembatalan", 500),
   items: z.array(jobItemSchema).max(50, "Maksimal 50 item per job.").default([]),
 }).strict();
@@ -594,6 +596,8 @@ jobsRouter.patch("/:id", async (req, res) => {
       afterPhotoUrl: afterPhotoUrl === undefined ? undefined : afterPhotoUrl || null,
       technicianId: nextTechnicianIds[0] ?? null,
       assignedTechnicianIds: nextTechnicianIds,
+      completedLatitude: safePayload.completedLatitude === undefined ? undefined : safePayload.completedLatitude || null,
+      completedLongitude: safePayload.completedLongitude === undefined ? undefined : safePayload.completedLongitude || null,
       deadlineAt: safePayload.deadlineAt === undefined ? undefined : nextDeadlineAt || null,
       cancelReason:
         safePayload.cancelReason === undefined

@@ -1,0 +1,6 @@
+#!/usr/bin/expect -f
+set timeout 10
+spawn ssh -o StrictHostKeyChecking=no root@coreveta.com "rsync --version"
+expect "password:"
+send "RootpasswordPTinqo1109@\r"
+expect eof

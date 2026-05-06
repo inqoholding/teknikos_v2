@@ -4,7 +4,7 @@ import { Badge } from "../components/UI";
 import { getErrorMessage } from "../api/client";
 import { PageError, PageLoader } from "../components/PageState";
 
-const ADMIN_WHATSAPP = "6281354444967";
+const ADMIN_WHATSAPP = "6285645286293";
 
 function buildWhatsAppLink(input: {
   businessName?: string | null;

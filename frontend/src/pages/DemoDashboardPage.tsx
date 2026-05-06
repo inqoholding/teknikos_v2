@@ -17,7 +17,7 @@ const queueCards = [
 ];
 
 const waLink =
-  "https://wa.me/6281354444967?text=Halo%20Coreveta,%20saya%20ingin%20lanjut%20demo%20atau%20berlangganan.";
+  "https://wa.me/6285645286293?text=Halo%20Coreveta,%20saya%20ingin%20lanjut%20demo%20atau%20berlangganan.";
 
 export default function DemoDashboardPage() {
   return (

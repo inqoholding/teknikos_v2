@@ -4,7 +4,7 @@ import { getErrorMessage, isApiErrorStatus } from "../api/client";
 import { useBusinessQuery, useCreatePublicSupportRequestMutation, useLoginMutation, useSessionQuery, useLogoutMutation } from "../api/hooks";
 import { AuthScaffold } from "../components/Layout";
 
-const SALES_WHATSAPP = "6281354444967";
+const SALES_WHATSAPP = "6285645286293";
 
 function buildResetPasswordLink(email?: string) {
   const message = [

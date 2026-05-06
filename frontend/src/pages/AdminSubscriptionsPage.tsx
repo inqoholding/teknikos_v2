@@ -12,7 +12,7 @@ import { PageError, PageLoader } from "../components/PageState";
 import { DeadlineList, ScheduleCalendar } from "../components/ScheduleCalendar";
 import { Badge, EmptyAction, SectionCard, StatCard } from "../components/UI";
 
-const SALES_WHATSAPP = "6281354444967";
+const SALES_WHATSAPP = "6285645286293";
 
 function toDateTimeLocal(value?: string | null) {
   if (!value) return "";

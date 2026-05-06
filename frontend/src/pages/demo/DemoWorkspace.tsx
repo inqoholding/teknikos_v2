@@ -31,7 +31,7 @@ import {
 } from "../../data/mock";
 
 const waLink =
-  "https://wa.me/6281354444967?text=Halo%20Coreveta,%20saya%20ingin%20lanjut%20demo%20atau%20berlangganan.";
+  "https://wa.me/6285645286293?text=Halo%20Coreveta,%20saya%20ingin%20lanjut%20demo%20atau%20berlangganan.";
 
 const demoNav = [
   { to: "/demo-owner-dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -222,7 +222,7 @@ export function DemoWorkspaceLayout() {
             </div>
             <a href={waLink} className="btn btn--primary" target="_blank" rel="noreferrer">
               <MessageCircle size={16} />
-              Hubungi Sales 0813-5444-4967
+              Hubungi Sales 085645286293
             </a>
           </div>
           <Outlet />

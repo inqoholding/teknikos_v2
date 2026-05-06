@@ -104,6 +104,8 @@ export const jobs = sqliteTable("jobs", {
   afterPhotoUrl: text("after_photo_url"),
   cancelReason: text("cancel_reason"),
   completedAt: timestamp("completed_at"),
+  completedLatitude: real("completed_latitude"),
+  completedLongitude: real("completed_longitude"),
   createdAt: timestamp("created_at").default(sql`(unixepoch())`).notNull(),
   updatedAt: timestamp("updated_at").default(sql`(unixepoch())`).notNull(),
 });

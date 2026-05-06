@@ -14,9 +14,9 @@ export const SITE_KEYWORDS = [
 ].join(", ");
 
 export const SUPPORT_URL =
-  "https://wa.me/6281354444967?text=Halo%20tim%20Coreveta,%20saya%20butuh%20bantuan.";
+  "https://wa.me/6285645286293?text=Halo%20tim%20Coreveta,%20saya%20butuh%20bantuan.";
 export const SALES_WHATSAPP_LINK =
-  "https://wa.me/6281354444967?text=Halo%20sales%20Coreveta,%20saya%20ingin%20tanya%20demo%20dan%20langganan.";
+  "https://wa.me/6285645286293?text=Halo%20sales%20Coreveta,%20saya%20ingin%20tanya%20demo%20dan%20langganan.";
 export const SUPPORT_EMAIL = "support@coreveta.com";
 export const PRIVACY_URL = `${SITE_URL}/privacy`;
 export const TERMS_URL = `${SITE_URL}/terms`;

@@ -232,12 +232,37 @@ export default function JobDetailPage() {
         note: item.note?.trim() || undefined,
       }));
 
+    let completedLatitude: number | null = null;
+    let completedLongitude: number | null = null;
+
+    if (status === "done") {
+      if (!afterPhotoUrl) {
+        alert("Foto bukti pengerjaan (foto sesudah) wajib diunggah sebelum job diselesaikan.");
+        return;
+      }
+
+      // Try to get GPS coordinates for audit trail
+      try {
+        const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+          navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 5000 });
+        });
+        completedLatitude = position.coords.latitude;
+        completedLongitude = position.coords.longitude;
+      } catch (err) {
+        console.warn("Gagal mengambil lokasi GPS untuk bukti penyelesaian:", err);
+        // We still allow completion if GPS fails (e.g. user denied permission), 
+        // but we've tried our best for the audit trail as per the 'Paranoid' mitigation.
+      }
+    }
+
     const payload = isTechnician
       ? {
           status,
           cancelReason: status === "cancelled" ? cancelReason : null,
           beforePhotoUrl,
           afterPhotoUrl,
+          completedLatitude,
+          completedLongitude,
           items: payloadItems,
         }
       : {
@@ -247,6 +272,8 @@ export default function JobDetailPage() {
           deadlineAt: deadlineAt || null,
           beforePhotoUrl,
           afterPhotoUrl,
+          completedLatitude,
+          completedLongitude,
           items: payloadItems,
           price: totalItemsValue > 0 ? totalItemsValue : undefined,
         };

@@ -143,7 +143,7 @@ const faqItems = [
 ];
 
 const supportWhatsappLink =
-  "https://wa.me/6281354444967?text=Halo%20Coreveta,%20saya%20ingin%20tanya%20fitur%20atau%20minta%20bantuan%20troubleshooting.";
+  "https://wa.me/6285645286293?text=Halo%20Coreveta,%20saya%20ingin%20tanya%20fitur%20atau%20minta%20bantuan%20troubleshooting.";
 
 export default function FeatureGuidePage() {
   return (

@@ -10,7 +10,7 @@ import {
 import { PageError, PageLoader } from "../components/PageState";
 import { SectionCard } from "../components/UI";
 
-const SALES_WHATSAPP = "6281354444967";
+const SALES_WHATSAPP = "6285645286293";
 
 function buildSalesSubscriptionLink(input: { businessName?: string | null; plan?: string | null; type: "upgrade" | "renewal" }) {
   const message = [

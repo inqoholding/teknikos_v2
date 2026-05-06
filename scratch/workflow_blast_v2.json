@@ -1,0 +1,66 @@
+{
+  "id": "2",
+  "name": "Coreveta Smart Blast",
+  "nodes": [
+    {
+      "parameters": {
+        "jsCode": "return [\n  { json: { nomor: \"62812345678\", nama_bisnis: \"Service AC Maju\", punya_web: false } },\n  { json: { nomor: \"62898765432\", nama_bisnis: \"Bengkel Elektronik\", punya_web: true } }\n];"
+      },
+      "id": "data",
+      "name": "Daftar Nomor",
+      "type": "n8nio.nodes.code",
+      "typeVersion": 2,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "model": "gemini-1.5-flash",
+        "prompt": "={{ $json.punya_web ? \"Buatkan sapaan singkat untuk \" + $json.nama_bisnis + \" yang sudah punya web. Puji webnya dan tawarkan Coreveta untuk operasional.\" : \"Tawarkan web GRATIS untuk \" + $json.nama_bisnis + \" karena belum punya web. Gunakan gaya Sales Bible Coreveta.\" }}"
+      },
+      "id": "ai-blast",
+      "name": "AI Message",
+      "type": "n8nio.nodes.googleAiChat",
+      "typeVersion": 1,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "amount": "={{ Math.floor(Math.random() * 20) + 40 }}",
+        "unit": "seconds"
+      },
+      "id": "wait",
+      "name": "Jeda Anti-Ban",
+      "type": "n8nio.nodes.wait",
+      "typeVersion": 1,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:3000/api/sendText",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [ { "name": "X-Api-Key", "value": "662e525f5e144bcde6cc2f0f6d36f3c9f62941a66b61b818" } ]
+        },
+        "bodyParameters": {
+          "parameters": [
+            { "name": "chatId", "value": "={{ $node[\"data\"].json.nomor + \"@c.us\" }}" },
+            { "name": "text", "value": "={{ $json.text }}" }
+          ]
+        }
+      },
+      "id": "send",
+      "name": "Kirim WA",
+      "type": "n8nio.nodes.httpRequest",
+      "typeVersion": 4.1,
+      "position": [850, 300]
+    }
+  ],
+  "connections": {
+    "data": { "main": [ [ { "node": "ai-blast", "type": "main", "index": 0 } ] ] },
+    "ai-blast": { "main": [ [ { "node": "wait", "type": "main", "index": 0 } ] ] },
+    "wait": { "main": [ [ { "node": "send", "type": "main", "index": 0 } ] ] }
+  },
+  "active": false,
+  "settings": {}
+}
