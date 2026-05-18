@@ -1,0 +1,16 @@
+#!/usr/bin/expect -f
+set timeout -1
+set password "RootpasswordPTinqo1109@"
+set target_ip "coreveta.com"
+set local_dir "/Users/nsrr/Documents/teknikos_v2/"
+set remote_dir "/var/www/teknikos/"
+
+spawn rsync -avz --exclude node_modules --exclude .git --exclude dist -e "ssh -o StrictHostKeyChecking=no" $local_dir root@$target_ip:$remote_dir
+expect "password:"
+send "$password\r"
+expect eof
+
+spawn ssh -o StrictHostKeyChecking=no root@$target_ip "cd /var/www/teknikos && npm install && npm run install:frontend && npm run install:backend && npm run build:all && npm run db:push:backend && pm2 restart teknikos-backend"
+expect "password:"
+send "$password\r"
+expect eof

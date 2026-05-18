@@ -1,0 +1,9 @@
+#!/usr/bin/expect -f
+set timeout -1
+set password "RootpasswordPTinqo1109@"
+set target_ip "coreveta.com"
+
+spawn ssh -o StrictHostKeyChecking=no root@$target_ip "cd /var/www/teknikos && pm2 stop all && pm2 save && cp -r backend/prisma/dev.db backend/prisma/dev.db.bak || true && tar -czvf /root/coreveta_backup.tar.gz backend/prisma/dev.db backend/.env frontend/.env"
+expect "password:"
+send "$password\r"
+expect eof
