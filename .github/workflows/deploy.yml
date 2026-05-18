@@ -48,20 +48,20 @@ jobs:
             cd /var/www/teknikos
             git pull origin main
             
-            # Restart DBs/WAHA if needed
-            docker-compose -f infrastructure/docker-compose.prod.yml up -d
+            # Install Dependencies
+            npm install
+            npm run install:backend
+            npm run install:frontend
             
             # Build and Restart Backend
             cd backend
-            npm install
             npm run build
-            pm2 restart teknikos-backend || pm2 start dist/server.js --name teknikos-backend
+            pm2 restart ecosystem.config.cjs || pm2 start ecosystem.config.cjs
             
-            # Build and Update Frontend
+            # Build Frontend
             cd ../frontend
-            npm install
             npm run build
             
-            # Sync Nginx if changed
-            cp ../infrastructure/nginx/teknikos.conf /etc/nginx/sites-available/teknikos
-            nginx -t && systemctl reload nginx
+            # Sync Nginx if changed (Requires sudo without password or pre-configured permissions)
+            # cp deploy/nginx.teknikos.conf /etc/nginx/sites-available/teknikos
+            # nginx -t && systemctl reload nginx
